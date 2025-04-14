@@ -175,12 +175,19 @@ const Dashboard = () => {
                   <Star className="mr-1 h-4 w-4" /> Premium
                 </TabsTrigger>
               </TabsList>
+              
+              {/* Move TabsContent inside the Tabs component */}
+              <TabsContent value="all" className="mt-6">
+                <DealGrid deals={filteredDeals} userIsPremium={userIsPremium} />
+              </TabsContent>
+              <TabsContent value="regular" className="mt-6">
+                <DealGrid deals={filteredDeals} userIsPremium={userIsPremium} />
+              </TabsContent>
+              <TabsContent value="premium" className="mt-6">
+                <DealGrid deals={filteredDeals} userIsPremium={userIsPremium} />
+              </TabsContent>
             </Tabs>
           </div>
-          
-          <TabsContent value={activeTab} className="mt-0">
-            <DealGrid deals={filteredDeals} userIsPremium={userIsPremium} />
-          </TabsContent>
         </section>
       </main>
     </div>
