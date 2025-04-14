@@ -1,6 +1,7 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface NavbarProps {
@@ -34,6 +35,12 @@ export const Navbar = ({ onOpenAuth, isLoggedIn = false }: NavbarProps) => {
             <div className="flex items-center space-x-4">
               <Link to="/dashboard">
                 <Button variant="primary">My Deals</Button>
+              </Link>
+              <Link to="/vendor">
+                <Button variant="outline" className="flex items-center">
+                  <Tag className="mr-2 h-4 w-4" />
+                  For Vendors
+                </Button>
               </Link>
               <Link to="/settings">
                 <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
@@ -72,6 +79,12 @@ export const Navbar = ({ onOpenAuth, isLoggedIn = false }: NavbarProps) => {
                 <div className="flex flex-col space-y-3">
                   <Link to="/dashboard">
                     <Button className="w-full" variant="primary">My Deals</Button>
+                  </Link>
+                  <Link to="/vendor">
+                    <Button className="w-full flex items-center justify-center" variant="outline">
+                      <Tag className="mr-2 h-4 w-4" />
+                      For Vendors
+                    </Button>
                   </Link>
                   <Link to="/settings">
                     <Button className="w-full" variant="secondary">Settings</Button>
