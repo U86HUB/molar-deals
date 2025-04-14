@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AreaChart, BarChart } from "@/components/ui/chart";
+import { BarChart as Recharts, AreaChart, Area, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Star, Lock } from "lucide-react";
 
 const mockDealViews = [
@@ -65,14 +65,15 @@ export const VendorAnalyticsTab = ({ isPremium }: VendorAnalyticsTabProps) => {
             <h3 className="text-lg font-medium">Deal Views Over Time</h3>
           </CardHeader>
           <CardContent>
-            <AreaChart 
-              data={formattedViewData} 
-              categories={["Views"]} 
-              index="date"
-              colors={["blue"]}
-              valueFormatter={(value) => `${value} views`}
-              className="h-[300px] mt-4"
-            />
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={formattedViewData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Area type="monotone" dataKey="Views" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
+              </AreaChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
         
@@ -95,14 +96,15 @@ export const VendorAnalyticsTab = ({ isPremium }: VendorAnalyticsTabProps) => {
             <h3 className="text-lg font-medium">Deal Conversions</h3>
           </CardHeader>
           <CardContent>
-            <BarChart
-              data={mockConversionData}
-              categories={["value"]}
-              index="name"
-              colors={["violet"]}
-              valueFormatter={(value) => `${value} clicks`}
-              className="h-[300px] mt-4"
-            />
+            <ResponsiveContainer width="100%" height={300}>
+              <Recharts data={mockConversionData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#8b5cf6" />
+              </Recharts>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
         
