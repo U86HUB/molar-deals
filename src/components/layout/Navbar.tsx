@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Tag } from "lucide-react";
+import { Menu, X, Tag, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface NavbarProps {
@@ -27,7 +27,9 @@ export const Navbar = ({ onOpenAuth, isLoggedIn = false }: NavbarProps) => {
           <Link to="/" className="text-gray-600 hover:text-primary transition-colors">Home</Link>
           <Link to="/how-it-works" className="text-gray-600 hover:text-primary transition-colors">How It Works</Link>
           <Link to="/brands" className="text-gray-600 hover:text-primary transition-colors">Our Brands</Link>
-          <Link to="/pricing" className="text-gray-600 hover:text-primary transition-colors">Pricing</Link>
+          {isLoggedIn && (
+            <Link to="/referrals" className="text-gray-600 hover:text-primary transition-colors">Leaderboard</Link>
+          )}
         </nav>
 
         <div className="hidden md:flex items-center space-x-4">
@@ -35,6 +37,12 @@ export const Navbar = ({ onOpenAuth, isLoggedIn = false }: NavbarProps) => {
             <div className="flex items-center space-x-4">
               <Link to="/dashboard">
                 <Button variant="primary">My Deals</Button>
+              </Link>
+              <Link to="/referrals">
+                <Button variant="outline" className="flex items-center">
+                  <Award className="mr-2 h-4 w-4" />
+                  Referrals
+                </Button>
               </Link>
               <Link to="/vendor">
                 <Button variant="outline" className="flex items-center">
@@ -72,13 +80,21 @@ export const Navbar = ({ onOpenAuth, isLoggedIn = false }: NavbarProps) => {
             <Link to="/" className="block py-2 text-gray-600 hover:text-primary transition-colors">Home</Link>
             <Link to="/how-it-works" className="block py-2 text-gray-600 hover:text-primary transition-colors">How It Works</Link>
             <Link to="/brands" className="block py-2 text-gray-600 hover:text-primary transition-colors">Our Brands</Link>
-            <Link to="/pricing" className="block py-2 text-gray-600 hover:text-primary transition-colors">Pricing</Link>
+            {isLoggedIn && (
+              <Link to="/referrals" className="block py-2 text-gray-600 hover:text-primary transition-colors">Leaderboard</Link>
+            )}
             
             <div className="pt-3 border-t border-gray-100 space-y-3">
               {isLoggedIn ? (
                 <div className="flex flex-col space-y-3">
                   <Link to="/dashboard">
                     <Button className="w-full" variant="primary">My Deals</Button>
+                  </Link>
+                  <Link to="/referrals">
+                    <Button className="w-full flex items-center justify-center" variant="outline">
+                      <Award className="mr-2 h-4 w-4" />
+                      Referrals
+                    </Button>
                   </Link>
                   <Link to="/vendor">
                     <Button className="w-full flex items-center justify-center" variant="outline">

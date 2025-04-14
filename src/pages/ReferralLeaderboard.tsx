@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -238,9 +239,11 @@ const ReferralLeaderboard = () => {
                   Invite colleagues to join DentalDeals and earn rewards for each successful referral.
                 </p>
               </div>
-              <Button className="md:self-start">
-                View My Referrals
-              </Button>
+              <Link to="/settings?tab=referrals">
+                <Button className="md:self-start">
+                  View My Referrals
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
