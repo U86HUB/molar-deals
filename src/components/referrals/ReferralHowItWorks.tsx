@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, Gift } from "lucide-react";
+import { Star, Gift, CreditCard } from "lucide-react";
 
 export function ReferralHowItWorks() {
   return (
@@ -44,6 +44,16 @@ export function ReferralHowItWorks() {
               <li>Monthly Winner: iPad or €300 cash equivalent</li>
               <li>Annual Winner: Dental chair or €5,000 cash equivalent</li>
             </ul>
+          </div>
+
+          <div className="mt-2 border-t pt-4">
+            <h4 className="text-sm font-medium flex items-center mb-1">
+              <CreditCard className="mr-2 h-4 w-4 text-green-500" />
+              Earnings
+            </h4>
+            <p className="text-xs text-muted-foreground">
+              Referrers earn 50% of the premium plan payment for each referral that joins the premium plan within 30 days of account creation.
+            </p>
           </div>
         </div>
       </CardContent>
