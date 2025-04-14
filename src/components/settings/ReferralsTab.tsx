@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CardHeader, CardContent } from "@/components/ui/card";
-import { Link } from "lucide-react";
+import { Link as LinkIcon, Trophy } from "lucide-react";
 import { toast } from "sonner";
 
 export function ReferralsTab() {
@@ -56,13 +56,31 @@ export function ReferralsTab() {
               className="font-mono text-sm"
             />
             <Button variant="outline" onClick={handleGenerateLink}>
-              <Link className="h-4 w-4 mr-2" />
+              <LinkIcon className="h-4 w-4 mr-2" />
               Copy
             </Button>
           </div>
           <p className="text-sm text-muted-foreground">
             For each successful referral, both you and your colleague will receive a $10 credit.
           </p>
+        </div>
+
+        <div className="bg-primary/10 p-4 rounded-lg mb-4">
+          <h3 className="text-lg font-medium flex items-center mb-2">
+            <Trophy className="h-5 w-5 text-amber-500 mr-2" />
+            How Points Are Calculated
+          </h3>
+          <p className="text-sm mb-2">
+            Your leaderboard score is calculated using our weighted algorithm:
+          </p>
+          <p className="text-sm font-mono bg-white p-2 rounded border mb-2">
+            Score = (Regular × 1) + (Premium × 2) + Bonus
+          </p>
+          <ul className="text-sm list-disc pl-5 space-y-1 text-muted-foreground">
+            <li>Regular referrals: Free-tier users you refer (1 point each)</li>
+            <li>Premium referrals: Premium users you refer (2 points each)</li>
+            <li>Bonus points: Special achievements and milestones</li>
+          </ul>
         </div>
         
         <div className="space-y-4">
@@ -73,6 +91,7 @@ export function ReferralsTab() {
                 <th className="text-left py-2 font-medium">Name</th>
                 <th className="text-left py-2 font-medium">Date</th>
                 <th className="text-left py-2 font-medium">Status</th>
+                <th className="text-left py-2 font-medium">Type</th>
               </tr>
             </thead>
             <tbody>
@@ -84,6 +103,11 @@ export function ReferralsTab() {
                     Completed
                   </span>
                 </td>
+                <td className="py-3">
+                  <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
+                    Premium
+                  </span>
+                </td>
               </tr>
               <tr className="border-b">
                 <td className="py-3">Dr. Maria Garcia</td>
@@ -93,6 +117,11 @@ export function ReferralsTab() {
                     Completed
                   </span>
                 </td>
+                <td className="py-3">
+                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                    Regular
+                  </span>
+                </td>
               </tr>
               <tr>
                 <td className="py-3">Dr. James Wilson</td>
@@ -100,6 +129,11 @@ export function ReferralsTab() {
                 <td className="py-3">
                   <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
                     Pending
+                  </span>
+                </td>
+                <td className="py-3">
+                  <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+                    Unknown
                   </span>
                 </td>
               </tr>
