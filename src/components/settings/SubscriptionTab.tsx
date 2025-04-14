@@ -2,6 +2,7 @@
 import { CardHeader, CardContent, Card } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/Button";
+import { CheckItem } from "@/components/settings/CheckItem";
 
 export function SubscriptionTab() {
   return (
@@ -19,30 +20,10 @@ export function SubscriptionTab() {
             Basic access to dental deals
           </p>
           <ul className="space-y-2 mb-6">
-            <li className="flex items-center">
-              <svg className="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-              Access to regular deals
-            </li>
-            <li className="flex items-center">
-              <svg className="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-              Basic dashboard features
-            </li>
-            <li className="flex items-center text-muted-foreground">
-              <svg className="h-5 w-5 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              Premium deals locked
-            </li>
-            <li className="flex items-center text-muted-foreground">
-              <svg className="h-5 w-5 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              Early access to new deals
-            </li>
+            <CheckItem text="Access to regular deals" checked={true} />
+            <CheckItem text="Basic dashboard features" checked={true} />
+            <CheckItem text="Premium deals locked" checked={false} />
+            <CheckItem text="Early access to new deals" checked={false} />
           </ul>
           <Button variant="success" className="w-full">
             Upgrade to Premium
@@ -55,36 +36,31 @@ export function SubscriptionTab() {
           </CardHeader>
           <CardContent className="pt-0">
             <ul className="space-y-2">
-              <li className="flex items-center">
-                <svg className="h-5 w-5 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-                Access to all deals, including premium offers
-              </li>
-              <li className="flex items-center">
-                <svg className="h-5 w-5 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-                Early access to new deals before others
-              </li>
-              <li className="flex items-center">
-                <svg className="h-5 w-5 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-                Exclusive webinars and educational content
-              </li>
-              <li className="flex items-center">
-                <svg className="h-5 w-5 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-                Priority customer support
-              </li>
-              <li className="flex items-center">
-                <svg className="h-5 w-5 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-                2x referral bonuses
-              </li>
+              <CheckItem 
+                text="Access to all deals, including premium offers" 
+                checked={true}
+                className="text-primary"
+              />
+              <CheckItem 
+                text="Early access to new deals before others" 
+                checked={true} 
+                className="text-primary"
+              />
+              <CheckItem 
+                text="Exclusive webinars and educational content" 
+                checked={true} 
+                className="text-primary"
+              />
+              <CheckItem 
+                text="Priority customer support" 
+                checked={true} 
+                className="text-primary"
+              />
+              <CheckItem 
+                text="2x referral bonuses" 
+                checked={true} 
+                className="text-primary"
+              />
             </ul>
             <p className="text-sm text-muted-foreground mt-4">
               Premium plan starts at $19.99/month. Cancel anytime.
