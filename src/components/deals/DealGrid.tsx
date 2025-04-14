@@ -1,10 +1,11 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DealCard, DealProps } from "./DealCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Filter, Search, X } from "lucide-react";
+import { Filter, Search, X, Globe, MapPin } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface DealGridProps {
   deals: DealProps[];
@@ -15,11 +16,18 @@ export const DealGrid = ({ deals, userIsPremium = false }: DealGridProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
+  const [userCountry, setUserCountry] = useState<string>("");
   
   // Get unique categories from deals
   const categories = Array.from(new Set(deals.map(deal => deal.category)));
   
-  // Filter deals based on search and category
+  // Load user's country preference
+  useEffect(() => {
+    const savedCountry = localStorage.getItem("userCountry");
+    setUserCountry(savedCountry || "");
+  }, []);
+  
+  // Filter deals based on search, category, and country
   const filteredDeals = deals.filter(deal => {
     const matchesSearch = deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          deal.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -27,11 +35,32 @@ export const DealGrid = ({ deals, userIsPremium = false }: DealGridProps) => {
     
     const matchesCategory = selectedCategory ? deal.category === selectedCategory : true;
     
-    return matchesSearch && matchesCategory;
+    // Filter by country: show if deal is global or matches user country
+    const matchesCountry = !userCountry || 
+                          userCountry === "GLOBAL" || 
+                          !deal.country || 
+                          deal.country === "GLOBAL" || 
+                          deal.country === userCountry;
+    
+    return matchesSearch && matchesCategory && matchesCountry;
   });
 
   return (
     <div className="space-y-6">
+      {/* Country alert when no country is set */}
+      {!userCountry && (
+        <Alert className="bg-amber-50 border-amber-200">
+          <MapPin className="h-4 w-4 text-amber-500" />
+          <AlertTitle>Location Not Set</AlertTitle>
+          <AlertDescription className="flex flex-col gap-2">
+            <p>Please set your country in Settings to see deals specific to your location.</p>
+            <Button variant="outline" size="sm" asChild className="w-fit">
+              <a href="/settings">Go to Settings</a>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Search and filters */}
       <div className="flex flex-col md:flex-row gap-4 items-center">
         <div className="relative w-full">
@@ -89,6 +118,20 @@ export const DealGrid = ({ deals, userIsPremium = false }: DealGridProps) => {
           </div>
         </div>
       </div>
+      
+      {/* Location indicator */}
+      {userCountry && (
+        <div className="flex items-center gap-1 text-sm">
+          <span className="text-muted-foreground">Location:</span>
+          <span className="flex items-center gap-1 font-medium">
+            {userCountry === "GLOBAL" ? (
+              <><Globe className="inline h-4 w-4" /> Global (All deals)</>
+            ) : (
+              <><MapPin className="inline h-4 w-4" /> {userCountry}</>
+            )}
+          </span>
+        </div>
+      )}
       
       {/* Results count */}
       <div className="text-sm text-muted-foreground">

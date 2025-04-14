@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,8 @@ const Dashboard = () => {
       expiryDate: "2025-06-15",
       isPremium: false,
       isNew: true,
-      url: "https://example.com/deal/1"
+      url: "https://example.com/deal/1",
+      country: "USA"
     },
     {
       id: "2",
@@ -37,7 +37,8 @@ const Dashboard = () => {
       category: "Dental Materials",
       expiryDate: "2025-05-20",
       isPremium: false,
-      url: "https://example.com/deal/2"
+      url: "https://example.com/deal/2",
+      country: "GLOBAL"
     },
     {
       id: "3",
@@ -49,7 +50,8 @@ const Dashboard = () => {
       category: "Equipment",
       expiryDate: "2025-05-30",
       isPremium: true,
-      url: "https://example.com/deal/3"
+      url: "https://example.com/deal/3",
+      country: "UK"
     },
     {
       id: "4",
@@ -61,7 +63,8 @@ const Dashboard = () => {
       category: "Software",
       expiryDate: "2025-07-01",
       isPremium: false,
-      url: "https://example.com/deal/4"
+      url: "https://example.com/deal/4",
+      country: "GLOBAL"
     },
     {
       id: "5",
@@ -73,7 +76,8 @@ const Dashboard = () => {
       category: "Continuing Education",
       expiryDate: "2025-06-10",
       isPremium: true,
-      url: "https://example.com/deal/5"
+      url: "https://example.com/deal/5",
+      country: "CAN"
     },
     {
       id: "6",
@@ -86,7 +90,8 @@ const Dashboard = () => {
       expiryDate: "2025-05-25",
       isPremium: false,
       isNew: true,
-      url: "https://example.com/deal/6"
+      url: "https://example.com/deal/6",
+      country: "AUS"
     }
   ];
   

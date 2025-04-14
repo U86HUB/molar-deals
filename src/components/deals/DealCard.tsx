@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Calendar, Clock, ExternalLink, Heart, Lock } from "lucide-react";
+import { Calendar, Clock, ExternalLink, Heart, Lock, Globe, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface DealProps {
@@ -18,6 +17,7 @@ export interface DealProps {
   isPremium: boolean;
   isNew?: boolean;
   url: string;
+  country?: string; // Country code or "GLOBAL"
 }
 
 interface DealCardProps {
@@ -30,6 +30,7 @@ export const DealCard = ({ deal, userIsPremium = false }: DealCardProps) => {
   
   const isLocked = deal.isPremium && !userIsPremium;
   const daysRemaining = calculateDaysRemaining(deal.expiryDate);
+  const isGlobal = !deal.country || deal.country === "GLOBAL";
   
   function calculateDaysRemaining(dateString: string): number {
     const expiryDate = new Date(dateString);
@@ -47,11 +48,9 @@ export const DealCard = ({ deal, userIsPremium = false }: DealCardProps) => {
   
   const handleClickDeal = () => {
     if (isLocked) {
-      // Show upgrade prompt
       return;
     }
     
-    // In a real app, this would log the click and redirect
     window.open(deal.url, "_blank");
   };
 
@@ -60,7 +59,6 @@ export const DealCard = ({ deal, userIsPremium = false }: DealCardProps) => {
       "relative h-full overflow-hidden transition duration-300 hover:shadow-lg border",
       isLocked ? "opacity-90" : "",
     )}>
-      {/* Premium badge */}
       {deal.isPremium && (
         <div className="absolute top-0 right-0 bg-black/50 text-white px-3 py-1 text-xs font-medium z-10">
           PREMIUM
@@ -85,7 +83,16 @@ export const DealCard = ({ deal, userIsPremium = false }: DealCardProps) => {
             </div>
             <div>
               <p className="text-sm font-medium">{deal.brandName}</p>
-              <Badge variant="secondary" className="mt-1">{deal.category}</Badge>
+              <div className="flex flex-wrap gap-1 mt-1">
+                <Badge variant="secondary">{deal.category}</Badge>
+                <Badge variant="outline" className="flex items-center gap-1 text-xs">
+                  {isGlobal ? (
+                    <><Globe className="h-3 w-3" /> Global</>
+                  ) : (
+                    <><MapPin className="h-3 w-3" /> {deal.country}</>
+                  )}
+                </Badge>
+              </div>
             </div>
           </div>
           
@@ -143,7 +150,6 @@ export const DealCard = ({ deal, userIsPremium = false }: DealCardProps) => {
         </Button>
       </CardFooter>
       
-      {/* Lock overlay for premium deals */}
       {isLocked && (
         <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
           <div className="text-center p-4">
