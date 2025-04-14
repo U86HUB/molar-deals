@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CardHeader, CardContent } from "@/components/ui/card";
@@ -79,7 +78,13 @@ export function ReferralsTab() {
           <ul className="text-sm list-disc pl-5 space-y-1 text-muted-foreground">
             <li>Regular referrals: Free-tier users you refer (1 point each)</li>
             <li>Premium referrals: Premium users you refer (2 points each)</li>
-            <li>Bonus points: Special achievements and milestones</li>
+            <li>Bonus points: 
+              <ul className="list-disc pl-5 mt-1 space-y-1">
+                <li>Premium user status: +5 bonus points each month</li>
+                <li>Every 10 referrals milestone: +10 bonus points</li>
+                <li>Every 50 referrals milestone: +50 bonus points</li>
+              </ul>
+            </li>
           </ul>
         </div>
         
