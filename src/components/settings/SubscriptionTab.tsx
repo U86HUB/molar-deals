@@ -1,7 +1,7 @@
 
 import { CardHeader, CardContent, Card } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { CheckItem } from "@/components/settings/CheckItem";
 
 export function SubscriptionTab() {

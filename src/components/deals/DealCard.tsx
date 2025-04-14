@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Calendar, Clock, ExternalLink, Heart, Lock } from "lucide-react";

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Mail, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 

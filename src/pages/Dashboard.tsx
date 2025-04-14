@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { DealGrid } from "@/components/deals/DealGrid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight, Bell, Gift, Star } from "lucide-react";

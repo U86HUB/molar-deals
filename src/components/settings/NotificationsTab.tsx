@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { CardHeader, CardContent } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";

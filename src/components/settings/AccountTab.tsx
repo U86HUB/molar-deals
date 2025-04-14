@@ -1,5 +1,5 @@
 
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { CardHeader, CardContent } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
 

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
