@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
@@ -43,7 +42,6 @@ const Settings = () => {
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
           <Card className="lg:col-span-1 h-fit">
             <CardContent className="p-0">
               <Tabs
@@ -88,7 +86,6 @@ const Settings = () => {
             </CardContent>
           </Card>
           
-          {/* Content area */}
           <Card className="lg:col-span-3">
             <TabsContent value="profile" className="m-0">
               <CardHeader>
@@ -444,7 +441,7 @@ const Settings = () => {
                   <p className="text-sm text-muted-foreground mb-4">
                     Once you delete your account, there is no going back. Please be certain.
                   </p>
-                  <Button variant="destructive">Delete Account</Button>
+                  <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-100">Delete Account</Button>
                 </div>
               </CardContent>
             </TabsContent>

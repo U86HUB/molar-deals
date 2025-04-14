@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "default" | "primary" | "secondary" | "outline" | "ghost" | "link" | "success";
+  variant?: "default" | "primary" | "secondary" | "outline" | "ghost" | "link" | "success" | "destructive";
   size?: "default" | "sm" | "lg" | "icon";
   children: React.ReactNode;
   className?: string;
