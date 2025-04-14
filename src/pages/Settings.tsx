@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Card } from "@/components/ui/card";
-import { Tabs } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { TabNavigation } from "@/components/settings/TabNavigation";
 import { ProfileTab } from "@/components/settings/ProfileTab";
 import { AccountTab } from "@/components/settings/AccountTab";
@@ -30,11 +30,21 @@ const Settings = () => {
           
           <Card className="lg:col-span-3">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <ProfileTab />
-              <AccountTab />
-              <NotificationsTab />
-              <ReferralsTab />
-              <SubscriptionTab />
+              <TabsContent value="profile">
+                <ProfileTab />
+              </TabsContent>
+              <TabsContent value="account">
+                <AccountTab />
+              </TabsContent>
+              <TabsContent value="notifications">
+                <NotificationsTab />
+              </TabsContent>
+              <TabsContent value="referrals">
+                <ReferralsTab />
+              </TabsContent>
+              <TabsContent value="subscription">
+                <SubscriptionTab />
+              </TabsContent>
             </Tabs>
           </Card>
         </div>
