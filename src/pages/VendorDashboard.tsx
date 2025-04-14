@@ -121,17 +121,19 @@ const VendorDashboard = () => {
           </Card>
         )}
         
-        <TabsContent value="deals" className="mt-0">
-          <VendorDealsTab />
-        </TabsContent>
-        
-        <TabsContent value="analytics" className="mt-0">
-          <VendorAnalyticsTab isPremium={isPremium} />
-        </TabsContent>
-        
-        <TabsContent value="settings" className="mt-0">
-          <VendorSettingsTab />
-        </TabsContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsContent value="deals" className="mt-0">
+            <VendorDealsTab />
+          </TabsContent>
+          
+          <TabsContent value="analytics" className="mt-0">
+            <VendorAnalyticsTab isPremium={isPremium} />
+          </TabsContent>
+          
+          <TabsContent value="settings" className="mt-0">
+            <VendorSettingsTab />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
