@@ -14,10 +14,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PrizeInfo } from "@/components/referrals/PrizeInfo";
 
 const ReferralLeaderboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [timeframe, setTimeframe] = useState<"monthly" | "yearly">("monthly");
   const itemsPerPage = 10;
   
   // Generate mock data
@@ -52,8 +55,25 @@ const ReferralLeaderboard = () => {
           </div>
         </div>
 
+        {/* Prize information */}
+        <PrizeInfo />
+
+        {/* Monthly/Yearly tabs */}
+        <Tabs value={timeframe} onValueChange={(value) => setTimeframe(value as "monthly" | "yearly")} className="mb-6">
+          <TabsList className="mb-2">
+            <TabsTrigger value="monthly">Monthly Rankings</TabsTrigger>
+            <TabsTrigger value="yearly">Yearly Rankings</TabsTrigger>
+          </TabsList>
+          <TabsContent value="monthly">
+            <h2 className="text-lg font-medium mb-4">Monthly Referral Leaders - April 2025</h2>
+          </TabsContent>
+          <TabsContent value="yearly">
+            <h2 className="text-lg font-medium mb-4">Yearly Referral Leaders - 2025</h2>
+          </TabsContent>
+        </Tabs>
+
         {/* Top referrers showcase */}
-        <TopReferrersCards topReferrers={mockReferrers} />
+        <TopReferrersCards topReferrers={mockReferrers} timeframe={timeframe} />
 
         {/* Search and filters */}
         <LeaderboardSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />

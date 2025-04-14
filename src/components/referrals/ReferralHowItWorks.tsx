@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
+import { Star, Gift } from "lucide-react";
 
 export function ReferralHowItWorks() {
   return (
@@ -32,6 +32,17 @@ export function ReferralHowItWorks() {
               <li>Premium user status: +5 bonus points each month</li>
               <li>Every 10 referrals: +10 bonus points</li>
               <li>Every 50 referrals: +50 bonus points</li>
+            </ul>
+          </div>
+          
+          <div className="mt-2 border-t pt-4">
+            <h4 className="text-sm font-medium flex items-center mb-1">
+              <Gift className="mr-2 h-4 w-4 text-purple-500" />
+              Prizes
+            </h4>
+            <ul className="text-xs text-muted-foreground space-y-1 list-disc pl-5">
+              <li>Monthly Winner: iPad or €300 cash equivalent</li>
+              <li>Annual Winner: Dental chair or €5,000 cash equivalent</li>
             </ul>
           </div>
         </div>
