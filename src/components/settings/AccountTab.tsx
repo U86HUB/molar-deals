@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CardHeader, CardContent } from "@/components/ui/card";
-import { TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -39,7 +38,7 @@ export function AccountTab() {
   };
 
   return (
-    <TabsContent value="account" className="m-0">
+    <div className="space-y-6">
       <CardHeader>
         <h2 className="text-xl font-semibold">Account Settings</h2>
         <p className="text-muted-foreground">
@@ -91,6 +90,6 @@ export function AccountTab() {
           <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-100">Delete Account</Button>
         </div>
       </CardContent>
-    </TabsContent>
+    </div>
   );
 }

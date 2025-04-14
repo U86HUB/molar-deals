@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { CardHeader, CardContent } from "@/components/ui/card";
-import { TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 export function NotificationsTab() {
@@ -18,7 +17,7 @@ export function NotificationsTab() {
   };
   
   return (
-    <TabsContent value="notifications" className="m-0">
+    <div className="space-y-6">
       <CardHeader>
         <h2 className="text-xl font-semibold">Notification Preferences</h2>
         <p className="text-muted-foreground">
@@ -74,6 +73,6 @@ export function NotificationsTab() {
           </Button>
         </div>
       </CardContent>
-    </TabsContent>
+    </div>
   );
 }

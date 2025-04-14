@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CardHeader, CardContent } from "@/components/ui/card";
-import { TabsContent } from "@/components/ui/tabs";
 import { Link } from "lucide-react";
 import { toast } from "sonner";
 
@@ -13,7 +12,7 @@ export function ReferralsTab() {
   };
   
   return (
-    <TabsContent value="referrals" className="m-0">
+    <div className="space-y-6">
       <CardHeader>
         <h2 className="text-xl font-semibold">Referral Program</h2>
         <p className="text-muted-foreground">
@@ -108,6 +107,6 @@ export function ReferralsTab() {
           </table>
         </div>
       </CardContent>
-    </TabsContent>
+    </div>
   );
 }

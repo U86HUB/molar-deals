@@ -1,12 +1,11 @@
 
 import { CardHeader, CardContent, Card } from "@/components/ui/card";
-import { TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { CheckItem } from "@/components/settings/CheckItem";
 
 export function SubscriptionTab() {
   return (
-    <TabsContent value="subscription" className="m-0">
+    <div className="space-y-6">
       <CardHeader>
         <h2 className="text-xl font-semibold">Subscription Management</h2>
         <p className="text-muted-foreground">
@@ -68,6 +67,6 @@ export function SubscriptionTab() {
           </CardContent>
         </Card>
       </CardContent>
-    </TabsContent>
+    </div>
   );
 }

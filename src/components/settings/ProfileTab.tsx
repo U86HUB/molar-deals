@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CardHeader, CardContent } from "@/components/ui/card";
-import { TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 export function ProfileTab() {
@@ -22,7 +20,7 @@ export function ProfileTab() {
   };
   
   return (
-    <TabsContent value="profile" className="m-0">
+    <div className="space-y-6">
       <CardHeader>
         <h2 className="text-xl font-semibold">Profile Information</h2>
         <p className="text-muted-foreground">
@@ -108,6 +106,6 @@ export function ProfileTab() {
           </Button>
         </div>
       </CardContent>
-    </TabsContent>
+    </div>
   );
 }
