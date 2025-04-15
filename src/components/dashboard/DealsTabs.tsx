@@ -22,9 +22,9 @@ export const DealsTabs = ({ deals, userIsPremium }: DealsTabsProps) => {
 
   return (
     <section>
+      <h2 className="text-2xl font-bold mb-6">Current Deals</h2>
+      
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <h2 className="text-2xl font-bold">Current Deals</h2>
-        
         <Tabs 
           value={activeTab} 
           onValueChange={setActiveTab} 
@@ -52,3 +52,4 @@ export const DealsTabs = ({ deals, userIsPremium }: DealsTabsProps) => {
     </section>
   );
 };
+
