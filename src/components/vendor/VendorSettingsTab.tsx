@@ -3,6 +3,7 @@ import { BrandDetailsCard } from "./settings/BrandDetailsCard";
 import { DealTargetingCard } from "./settings/DealTargetingCard";
 import { NotificationSettingsCard } from "./settings/NotificationSettingsCard";
 import { BillingCard } from "./settings/BillingCard";
+import { SecuritySettingsCard } from "./settings/SecuritySettingsCard";
 
 export const VendorSettingsTab = () => {
   return (
@@ -11,6 +12,7 @@ export const VendorSettingsTab = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <BrandDetailsCard />
+        <SecuritySettingsCard />
         <DealTargetingCard />
         <NotificationSettingsCard />
         <BillingCard />

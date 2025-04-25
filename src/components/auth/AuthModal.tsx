@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Mail, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, ArrowRight, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 interface AuthModalProps {
@@ -17,26 +17,47 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const [activeTab, setActiveTab] = useState<string>("login");
   const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [secureLogin, setSecureLogin] = useState<boolean>(true);
+
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !email.includes('@')) {
+    
+    if (!email) {
+      toast.error("Please enter your email address");
+      return;
+    }
+    
+    if (!validateEmail(email)) {
       toast.error("Please enter a valid email address");
       return;
     }
 
     setLoading(true);
-    // Simulating auth request
-    setTimeout(() => {
+    // Simulating auth request with security measures
+    try {
+      // Simulate network request
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       toast.success(`Magic link sent to ${email}. Check your inbox!`);
-      setLoading(false);
+      
       // In a real app, we'd wait for the user to click the link
       // For now, we'll just simulate a successful login
-      setTimeout(() => {
-        onSuccess();
-        onClose();
-      }, 1500);
-    }, 1500);
+      if (secureLogin) {
+        setTimeout(() => {
+          onSuccess();
+          onClose();
+        }, 1500);
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,7 +87,22 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  autoComplete="email"
                 />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="secure-login"
+                  checked={secureLogin}
+                  onChange={(e) => setSecureLogin(e.target.checked)}
+                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <label htmlFor="secure-login" className="text-sm text-gray-600 flex items-center">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Enable secure login session
+                </label>
               </div>
               
               <Button 
@@ -121,7 +157,22 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  autoComplete="email"
                 />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="secure-registration"
+                  checked={secureLogin}
+                  onChange={(e) => setSecureLogin(e.target.checked)}
+                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <label htmlFor="secure-registration" className="text-sm text-gray-600 flex items-center">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Create secure account session
+                </label>
               </div>
               
               <Button 
