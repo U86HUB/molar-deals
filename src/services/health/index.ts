@@ -7,5 +7,7 @@ export type {
   EndpointHealth,
   ResourceUsage,
   SystemLog,
-  ServiceStatus
+  ServiceStatus,
+  TimeSeriesDataPoint,
+  DiskUsageItem
 } from './types';
