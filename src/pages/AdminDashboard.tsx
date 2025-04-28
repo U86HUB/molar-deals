@@ -14,6 +14,14 @@ const ReferralManagementTab = lazy(() => import("@/components/admin/ReferralMana
 const AnalyticsTab = lazy(() => import("@/components/admin/AnalyticsTab"));
 const SettingsTab = lazy(() => import("@/components/admin/SettingsTab"));
 
+// Placeholder for future content management tab
+const ContentManagementTab = () => (
+  <div className="flex flex-col items-center justify-center py-12">
+    <h2 className="text-2xl font-bold mb-4">Content Management</h2>
+    <p className="text-muted-foreground mb-6">This feature is coming soon.</p>
+  </div>
+);
+
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("deals");
 
@@ -21,7 +29,7 @@ const AdminDashboard = () => {
     <>
       <Helmet>
         <title>Admin Dashboard | DentalDeals</title>
-        <meta name="description" content="Admin dashboard for managing dental deals, vendors, and referrals." />
+        <meta name="description" content="Admin dashboard for managing dental deals, vendors, users, and referrals." />
       </Helmet>
 
       <div className="flex min-h-screen bg-gray-50">
@@ -38,6 +46,7 @@ const AdminDashboard = () => {
                 <TabsTrigger value="users">Users</TabsTrigger>
                 <TabsTrigger value="referrals">Referrals</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                <TabsTrigger value="content" disabled>Content</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
               
@@ -61,6 +70,9 @@ const AdminDashboard = () => {
                 </TabsContent>
                 <TabsContent value="analytics">
                   <AnalyticsTab />
+                </TabsContent>
+                <TabsContent value="content">
+                  <ContentManagementTab />
                 </TabsContent>
                 <TabsContent value="settings">
                   <SettingsTab />

@@ -1,7 +1,11 @@
 
 import { Link } from "react-router-dom";
-import { PackageOpen, Users, TrendingUp, ChartBar, Settings, User } from "lucide-react";
+import { 
+  PackageOpen, Users, TrendingUp, ChartBar, Settings, User,
+  ShieldCheck, BriefcaseBusiness, FileSearch
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -9,13 +13,29 @@ interface AdminSidebarProps {
 }
 
 export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
-  const menuItems = [
-    { id: "deals", label: "Deals Management", icon: PackageOpen },
-    { id: "vendors", label: "Vendor Management", icon: Users },
-    { id: "users", label: "User Management", icon: User },
-    { id: "referrals", label: "Referral Management", icon: Users },
-    { id: "analytics", label: "Analytics & Insights", icon: ChartBar },
-    { id: "settings", label: "Admin Settings", icon: Settings },
+  const menuCategories = [
+    {
+      title: "Core Management",
+      items: [
+        { id: "deals", label: "Deals Management", icon: PackageOpen },
+        { id: "vendors", label: "Vendor Management", icon: BriefcaseBusiness },
+        { id: "users", label: "User Management", icon: User, badge: "Enhanced" }
+      ]
+    },
+    {
+      title: "Platform",
+      items: [
+        { id: "referrals", label: "Referral Management", icon: Users },
+        { id: "analytics", label: "Analytics & Insights", icon: ChartBar },
+      ]
+    },
+    {
+      title: "Administration",
+      items: [
+        { id: "content", label: "Content Management", icon: FileSearch, badge: "Coming Soon", disabled: true },
+        { id: "settings", label: "Admin Settings", icon: Settings },
+      ]
+    }
   ];
 
   return (
@@ -29,25 +49,39 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
         </Link>
       </div>
       
-      <nav className="flex-1 pt-4">
-        <ul className="space-y-1 px-2">
-          {menuItems.map((item) => (
-            <li key={item.id}>
-              <button
-                onClick={() => onTabChange(item.id)}
-                className={cn(
-                  "flex w-full items-center px-4 py-3 text-sm font-medium rounded-md",
-                  activeTab === item.id
-                    ? "bg-primary text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                )}
-              >
-                <item.icon className="mr-3 h-5 w-5" />
-                {item.label}
-              </button>
-            </li>
-          ))}
-        </ul>
+      <nav className="flex-1 pt-4 overflow-y-auto">
+        {menuCategories.map((category, idx) => (
+          <div key={category.title} className={cn(idx > 0 && "mt-6")}>
+            <h3 className="px-4 mb-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">{category.title}</h3>
+            <ul className="space-y-1 px-2">
+              {category.items.map((item) => (
+                <li key={item.id}>
+                  <button
+                    onClick={() => !item.disabled && onTabChange(item.id)}
+                    disabled={item.disabled}
+                    className={cn(
+                      "flex w-full items-center justify-between px-4 py-3 text-sm font-medium rounded-md",
+                      activeTab === item.id
+                        ? "bg-primary text-white"
+                        : "text-gray-700 hover:bg-gray-100",
+                      item.disabled && "opacity-60 cursor-not-allowed"
+                    )}
+                  >
+                    <div className="flex items-center">
+                      <item.icon className="mr-3 h-5 w-5" />
+                      {item.label}
+                    </div>
+                    {item.badge && (
+                      <Badge variant={item.badge === "Enhanced" ? "secondary" : "outline"} className="ml-2">
+                        {item.badge}
+                      </Badge>
+                    )}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </nav>
       
       <div className="p-4 border-t border-gray-200">
