@@ -15,6 +15,7 @@ const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const VendorDashboard = lazy(() => import("./pages/VendorDashboard"));
 const ReferralLeaderboard = lazy(() => import("./pages/ReferralLeaderboard"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 // Configure query client with better defaults for production
 const queryClient = new QueryClient({
@@ -48,6 +49,7 @@ const App = () => (
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/vendor" element={<VendorDashboard />} />
                 <Route path="/referrals" element={<ReferralLeaderboard />} />
+                <Route path="/admin" element={<AdminDashboard />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

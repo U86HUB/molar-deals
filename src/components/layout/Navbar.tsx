@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Tag, Award } from "lucide-react";
+import { Menu, X, Tag, Award, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface NavbarProps {
@@ -11,6 +11,9 @@ interface NavbarProps {
 
 export const Navbar = ({ onOpenAuth, isLoggedIn = false }: NavbarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Mock admin status - in a real app this would come from auth
+  const isAdmin = true; // For demo purposes
 
   return (
     <header className="fixed w-full top-0 bg-white z-50 shadow-sm">
@@ -50,6 +53,14 @@ export const Navbar = ({ onOpenAuth, isLoggedIn = false }: NavbarProps) => {
                   For Vendors
                 </Button>
               </Link>
+              {isAdmin && (
+                <Link to="/admin">
+                  <Button variant="secondary" className="flex items-center">
+                    <Shield className="mr-2 h-4 w-4" />
+                    Admin
+                  </Button>
+                </Link>
+              )}
               <Link to="/settings">
                 <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
                   <span className="text-gray-700 font-medium text-sm">U</span>
@@ -102,6 +113,14 @@ export const Navbar = ({ onOpenAuth, isLoggedIn = false }: NavbarProps) => {
                       For Vendors
                     </Button>
                   </Link>
+                  {isAdmin && (
+                    <Link to="/admin">
+                      <Button className="w-full flex items-center justify-center" variant="secondary">
+                        <Shield className="mr-2 h-4 w-4" />
+                        Admin Panel
+                      </Button>
+                    </Link>
+                  )}
                   <Link to="/settings">
                     <Button className="w-full" variant="secondary">Settings</Button>
                   </Link>
