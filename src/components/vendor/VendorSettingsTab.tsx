@@ -14,7 +14,7 @@ export const VendorSettingsTab = () => {
     if (typeof window !== 'undefined' && 'performance' in window) {
       window.addEventListener('load', () => {
         const timing = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
-        console.log(`Page load time: ${timing.loadEventEnd - timing.navigationStart}ms`);
+        console.log(`Page load time: ${timing.loadEventEnd - timing.startTime}ms`);
       });
     }
     
