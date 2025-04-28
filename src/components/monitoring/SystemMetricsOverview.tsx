@@ -44,8 +44,7 @@ export function SystemMetricsOverview({ metrics }: SystemMetricsOverviewProps) {
           <p className="text-xs text-muted-foreground">Last 30 days</p>
           <Progress 
             value={metrics.uptime} 
-            className="mt-2" 
-            indicatorClassName={getProgressColor(metrics.uptime)}
+            className={`mt-2 h-2 ${getProgressColor(metrics.uptime)}`}
           />
         </CardContent>
       </Card>
@@ -60,8 +59,7 @@ export function SystemMetricsOverview({ metrics }: SystemMetricsOverviewProps) {
           <p className="text-xs text-muted-foreground">Average</p>
           <Progress 
             value={100 - (metrics.responseTime / 10)} 
-            className="mt-2"
-            indicatorClassName={getProgressColor(100 - (metrics.responseTime / 10))}
+            className={`mt-2 h-2 ${getProgressColor(100 - (metrics.responseTime / 10))}`}
           />
         </CardContent>
       </Card>
@@ -78,8 +76,7 @@ export function SystemMetricsOverview({ metrics }: SystemMetricsOverviewProps) {
           <p className="text-xs text-muted-foreground">Last 24 hours</p>
           <Progress 
             value={metrics.errorRate * 5} 
-            className="mt-2"
-            indicatorClassName={getProgressColor(100 - (metrics.errorRate * 20), true)} 
+            className={`mt-2 h-2 ${getProgressColor(100 - (metrics.errorRate * 20), true)}`}
           />
         </CardContent>
       </Card>
@@ -94,8 +91,7 @@ export function SystemMetricsOverview({ metrics }: SystemMetricsOverviewProps) {
           <p className="text-xs text-muted-foreground">{metrics.memoryUsage}% Memory Usage</p>
           <Progress 
             value={metrics.cpuUsage} 
-            className="mt-2"
-            indicatorClassName={getProgressColor(100 - metrics.cpuUsage, true)}
+            className={`mt-2 h-2 ${getProgressColor(100 - metrics.cpuUsage, true)}`}
           />
         </CardContent>
       </Card>

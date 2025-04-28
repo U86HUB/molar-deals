@@ -46,8 +46,8 @@ export function ResourceUsageCharts({ resourceData }: ResourceUsageChartsProps) 
           <CardContent className="h-80">
             <ChartContainer 
               config={{
-                cpu: { theme: { light: "#2563eb" } },
-                threshold: { theme: { light: "#ef4444" } }
+                cpu: { theme: { light: "#2563eb", dark: "#3b82f6" } },
+                threshold: { theme: { light: "#ef4444", dark: "#f87171" } }
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
@@ -87,8 +87,8 @@ export function ResourceUsageCharts({ resourceData }: ResourceUsageChartsProps) 
           <CardContent className="h-80">
             <ChartContainer
               config={{
-                memory: { theme: { light: "#8b5cf6" } },
-                threshold: { theme: { light: "#ef4444" } }
+                memory: { theme: { light: "#8b5cf6", dark: "#a78bfa" } },
+                threshold: { theme: { light: "#ef4444", dark: "#f87171" } }
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
@@ -130,8 +130,8 @@ export function ResourceUsageCharts({ resourceData }: ResourceUsageChartsProps) 
           <CardContent className="h-80">
             <ChartContainer
               config={{
-                used: { theme: { light: "#ef4444" } },
-                free: { theme: { light: "#10b981" } }
+                used: { theme: { light: "#ef4444", dark: "#f87171" } },
+                free: { theme: { light: "#10b981", dark: "#34d399" } }
               }}
             >
               <ResponsiveContainer width="100%" height="100%">
@@ -160,8 +160,8 @@ export function ResourceUsageCharts({ resourceData }: ResourceUsageChartsProps) 
           <CardContent className="h-80">
             <ChartContainer
               config={{
-                incoming: { theme: { light: "#0ea5e9" } },
-                outgoing: { theme: { light: "#f97316" } }
+                incoming: { theme: { light: "#0ea5e9", dark: "#38bdf8" } },
+                outgoing: { theme: { light: "#f97316", dark: "#fb923c" } }
               }}
             >
               <ResponsiveContainer width="100%" height="100%">

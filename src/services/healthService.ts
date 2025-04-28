@@ -3,7 +3,7 @@
 // In a real application, this would be replaced with actual API calls to backend services
 
 // Helper to generate random time series data
-const generateTimeSeriesData = (hours: number, valueFn: () => number) => {
+const generateTimeSeriesData = (hours: number, valueFn: () => any) => {
   const data = [];
   const now = new Date();
   
