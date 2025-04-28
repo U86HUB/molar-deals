@@ -10,9 +10,10 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 import { Badge } from "@/components/ui/badge";
 import { Clock, RefreshCw } from "lucide-react";
+import type { HealthData } from "@/services/health";
 
 interface SystemHealthDashboardProps {
-  healthData: any;
+  healthData: HealthData | null;
 }
 
 export function SystemHealthDashboard({ healthData }: SystemHealthDashboardProps) {
