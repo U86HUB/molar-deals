@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { 
   PackageOpen, Users, TrendingUp, ChartBar, Settings, User,
-  ShieldCheck, BriefcaseBusiness, FileSearch
+  FileSearch, BriefcaseBusiness
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +32,7 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
     {
       title: "Administration",
       items: [
-        { id: "content", label: "Content Management", icon: FileSearch, badge: "Coming Soon", disabled: true },
+        { id: "content", label: "Content Management", icon: FileSearch },
         { id: "settings", label: "Admin Settings", icon: Settings },
       ]
     }

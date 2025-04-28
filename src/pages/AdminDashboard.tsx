@@ -12,15 +12,8 @@ const VendorManagementTab = lazy(() => import("@/components/admin/VendorManageme
 const UserManagementTab = lazy(() => import("@/components/admin/UserManagementTab"));
 const ReferralManagementTab = lazy(() => import("@/components/admin/ReferralManagementTab"));
 const AnalyticsTab = lazy(() => import("@/components/admin/AnalyticsTab"));
+const ContentManagementTab = lazy(() => import("@/components/admin/ContentManagementTab"));
 const SettingsTab = lazy(() => import("@/components/admin/SettingsTab"));
-
-// Placeholder for future content management tab
-const ContentManagementTab = () => (
-  <div className="flex flex-col items-center justify-center py-12">
-    <h2 className="text-2xl font-bold mb-4">Content Management</h2>
-    <p className="text-muted-foreground mb-6">This feature is coming soon.</p>
-  </div>
-);
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("deals");
@@ -46,7 +39,7 @@ const AdminDashboard = () => {
                 <TabsTrigger value="users">Users</TabsTrigger>
                 <TabsTrigger value="referrals">Referrals</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                <TabsTrigger value="content" disabled>Content</TabsTrigger>
+                <TabsTrigger value="content">Content</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
               
