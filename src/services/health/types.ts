@@ -34,6 +34,9 @@ export interface EndpointHealth {
 
 export interface TimeSeriesDataPoint {
   time: string;
+  usage?: number;
+  incoming?: number;
+  outgoing?: number;
   [key: string]: unknown;
 }
 

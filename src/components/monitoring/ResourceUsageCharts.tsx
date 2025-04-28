@@ -17,22 +17,36 @@ import {
   Bar,
   Legend
 } from "recharts";
+import type { ResourceUsage, TimeSeriesDataPoint, DiskUsageItem } from "@/services/health";
 
 interface ResourceUsageChartsProps {
-  resourceData: {
-    cpuHistory: Array<{ time: string; usage: number }>;
-    memoryHistory: Array<{ time: string; usage: number }>;
-    diskUsage: Array<{ name: string; used: number; total: number }>;
-    networkTraffic: Array<{ time: string; incoming: number; outgoing: number }>;
-  };
+  resourceData: ResourceUsage;
 }
 
 export function ResourceUsageCharts({ resourceData }: ResourceUsageChartsProps) {
   // Process disk usage data to get percentages
-  const diskData = resourceData.diskUsage.map(item => ({
+  const diskData = resourceData.diskUsage.map((item: DiskUsageItem) => ({
     name: item.name,
     used: parseFloat(((item.used / item.total) * 100).toFixed(1)),
     free: parseFloat((100 - ((item.used / item.total) * 100)).toFixed(1)),
+  }));
+
+  // Process CPU and memory data for the charts
+  const cpuData = resourceData.cpuHistory.map((item: TimeSeriesDataPoint) => ({
+    time: item.time,
+    usage: item.usage as number,
+  }));
+
+  const memoryData = resourceData.memoryHistory.map((item: TimeSeriesDataPoint) => ({
+    time: item.time,
+    usage: item.usage as number,
+  }));
+
+  // Process network traffic data
+  const networkData = resourceData.networkTraffic.map((item: TimeSeriesDataPoint) => ({
+    time: item.time,
+    incoming: item.incoming as number,
+    outgoing: item.outgoing as number,
   }));
 
   return (
@@ -52,7 +66,7 @@ export function ResourceUsageCharts({ resourceData }: ResourceUsageChartsProps) 
             >
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={resourceData.cpuHistory}
+                  data={cpuData}
                   margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                 >
                   <defs>
@@ -93,7 +107,7 @@ export function ResourceUsageCharts({ resourceData }: ResourceUsageChartsProps) 
             >
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={resourceData.memoryHistory}
+                  data={memoryData}
                   margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                 >
                   <defs>
@@ -166,7 +180,7 @@ export function ResourceUsageCharts({ resourceData }: ResourceUsageChartsProps) 
             >
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={resourceData.networkTraffic}
+                  data={networkData}
                   margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
