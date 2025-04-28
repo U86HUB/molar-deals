@@ -1,29 +1,30 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 import { Check, Star, Users, Package, ArrowRight } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   const handleAuthSuccess = () => {
-    setIsLoggedIn(true);
     setShowOnboarding(true);
   };
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
-    window.location.href = "/dashboard";
+    navigate("/dashboard");
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar onOpenAuth={() => setShowAuthModal(true)} isLoggedIn={isLoggedIn} />
+      <Navbar onOpenAuth={() => setShowAuthModal(true)} />
       
       <AuthModal 
         isOpen={showAuthModal}
@@ -50,9 +51,15 @@ const Index = () => {
             Connect with top dental brands and access exclusive deals curated specifically for dental professionals like you.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Button size="lg" variant="primary" onClick={() => setShowAuthModal(true)}>
-              Get Started Free
-            </Button>
+            {isAuthenticated ? (
+              <Button size="lg" variant="primary" onClick={() => navigate("/dashboard")}>
+                Go to Dashboard
+              </Button>
+            ) : (
+              <Button size="lg" variant="primary" onClick={() => setShowAuthModal(true)}>
+                Get Started Free
+              </Button>
+            )}
             <Button size="lg" variant="outline">
               See How It Works
             </Button>
@@ -172,7 +179,7 @@ const Index = () => {
                   <span>Participate in referral program</span>
                 </li>
               </ul>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={() => setShowAuthModal(true)}>
                 Sign Up Free
               </Button>
             </div>
@@ -210,7 +217,7 @@ const Index = () => {
                   <span>Exclusive webinars & education</span>
                 </li>
               </ul>
-              <Button variant="primary" className="w-full">
+              <Button variant="primary" className="w-full" onClick={() => setShowAuthModal(true)}>
                 Start Premium
               </Button>
             </div>
@@ -238,39 +245,39 @@ const Index = () => {
       </section>
       
       {/* Footer */}
-      <footer className="bg-secondary py-12 px-4">
+      <section className="bg-secondary py-12 px-4">
         <div className="container mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
               <h3 className="font-bold mb-4">Company</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">About</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Careers</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Brand Partners</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Press</a></li>
+                <li><a href="/about" className="text-muted-foreground hover:text-foreground">About</a></li>
+                <li><a href="/careers" className="text-muted-foreground hover:text-foreground">Careers</a></li>
+                <li><a href="/brands" className="text-muted-foreground hover:text-foreground">Brand Partners</a></li>
+                <li><a href="/press" className="text-muted-foreground hover:text-foreground">Press</a></li>
               </ul>
             </div>
             <div>
               <h3 className="font-bold mb-4">Resources</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Blog</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Help Center</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Webinars</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Dental Resources</a></li>
+                <li><a href="/blog" className="text-muted-foreground hover:text-foreground">Blog</a></li>
+                <li><a href="/help" className="text-muted-foreground hover:text-foreground">Help Center</a></li>
+                <li><a href="/webinars" className="text-muted-foreground hover:text-foreground">Webinars</a></li>
+                <li><a href="/how-it-works" className="text-muted-foreground hover:text-foreground">Dental Resources</a></li>
               </ul>
             </div>
             <div>
               <h3 className="font-bold mb-4">Legal</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Privacy Policy</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Terms of Service</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Cookie Settings</a></li>
+                <li><a href="/privacy" className="text-muted-foreground hover:text-foreground">Privacy Policy</a></li>
+                <li><a href="/terms" className="text-muted-foreground hover:text-foreground">Terms of Service</a></li>
+                <li><span className="text-muted-foreground hover:text-foreground cursor-pointer">Cookie Settings</span></li>
               </ul>
             </div>
             <div>
               <h3 className="font-bold mb-4">Connect</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Contact Us</a></li>
+                <li><a href="/contact" className="text-muted-foreground hover:text-foreground">Contact Us</a></li>
                 <li><a href="#" className="text-muted-foreground hover:text-foreground">Twitter</a></li>
                 <li><a href="#" className="text-muted-foreground hover:text-foreground">LinkedIn</a></li>
                 <li><a href="#" className="text-muted-foreground hover:text-foreground">Instagram</a></li>
@@ -290,7 +297,7 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </footer>
+      </section>
     </div>
   );
 };

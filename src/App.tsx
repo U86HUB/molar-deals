@@ -6,9 +6,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -56,43 +59,70 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
-            <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/vendor" element={<VendorDashboard />} />
-                <Route path="/referrals" element={<ReferralLeaderboard />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/system-health" element={<SystemHealth />} />
-                
-                {/* Existing extra pages */}
-                <Route path="/how-it-works" element={<HowItWorks />} />
-                <Route path="/brands" element={<Brands />} />
-                <Route path="/privacy" element={<Privacy />} />
-                
-                {/* New company pages */}
-                <Route path="/about" element={<About />} />
-                <Route path="/careers" element={<Careers />} />
-                <Route path="/press" element={<Press />} />
-                
-                {/* New resource pages */}
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/help" element={<HelpCenter />} />
-                <Route path="/webinars" element={<Webinars />} />
-                
-                {/* New legal pages */}
-                <Route path="/terms" element={<Terms />} />
-                
-                {/* Contact */}
-                <Route path="/contact" element={<Contact />} />
-                
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
+          <AuthProvider>
+            <BrowserRouter>
+              <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/settings" element={
+                    <ProtectedRoute>
+                      <Settings />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/vendor" element={
+                    <ProtectedRoute>
+                      <VendorDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/referrals" element={
+                    <ProtectedRoute>
+                      <ReferralLeaderboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin" element={
+                    <ProtectedRoute>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/system-health" element={
+                    <ProtectedRoute>
+                      <SystemHealth />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Existing extra pages */}
+                  <Route path="/how-it-works" element={<HowItWorks />} />
+                  <Route path="/brands" element={<Brands />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  
+                  {/* New company pages */}
+                  <Route path="/about" element={<About />} />
+                  <Route path="/careers" element={<Careers />} />
+                  <Route path="/press" element={<Press />} />
+                  
+                  {/* New resource pages */}
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/help" element={<HelpCenter />} />
+                  <Route path="/webinars" element={<Webinars />} />
+                  
+                  {/* New legal pages */}
+                  <Route path="/terms" element={<Terms />} />
+                  
+                  {/* Contact */}
+                  <Route path="/contact" element={<Contact />} />
+                  
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </AuthProvider>
         </TooltipProvider>
       </ErrorBoundary>
     </HelmetProvider>

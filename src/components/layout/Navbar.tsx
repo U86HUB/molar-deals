@@ -1,19 +1,32 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Tag, Award, Shield } from "lucide-react";
+import { Menu, X, Tag, Award, Shield, UserCircle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 interface NavbarProps {
-  onOpenAuth: () => void;
+  onOpenAuth?: () => void;
   isLoggedIn?: boolean;
 }
 
-export const Navbar = ({ onOpenAuth, isLoggedIn = false }: NavbarProps) => {
+export const Navbar = ({ onOpenAuth }: NavbarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut, isAuthenticated } = useAuth();
   
   // Mock admin status - in a real app this would come from auth
-  const isAdmin = true; // For demo purposes
+  const isAdmin = isAuthenticated && user?.email?.includes('admin');
+  
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <header className="fixed w-full top-0 bg-white z-50 shadow-sm">
@@ -30,13 +43,13 @@ export const Navbar = ({ onOpenAuth, isLoggedIn = false }: NavbarProps) => {
           <Link to="/" className="text-gray-600 hover:text-primary transition-colors">Home</Link>
           <Link to="/how-it-works" className="text-gray-600 hover:text-primary transition-colors">How It Works</Link>
           <Link to="/brands" className="text-gray-600 hover:text-primary transition-colors">Our Brands</Link>
-          {isLoggedIn && (
+          {isAuthenticated && (
             <Link to="/referrals" className="text-gray-600 hover:text-primary transition-colors">Leaderboard</Link>
           )}
         </nav>
 
         <div className="hidden md:flex items-center space-x-4">
-          {isLoggedIn ? (
+          {isAuthenticated ? (
             <div className="flex items-center space-x-4">
               <Link to="/dashboard">
                 <Button variant="primary">My Deals</Button>
@@ -61,11 +74,31 @@ export const Navbar = ({ onOpenAuth, isLoggedIn = false }: NavbarProps) => {
                   </Button>
                 </Link>
               )}
-              <Link to="/settings">
-                <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-700 font-medium text-sm">U</span>
-                </div>
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer">
+                    <span className="text-gray-700 font-medium text-sm">
+                      {user?.email?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <div className="px-2 py-1.5 text-sm">
+                    {user?.email}
+                  </div>
+                  <DropdownMenuSeparator />
+                  <Link to="/settings">
+                    <DropdownMenuItem>
+                      <UserCircle className="mr-2 h-4 w-4" />
+                      Settings
+                    </DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ) : (
             <>
@@ -91,12 +124,12 @@ export const Navbar = ({ onOpenAuth, isLoggedIn = false }: NavbarProps) => {
             <Link to="/" className="block py-2 text-gray-600 hover:text-primary transition-colors">Home</Link>
             <Link to="/how-it-works" className="block py-2 text-gray-600 hover:text-primary transition-colors">How It Works</Link>
             <Link to="/brands" className="block py-2 text-gray-600 hover:text-primary transition-colors">Our Brands</Link>
-            {isLoggedIn && (
+            {isAuthenticated && (
               <Link to="/referrals" className="block py-2 text-gray-600 hover:text-primary transition-colors">Leaderboard</Link>
             )}
             
             <div className="pt-3 border-t border-gray-100 space-y-3">
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 <div className="flex flex-col space-y-3">
                   <Link to="/dashboard">
                     <Button className="w-full" variant="primary">My Deals</Button>
@@ -124,6 +157,7 @@ export const Navbar = ({ onOpenAuth, isLoggedIn = false }: NavbarProps) => {
                   <Link to="/settings">
                     <Button className="w-full" variant="secondary">Settings</Button>
                   </Link>
+                  <Button className="w-full" variant="outline" onClick={handleSignOut}>Logout</Button>
                 </div>
               ) : (
                 <>

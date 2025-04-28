@@ -4,8 +4,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Mail, ArrowRight, Shield } from "lucide-react";
+import { Mail, ArrowRight, Shield, User, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -14,17 +16,22 @@ interface AuthModalProps {
 }
 
 export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
+  const { signIn, signUp } = useAuth();
   const [activeTab, setActiveTab] = useState<string>("login");
   const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
+  const [fullName, setFullName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [secureLogin, setSecureLogin] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email) {
@@ -37,24 +44,57 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
       return;
     }
 
+    if (!password) {
+      toast.error("Please enter your password");
+      return;
+    }
+
     setLoading(true);
-    // Simulating auth request with security measures
     try {
-      // Simulate network request
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast.success(`Magic link sent to ${email}. Check your inbox!`);
-      
-      // In a real app, we'd wait for the user to click the link
-      // For now, we'll just simulate a successful login
-      if (secureLogin) {
-        setTimeout(() => {
-          onSuccess();
-          onClose();
-        }, 1500);
-      }
+      await signIn(email, password);
+      onSuccess();
+      onClose();
     } catch (error) {
-      toast.error("An error occurred. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      toast.error("Please enter your email address");
+      return;
+    }
+    
+    if (!validateEmail(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    if (!password) {
+      toast.error("Please enter your password");
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await signUp(email, password, {
+        username,
+        full_name: fullName,
+      });
+      toast.success("Registration successful! Please check your email to confirm your account.");
+      onSuccess();
+      onClose();
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -76,19 +116,34 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
           </TabsList>
 
           <TabsContent value="login" className="mt-6 space-y-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">Email</label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="doctor@dental.com"
-                  className="rounded-md"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    type="email" 
+                    placeholder="Email"
+                    className="pl-10"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    type="password" 
+                    placeholder="Password"
+                    className="pl-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
               
               <div className="flex items-center space-x-2">
@@ -112,8 +167,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                 loading={loading}
                 disabled={loading}
               >
-                {!loading && <Mail className="mr-2 h-4 w-4" />}
-                Send Magic Link
+                Sign In
               </Button>
             </form>
 
@@ -146,19 +200,60 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
           </TabsContent>
 
           <TabsContent value="register" className="mt-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSignUp} className="space-y-6">
               <div className="space-y-2">
-                <label htmlFor="reg-email" className="text-sm font-medium">Email</label>
-                <Input 
-                  id="reg-email" 
-                  type="email" 
-                  placeholder="doctor@dental.com"
-                  className="rounded-md"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    type="email" 
+                    placeholder="Email"
+                    className="pl-10"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    type="text" 
+                    placeholder="Username (optional)"
+                    className="pl-10"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    type="text" 
+                    placeholder="Full Name (optional)"
+                    className="pl-10"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    type="password" 
+                    placeholder="Password"
+                    className="pl-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
               
               <div className="flex items-center space-x-2">
@@ -182,7 +277,6 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                 loading={loading}
                 disabled={loading}
               >
-                {!loading && <ArrowRight className="mr-2 h-4 w-4" />}
                 Create Account
               </Button>
               
