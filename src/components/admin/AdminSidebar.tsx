@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { PackageOpen, Users, TrendingUp, ChartBar, Settings } from "lucide-react";
+import { PackageOpen, Users, TrendingUp, ChartBar, Settings, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AdminSidebarProps {
@@ -12,6 +12,7 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
   const menuItems = [
     { id: "deals", label: "Deals Management", icon: PackageOpen },
     { id: "vendors", label: "Vendor Management", icon: Users },
+    { id: "users", label: "User Management", icon: User },
     { id: "referrals", label: "Referral Management", icon: Users },
     { id: "analytics", label: "Analytics & Insights", icon: ChartBar },
     { id: "settings", label: "Admin Settings", icon: Settings },

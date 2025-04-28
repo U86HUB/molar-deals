@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 // Lazy load admin tabs for better performance
 const DealManagementTab = lazy(() => import("@/components/admin/DealManagementTab"));
 const VendorManagementTab = lazy(() => import("@/components/admin/VendorManagementTab"));
+const UserManagementTab = lazy(() => import("@/components/admin/UserManagementTab"));
 const ReferralManagementTab = lazy(() => import("@/components/admin/ReferralManagementTab"));
 const AnalyticsTab = lazy(() => import("@/components/admin/AnalyticsTab"));
 const SettingsTab = lazy(() => import("@/components/admin/SettingsTab"));
@@ -34,6 +35,7 @@ const AdminDashboard = () => {
               <TabsList className="mb-8">
                 <TabsTrigger value="deals">Deals</TabsTrigger>
                 <TabsTrigger value="vendors">Vendors</TabsTrigger>
+                <TabsTrigger value="users">Users</TabsTrigger>
                 <TabsTrigger value="referrals">Referrals</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -50,6 +52,9 @@ const AdminDashboard = () => {
                 </TabsContent>
                 <TabsContent value="vendors">
                   <VendorManagementTab />
+                </TabsContent>
+                <TabsContent value="users">
+                  <UserManagementTab />
                 </TabsContent>
                 <TabsContent value="referrals">
                   <ReferralManagementTab />
