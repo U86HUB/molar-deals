@@ -1,4 +1,3 @@
-
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -17,10 +16,20 @@ const VendorDashboard = lazy(() => import("./pages/VendorDashboard"));
 const ReferralLeaderboard = lazy(() => import("./pages/ReferralLeaderboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
-// New pages
+// Existing pages
 const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 const Brands = lazy(() => import("./pages/Brands"));
 const Privacy = lazy(() => import("./pages/Privacy"));
+
+// New pages
+const About = lazy(() => import("./pages/About"));
+const Careers = lazy(() => import("./pages/Careers"));
+const Press = lazy(() => import("./pages/Press"));
+const Blog = lazy(() => import("./pages/Blog"));
+const HelpCenter = lazy(() => import("./pages/HelpCenter"));
+const Webinars = lazy(() => import("./pages/Webinars"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Contact = lazy(() => import("./pages/Contact"));
 
 // Configure query client with better defaults for production
 const queryClient = new QueryClient({
@@ -56,10 +65,26 @@ const App = () => (
                 <Route path="/referrals" element={<ReferralLeaderboard />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 
-                {/* New routes for critical missing pages */}
+                {/* Existing extra pages */}
                 <Route path="/how-it-works" element={<HowItWorks />} />
                 <Route path="/brands" element={<Brands />} />
                 <Route path="/privacy" element={<Privacy />} />
+                
+                {/* New company pages */}
+                <Route path="/about" element={<About />} />
+                <Route path="/careers" element={<Careers />} />
+                <Route path="/press" element={<Press />} />
+                
+                {/* New resource pages */}
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/help" element={<HelpCenter />} />
+                <Route path="/webinars" element={<Webinars />} />
+                
+                {/* New legal pages */}
+                <Route path="/terms" element={<Terms />} />
+                
+                {/* Contact */}
+                <Route path="/contact" element={<Contact />} />
                 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
