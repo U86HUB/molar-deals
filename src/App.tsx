@@ -15,6 +15,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const VendorDashboard = lazy(() => import("./pages/VendorDashboard"));
 const ReferralLeaderboard = lazy(() => import("./pages/ReferralLeaderboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const SystemHealth = lazy(() => import("./pages/SystemHealth"));
 
 // Existing pages
 const HowItWorks = lazy(() => import("./pages/HowItWorks"));
@@ -64,6 +65,7 @@ const App = () => (
                 <Route path="/vendor" element={<VendorDashboard />} />
                 <Route path="/referrals" element={<ReferralLeaderboard />} />
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/system-health" element={<SystemHealth />} />
                 
                 {/* Existing extra pages */}
                 <Route path="/how-it-works" element={<HowItWorks />} />
