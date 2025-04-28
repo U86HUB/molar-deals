@@ -1,24 +1,46 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>dental-deal-delight</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>DentalDeals - Exclusive Deals for Dental Professionals</title>
+    <meta name="description" content="Find the best deals on dental supplies and equipment for your practice." />
+    <meta name="author" content="DentalDeals Team" />
 
-    <meta property="og:title" content="dental-deal-delight" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <!-- PWA support -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1E40AF" />
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    
+    <!-- Security headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.gpteng.co; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https://*.lovable.dev;" />
+
+    <!-- Open Graph tags for social sharing -->
+    <meta property="og:title" content="DentalDeals" />
+    <meta property="og:description" content="Exclusive deals for dental professionals" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:url" content="https://dentaldeals.com" />
 
+    <!-- Twitter Card tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:site" content="@dental_deals" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- Preconnect to important domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Preload critical assets -->
+    <link rel="preload" href="/src/index.css" as="style" />
   </head>
 
   <body>
     <div id="root"></div>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
