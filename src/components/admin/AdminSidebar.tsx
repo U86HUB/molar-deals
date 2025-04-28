@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { 
   PackageOpen, Users, TrendingUp, ChartBar, Settings, User,
@@ -12,6 +11,14 @@ interface AdminSidebarProps {
   onTabChange: (tab: string) => void;
 }
 
+interface MenuItem {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string;
+  disabled?: boolean;
+}
+
 export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
   const menuCategories = [
     {
@@ -20,21 +27,21 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
         { id: "deals", label: "Deals Management", icon: PackageOpen },
         { id: "vendors", label: "Vendor Management", icon: BriefcaseBusiness },
         { id: "users", label: "User Management", icon: User, badge: "Enhanced" }
-      ]
+      ] as MenuItem[]
     },
     {
       title: "Platform",
       items: [
         { id: "referrals", label: "Referral Management", icon: Users },
         { id: "analytics", label: "Analytics & Insights", icon: ChartBar },
-      ]
+      ] as MenuItem[]
     },
     {
       title: "Administration",
       items: [
         { id: "content", label: "Content Management", icon: FileSearch },
         { id: "settings", label: "Admin Settings", icon: Settings },
-      ]
+      ] as MenuItem[]
     }
   ];
 

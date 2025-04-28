@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,11 +70,12 @@ const mockPosts = [
   },
 ];
 
-const statusColors = {
-  published: "success",
+// Update status colors to use valid Badge variants
+const statusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  published: "default",
   draft: "secondary",
-  archived: "default",
-} as const;
+  archived: "outline",
+};
 
 export const BlogPostsList = () => {
   const [searchTerm, setSearchTerm] = useState("");
