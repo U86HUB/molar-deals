@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -14,6 +15,7 @@ import { CommunicationStep } from "./steps/CommunicationStep";
 import { ReviewStep } from "./steps/ReviewStep";
 import { OnboardingWizardProps, UserData } from "./types";
 import { validateStep, initialUserData } from "./utils/onboardingUtils";
+import { Database } from "@/integrations/supabase/types";
 
 export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWizardProps) => {
   const { user } = useAuth();
@@ -77,13 +79,15 @@ export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWiza
     try {
       // Save user data to database if user is authenticated
       if (user?.id) {
+        const profileData: Database['public']['Tables']['profiles']['Update'] = {
+          full_name: userData.name,
+          username: userData.email.split('@')[0]
+        };
+        
         const { error } = await supabase
           .from('profiles')
-          .upsert({
-            id: user.id,
-            full_name: userData.name,
-            username: userData.email.split('@')[0]
-          });
+          .update(profileData)
+          .eq('id', user.id);
           
         if (error) {
           throw error;

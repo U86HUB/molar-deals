@@ -39,7 +39,9 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
       // Add a custom header to help diagnose CORS issues
       'X-Client-Info': 'DentalDeals Web App',
     },
-    fetch: (resource, config) => {
+    fetch: (...args: [RequestInfo | URL, RequestInit?]): Promise<Response> => {
+      const [resource, config] = args;
+      
       // Log the request for debugging
       console.log(`Supabase fetch request to: ${resource}`);
       

@@ -31,13 +31,15 @@ export interface CreateDealDto {
 }
 
 type DbDeal = Database['public']['Tables']['deals']['Row'];
+type DbDealInsert = Database['public']['Tables']['deals']['Insert'];
+type DbDealUpdate = Database['public']['Tables']['deals']['Update'];
 
 export async function getVendorDeals(vendorId: string) {
   try {
     const { data, error } = await supabase
       .from("deals")
       .select("*")
-      .eq("vendor_id", vendorId)
+      .eq("vendor_id", vendorId as string)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -50,13 +52,15 @@ export async function getVendorDeals(vendorId: string) {
 
 export async function createDeal(dealData: CreateDealDto, vendorId: string) {
   try {
+    const insertData: DbDealInsert = {
+      ...dealData,
+      vendor_id: vendorId,
+      status: "pending", // New deals start as pending
+    };
+    
     const { data, error } = await supabase
       .from("deals")
-      .insert({
-        ...dealData,
-        vendor_id: vendorId,
-        status: "pending", // New deals start as pending
-      })
+      .insert(insertData)
       .select();
 
     if (error) throw error;
@@ -70,7 +74,7 @@ export async function createDeal(dealData: CreateDealDto, vendorId: string) {
 
 export async function updateDeal(dealId: string, dealData: Partial<CreateDealDto>) {
   try {
-    const updatePayload: Partial<DbDeal> = {
+    const updatePayload: DbDealUpdate = {
       ...dealData,
       updated_at: new Date().toISOString(),
     };
@@ -78,7 +82,7 @@ export async function updateDeal(dealId: string, dealData: Partial<CreateDealDto
     const { data, error } = await supabase
       .from("deals")
       .update(updatePayload)
-      .eq("id", dealId)
+      .eq("id", dealId as string)
       .select();
 
     if (error) throw error;
@@ -95,7 +99,7 @@ export async function deleteDeal(dealId: string) {
     const { error } = await supabase
       .from("deals")
       .delete()
-      .eq("id", dealId);
+      .eq("id", dealId as string);
 
     if (error) throw error;
     toast.success("Deal deleted successfully");
@@ -108,7 +112,7 @@ export async function deleteDeal(dealId: string) {
 
 export async function changeDealStatus(dealId: string, status: "active" | "pending" | "expired") {
   try {
-    const updatePayload: Partial<DbDeal> = {
+    const updatePayload: DbDealUpdate = {
       status,
       updated_at: new Date().toISOString(),
     };
@@ -116,7 +120,7 @@ export async function changeDealStatus(dealId: string, status: "active" | "pendi
     const { data, error } = await supabase
       .from("deals")
       .update(updatePayload)
-      .eq("id", dealId)
+      .eq("id", dealId as string)
       .select();
 
     if (error) throw error;
