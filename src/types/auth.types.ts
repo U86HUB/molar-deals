@@ -16,7 +16,7 @@ export interface AuthContextProps {
   resetPassword: (email: string) => Promise<void>;
   isAuthenticated: boolean;
   updateUserProfile: (data: { username?: string; full_name?: string; role?: string }) => Promise<void>;
-  updateUserPassword: (password: string) => Promise<void>;
+  updateUserPassword: (password: string) => Promise<boolean>; // Updated to return Promise<boolean>
   hasSetPassword: boolean;
   checkHasSetPassword: () => Promise<boolean>;
 }
