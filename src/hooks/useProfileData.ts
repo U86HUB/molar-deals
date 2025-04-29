@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { useLocationStore } from "@/stores/locationStore";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface ProfileFormData {
   name: string;
@@ -15,7 +16,7 @@ export interface ProfileFormData {
   yearsOfExperience: string;
   practiceSize: string;
   bio: string;
-  clinicBio?: string; // New field for clinic bio
+  clinicBio?: string;
 }
 
 export function useProfileData() {
@@ -39,36 +40,68 @@ export function useProfileData() {
   // Load user data on mount
   useEffect(() => {
     if (user) {
-      // First, set basic profile data
-      setProfileData({
-        name: user.user_metadata?.full_name || "",
-        email: user.email || "",
-        firstName: user.user_metadata?.first_name || "",
-        lastName: user.user_metadata?.last_name || "",
-        phone: user.user_metadata?.phone || "",
-        practiceName: user.user_metadata?.practice_name || "",
-        specialty: user.user_metadata?.specialty || "General Dentist",
-        yearsOfExperience: user.user_metadata?.years_of_experience || "0-5",
-        practiceSize: user.user_metadata?.practice_size || "solo",
-        bio: user.user_metadata?.bio || "",
-        clinicBio: user.user_metadata?.clinic_bio || ""
-      });
+      // First get the basic user info from auth
+      const userEmail = user.email || "";
       
-      // Then, set location data in the location store
-      if (user.user_metadata?.address_structured) {
-        setLocation({
-          addressStructured: user.user_metadata.address_structured,
-          source: user.user_metadata?.location_source || 'google',
-          isVerified: true // Consider existing data as verified
-        });
-      }
+      // Then fetch the detailed profile from profiles table
+      const fetchProfile = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+            
+          if (error) throw error;
+          
+          if (data) {
+            // Set profile data from the profiles table
+            setProfileData({
+              name: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
+              email: userEmail,
+              firstName: data.first_name || '',
+              lastName: data.last_name || '',
+              phone: data.phone || '',
+              practiceName: data.practice_name || '',
+              specialty: data.specialty || 'General Dentist',
+              yearsOfExperience: data.years_of_experience || '0-5',
+              practiceSize: data.practice_size || 'solo',
+              bio: data.bio || '',
+              clinicBio: data.clinic_bio || ''
+            });
+            
+            // Set location data in the location store
+            if (data.address_structured) {
+              setLocation({
+                addressStructured: data.address_structured,
+                source: data.location_source || 'google',
+                isVerified: true
+              });
+            }
+            
+            // If we have coords stored, set them as well
+            if (data.coords) {
+              // Extract coordinates from PostGIS point
+              // Format will be something like: POINT(longitude latitude)
+              const coordsStr = data.coords.toString();
+              const match = coordsStr.match(/POINT\(([^ ]*) ([^)]*)\)/);
+              
+              if (match && match.length === 3) {
+                const lng = parseFloat(match[1]);
+                const lat = parseFloat(match[2]);
+                
+                setLocation({
+                  coords: { lat, lng }
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+        }
+      };
       
-      // If we have coords stored, set them as well
-      if (user.user_metadata?.location?.coords) {
-        setLocation({
-          coords: user.user_metadata.location.coords
-        });
-      }
+      fetchProfile();
     }
   }, [user, setLocation]);
   
@@ -84,17 +117,9 @@ export function useProfileData() {
     try {
       // Format full name
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-      
-      // Create formatted location metadata
-      const locationMetadata = {
-        country: addressStructured?.country || "",
-        state: addressStructured?.state || "",
-        city: addressStructured?.city || "",
-        coords: coords || null
-      };
-      
-      // Update user profile with all metadata
-      await updateUserProfile({
+
+      // Prepare profile data for update
+      const profileUpdateData = {
         full_name: fullName,
         first_name: formData.firstName,
         last_name: formData.lastName,
@@ -104,11 +129,19 @@ export function useProfileData() {
         practice_size: formData.practiceSize,
         phone: formData.phone,
         bio: formData.bio,
-        clinic_bio: formData.clinicBio, // Add the new clinic bio field
+        clinic_bio: formData.clinicBio,
         address_structured: addressStructured || null,
-        location: locationMetadata,
-        location_source: source || 'google'
-      });
+        location_source: source || 'google',
+        has_set_password: true
+      };
+      
+      if (coords) {
+        // Format PostGIS point data
+        profileUpdateData.coords = `POINT(${coords.lng} ${coords.lat})`;
+      }
+
+      // Update user profile
+      await updateUserProfile(profileUpdateData);
       
       toast.success("Profile updated successfully!");
     } catch (error) {

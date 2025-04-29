@@ -8,11 +8,37 @@ import { UserMetadata } from "@/components/onboarding/types";
 export const useAuthProfile = () => {
   const updateUserProfile = async (data: Record<string, any>) => {
     try {
-      const { error } = await supabase.auth.updateUser({
-        data
+      // Only store essential auth-related data in user metadata
+      const { error: authError } = await supabase.auth.updateUser({
+        data: {
+          has_set_password: data.has_set_password || true,
+          onboarding_completed: data.onboarding_completed
+        }
       });
 
-      if (error) throw error;
+      if (authError) throw authError;
+      
+      // Store the rest of user profile data in the profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: (await supabase.auth.getUser()).data.user?.id,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          phone: data.phone,
+          specialty: data.specialty,
+          years_of_experience: data.years_of_experience,
+          bio: data.bio,
+          practice_name: data.practice_name,
+          practice_size: data.practice_size,
+          clinic_bio: data.clinic_bio,
+          address_structured: data.address_structured,
+          location_source: data.location_source
+        }, { 
+          onConflict: ['id']
+        });
+
+      if (profileError) throw profileError;
       
       toast.success("Profile updated successfully!");
     } catch (error: any) {
