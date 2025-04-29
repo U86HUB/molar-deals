@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Database } from "@/integrations/supabase/types";
 
 export interface Deal {
   id: string;
@@ -29,6 +30,8 @@ export interface CreateDealDto {
   image_url?: string;
 }
 
+type DbDeal = Database['public']['Tables']['deals']['Row'];
+
 export async function getVendorDeals(vendorId: string) {
   try {
     const { data, error } = await supabase
@@ -49,11 +52,11 @@ export async function createDeal(dealData: CreateDealDto, vendorId: string) {
   try {
     const { data, error } = await supabase
       .from("deals")
-      .insert([{
+      .insert({
         ...dealData,
         vendor_id: vendorId,
         status: "pending", // New deals start as pending
-      }])
+      })
       .select();
 
     if (error) throw error;
@@ -67,12 +70,14 @@ export async function createDeal(dealData: CreateDealDto, vendorId: string) {
 
 export async function updateDeal(dealId: string, dealData: Partial<CreateDealDto>) {
   try {
+    const updatePayload: Partial<DbDeal> = {
+      ...dealData,
+      updated_at: new Date().toISOString(),
+    };
+    
     const { data, error } = await supabase
       .from("deals")
-      .update({
-        ...dealData,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq("id", dealId)
       .select();
 
@@ -103,12 +108,14 @@ export async function deleteDeal(dealId: string) {
 
 export async function changeDealStatus(dealId: string, status: "active" | "pending" | "expired") {
   try {
+    const updatePayload: Partial<DbDeal> = {
+      status,
+      updated_at: new Date().toISOString(),
+    };
+    
     const { data, error } = await supabase
       .from("deals")
-      .update({
-        status,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq("id", dealId)
       .select();
 

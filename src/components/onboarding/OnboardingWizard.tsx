@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -83,8 +82,7 @@ export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWiza
           .upsert({
             id: user.id,
             full_name: userData.name,
-            // Add other fields that match your profiles table schema
-            // We'll store the complete onboarding data in user_metadata
+            username: userData.email.split('@')[0]
           });
           
         if (error) {

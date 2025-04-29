@@ -141,7 +141,6 @@ export const useAuthMethods = () => {
             connection: (navigator as any).connection ? (navigator as any).connection.effectiveType : "unknown",
             https: window.location.protocol === 'https:',
             timestamp: new Date().toISOString(),
-            url: SUPABASE_URL // This variable would need to be imported or defined
           });
           
           // Try to diagnose CORS issues
