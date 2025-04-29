@@ -11,6 +11,13 @@ const HmrErrorRecovery = () => {
   const [hasHmrError, setHasHmrError] = useState(false);
   
   useEffect(() => {
+    // Handle __WS_TOKEN__ undefined error at initialization
+    if (typeof window !== 'undefined' && window.__WS_TOKEN__ === undefined) {
+      // Define the token if it's missing
+      window.__WS_TOKEN__ = Date.now().toString();
+      console.log('Added missing __WS_TOKEN__ for HMR connection');
+    }
+    
     // Function to handle errors in the global window context
     const handleErrorEvent = (event: ErrorEvent) => {
       // Check for HMR and WebSocket related errors
@@ -30,6 +37,16 @@ const HmrErrorRecovery = () => {
           },
           duration: 10000, // Show for 10 seconds
         });
+        
+        // Try to recover by assigning a token value
+        if (event.message.includes('__WS_TOKEN__')) {
+          try {
+            window.__WS_TOKEN__ = Date.now().toString();
+            console.log('Attempted recovery by setting __WS_TOKEN__');
+          } catch (e) {
+            console.error('Recovery attempt failed:', e);
+          }
+        }
       }
     };
     
@@ -42,6 +59,16 @@ const HmrErrorRecovery = () => {
       ) {
         console.warn('HMR connection promise rejection:', event.reason);
         setHasHmrError(true);
+        
+        // Try to recover by assigning a token value for token-related errors
+        if (typeof event.reason === 'string' && event.reason.includes('__WS_TOKEN__')) {
+          try {
+            window.__WS_TOKEN__ = Date.now().toString();
+            console.log('Attempted recovery by setting __WS_TOKEN__ after rejection');
+          } catch (e) {
+            console.error('Recovery attempt failed:', e);
+          }
+        }
       }
     };
     
@@ -97,5 +124,13 @@ const HmrErrorRecovery = () => {
     </div>
   );
 };
+
+// Add TypeScript declaration to fix the compiler error
+declare global {
+  interface Window {
+    __WS_TOKEN__?: string;
+    __vite_error_overlay__?: any;
+  }
+}
 
 export default HmrErrorRecovery;

@@ -68,6 +68,7 @@ export default defineConfig(({ mode }) => ({
       clientPort: mode === 'production' ? 443 : undefined, // Use HTTPS port for websockets when deployed
       host: 'localhost', // Match the host setting
       overlay: false, // Disable the error overlay - we'll handle errors ourselves
+      reconnect: 10000, // Increase reconnection attempts for more stability
     },
     watch: {
       usePolling: false, // Disable polling for better performance
@@ -133,5 +134,9 @@ export default defineConfig(({ mode }) => ({
       ].filter(Boolean),
     },
     chunkSizeWarningLimit: 1000, // Increase warning limit
+  },
+  define: {
+    // Fix for __WS_TOKEN__ undefined error by providing a fallback value
+    __WS_TOKEN__: JSON.stringify(Date.now().toString()),
   }
 }));
