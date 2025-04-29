@@ -22,7 +22,7 @@ export const AddressModeSelector = ({
         type="single" 
         value={addressMode} 
         onValueChange={(value: string) => {
-          if (value && (value === 'google')) {
+          if (value && value === 'google') {
             setAddressMode(value as LocationSource);
           }
         }}

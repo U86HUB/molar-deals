@@ -27,7 +27,7 @@ export const useAuthProfile = () => {
           last_name: data.last_name,
           phone: data.phone,
           specialty: data.specialty,
-          years_of_experience: data.years_of_experience,
+          years_experience: data.years_of_experience, // Note: DB column is years_experience
           bio: data.bio,
           practice_name: data.practice_name,
           practice_size: data.practice_size,
@@ -35,7 +35,7 @@ export const useAuthProfile = () => {
           address_structured: data.address_structured,
           location_source: data.location_source
         }, { 
-          onConflict: ['id']
+          onConflict: 'id'
         });
 
       if (profileError) throw profileError;

@@ -40,6 +40,8 @@ export const useLocationStore = create<LocationState>((set) => ({
   setLocation: (data) => set((state) => ({
     ...state,
     ...data,
+    // Ensure source is always 'google' if provided but not a valid LocationSource
+    source: data.source === 'google' ? data.source : state.source
   })),
   
   setAddressComponent: (key, value) => set((state) => ({

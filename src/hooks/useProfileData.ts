@@ -64,7 +64,7 @@ export function useProfileData() {
               phone: data.phone || '',
               practiceName: data.practice_name || '',
               specialty: data.specialty || 'General Dentist',
-              yearsOfExperience: data.years_of_experience || '0-5',
+              yearsOfExperience: data.years_experience || '0-5', // Note: DB column is years_experience
               practiceSize: data.practice_size || 'solo',
               bio: data.bio || '',
               clinicBio: data.clinic_bio || ''
@@ -125,23 +125,24 @@ export function useProfileData() {
         last_name: formData.lastName,
         practice_name: formData.practiceName,
         specialty: formData.specialty,
-        years_of_experience: formData.yearsOfExperience,
+        years_experience: formData.yearsOfExperience, // Note: DB column is years_experience
         practice_size: formData.practiceSize,
         phone: formData.phone,
         bio: formData.bio,
         clinic_bio: formData.clinicBio,
-        address_structured: addressStructured || null,
-        location_source: source || 'google',
+        address_structured: addressStructured,
+        location_source: source,
         has_set_password: true
       };
       
-      if (coords) {
-        // Format PostGIS point data
-        profileUpdateData.coords = `POINT(${coords.lng} ${coords.lat})`;
-      }
+      // Add coordinates if available
+      const profileDataWithCoords = coords ? {
+        ...profileUpdateData,
+        coords: `POINT(${coords.lng} ${coords.lat})`
+      } : profileUpdateData;
 
       // Update user profile
-      await updateUserProfile(profileUpdateData);
+      await updateUserProfile(profileDataWithCoords);
       
       toast.success("Profile updated successfully!");
     } catch (error) {
