@@ -1,23 +1,17 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
-import { specialties } from "@/components/onboarding/data/onboardingOptions";
-import { LocationSelector, LocationData } from "@/components/shared/LocationSelector";
-import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { LocationData } from "@/components/shared/LocationSelector";
+import { PhotoUploadSection } from "./profile/PhotoUploadSection";
+import { BasicInfoSection } from "./profile/BasicInfoSection";
+import { LocationSection } from "./profile/LocationSection";
+import { BioSection } from "./profile/BioSection";
 
 // Get Google Maps API key from environment variables
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
-
-type AddressMode = "auto" | "manual";
 
 export function ProfileTab() {
   const { user, updateUserProfile } = useAuth();
@@ -42,17 +36,6 @@ export function ProfileTab() {
     postalCode: user?.user_metadata?.postal_code || ""
   });
   
-  // New states for Google Places autocomplete
-  const [addressMode, setAddressMode] = useState<AddressMode>("manual");
-  const [address, setAddress] = useState("");
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  
-  // Load Google Maps Places API
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries: ["places"],
-  });
-  
   useEffect(() => {
     if (user) {
       setProfileData({
@@ -74,21 +57,22 @@ export function ProfileTab() {
         streetAddress: user.user_metadata?.street_address || "",
         postalCode: user.user_metadata?.postal_code || ""
       });
-      
-      // Set the full address for Google autocomplete if data exists
-      if (user.user_metadata?.street_address && user.user_metadata?.city) {
-        const fullAddress = [
-          user.user_metadata.street_address,
-          user.user_metadata.location?.city,
-          user.user_metadata.location?.state,
-          user.user_metadata.location?.country,
-          user.user_metadata.postal_code
-        ].filter(Boolean).join(", ");
-        
-        setAddress(fullAddress);
-      }
     }
   }, [user]);
+  
+  const handleProfileDataChange = (field: string, value: string) => {
+    setProfileData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
+  const handleBioChange = (bio: string) => {
+    setProfileData(prev => ({
+      ...prev,
+      bio
+    }));
+  };
   
   const handleSave = async () => {
     setLoading(true);
@@ -122,62 +106,6 @@ export function ProfileTab() {
     }
   };
   
-  const handlePlaceChange = () => {
-    const place = autocompleteRef.current?.getPlace();
-    
-    if (place?.formatted_address) {
-      setAddress(place.formatted_address);
-      
-      // Extract address components
-      let streetNumber = '';
-      let street = '';
-      let city = '';
-      let state = '';
-      let country = '';
-      let postalCode = '';
-      
-      // Parse address components
-      if (place.address_components) {
-        for (const component of place.address_components) {
-          const componentType = component.types[0];
-          
-          switch (componentType) {
-            case 'street_number':
-              streetNumber = component.long_name;
-              break;
-            case 'route':
-              street = component.long_name;
-              break;
-            case 'locality':
-              city = component.long_name;
-              break;
-            case 'administrative_area_level_1':
-              state = component.short_name;
-              break;
-            case 'country':
-              country = component.short_name;
-              break;
-            case 'postal_code':
-              postalCode = component.long_name;
-              break;
-          }
-        }
-      }
-      
-      // Update location data
-      setLocationData({
-        ...locationData,
-        countryCode: country,
-        state: state,
-        city: city,
-        streetAddress: `${streetNumber} ${street}`.trim(),
-        postalCode: postalCode
-      });
-      
-      toast.success("Address verified successfully!");
-    }
-  };
-  
   return (
     <div className="space-y-6">
       <CardHeader>
@@ -187,214 +115,23 @@ export function ProfileTab() {
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex flex-col md:flex-row gap-6 items-start">
-          <div>
-            <Avatar className="h-24 w-24">
-              <AvatarImage src="" alt="Profile" />
-              <AvatarFallback className="text-3xl">
-                {profileData.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) || "?"}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-          
-          <div className="space-y-2">
-            <h3 className="text-base font-medium">Profile Photo</h3>
-            <p className="text-sm text-muted-foreground">
-              This photo will be displayed on your profile and in comments.
-            </p>
-            <div className="flex gap-3">
-              <Button variant="secondary" size="sm">
-                Upload New Photo
-              </Button>
-              <Button variant="outline" size="sm">
-                Remove
-              </Button>
-            </div>
-          </div>
-        </div>
+        <PhotoUploadSection name={profileData.name} />
         
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input 
-              id="name" 
-              value={profileData.name}
-              onChange={e => setProfileData({...profileData, name: e.target.value})}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <Input id="email" value={profileData.email} readOnly />
-            <p className="text-xs text-muted-foreground">
-              Your email cannot be changed
-            </p>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input 
-              id="phone" 
-              value={profileData.phone}
-              onChange={e => setProfileData({...profileData, phone: e.target.value})}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="practice">Practice Name</Label>
-            <Input 
-              id="practice" 
-              value={profileData.practiceName}
-              onChange={e => setProfileData({...profileData, practiceName: e.target.value})}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="specialty">Specialty</Label>
-            <Select 
-              value={profileData.specialty}
-              onValueChange={value => setProfileData({...profileData, specialty: value})}
-            >
-              <SelectTrigger id="specialty">
-                <SelectValue placeholder="Select specialty" />
-              </SelectTrigger>
-              <SelectContent>
-                {specialties.map(specialty => (
-                  <SelectItem key={specialty} value={specialty}>{specialty}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="yearsOfExperience">Years of Experience</Label>
-            <Select 
-              value={profileData.yearsOfExperience}
-              onValueChange={value => setProfileData({...profileData, yearsOfExperience: value})}
-            >
-              <SelectTrigger id="yearsOfExperience">
-                <SelectValue placeholder="Select years of experience" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="0-5">0-5 years</SelectItem>
-                <SelectItem value="6-10">6-10 years</SelectItem>
-                <SelectItem value="11-20">11-20 years</SelectItem>
-                <SelectItem value="20+">20+ years</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="practiceSize">Practice Size</Label>
-            <Select 
-              value={profileData.practiceSize}
-              onValueChange={value => setProfileData({...profileData, practiceSize: value})}
-            >
-              <SelectTrigger id="practiceSize">
-                <SelectValue placeholder="Select practice size" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="solo">Solo Practice</SelectItem>
-                <SelectItem value="small">Small Group (2-5 dentists)</SelectItem>
-                <SelectItem value="medium">Medium Group (6-20 dentists)</SelectItem>
-                <SelectItem value="large">Large Group / DSO (20+ dentists)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <BasicInfoSection 
+          profileData={profileData} 
+          onChange={handleProfileDataChange} 
+        />
         
-        <div className="space-y-4">
-          <h3 className="text-base font-medium">Location & Address</h3>
-          <p className="text-sm text-muted-foreground mb-2">
-            Enter the location and address of your practice
-          </p>
-          
-          <div className="mb-4">
-            <Label htmlFor="address-mode" className="mb-2 block">Address Entry Method</Label>
-            <ToggleGroup 
-              type="single" 
-              value={addressMode} 
-              onValueChange={(value: string) => {
-                if (value && (value === "auto" || value === "manual")) {
-                  setAddressMode(value as AddressMode);
-                }
-              }}
-              className="justify-start"
-            >
-              <ToggleGroupItem value="auto" disabled={!isLoaded || !!loadError}>
-                Verify via Google
-              </ToggleGroupItem>
-              <ToggleGroupItem value="manual">
-                Enter manually
-              </ToggleGroupItem>
-            </ToggleGroup>
-            
-            {!isLoaded && addressMode === "auto" && (
-              <p className="text-sm text-muted-foreground mt-2">Loading address verification...</p>
-            )}
-            
-            {loadError && (
-              <p className="text-sm text-destructive mt-2">
-                Error loading address verification. Please use manual entry.
-              </p>
-            )}
-            
-            {!GOOGLE_MAPS_API_KEY && addressMode === "auto" && (
-              <p className="text-sm text-amber-600 mt-2">
-                Google Maps API key not configured. Please use manual entry.
-              </p>
-            )}
-          </div>
-          
-          {addressMode === "auto" && isLoaded && GOOGLE_MAPS_API_KEY && (
-            <div className="mb-6 space-y-2">
-              <Label htmlFor="google-address">Verify Address</Label>
-              <Autocomplete
-                onLoad={(autocomplete) => (autocompleteRef.current = autocomplete)}
-                onPlaceChanged={handlePlaceChange}
-                options={{
-                  componentRestrictions: { country: ["us", "ca"] },
-                  fields: ["address_components", "formatted_address", "geometry"],
-                  types: ["address"]
-                }}
-              >
-                <Input
-                  id="google-address"
-                  placeholder="Start typing your practice address..."
-                  className="w-full"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                />
-              </Autocomplete>
-              <p className="text-xs text-muted-foreground">
-                Start typing your address and select from the dropdown to verify
-              </p>
-            </div>
-          )}
-          
-          {(addressMode === "manual" || !isLoaded || !GOOGLE_MAPS_API_KEY) && (
-            <LocationSelector 
-              value={locationData}
-              onChange={setLocationData}
-              allowGlobal={false}
-              allowRegion={false}
-              showAddress={true}
-            />
-          )}
-        </div>
+        <LocationSection 
+          locationData={locationData}
+          onChange={setLocationData}
+          googleMapsApiKey={GOOGLE_MAPS_API_KEY}
+        />
         
-        <div className="space-y-2">
-          <Label htmlFor="bio">Professional Bio</Label>
-          <Textarea
-            id="bio"
-            value={profileData.bio}
-            onChange={e => setProfileData({...profileData, bio: e.target.value})}
-            rows={4}
-          />
-          <p className="text-xs text-muted-foreground">
-            Brief description of your professional background and interests.
-          </p>
-        </div>
+        <BioSection 
+          bio={profileData.bio}
+          onChange={handleBioChange}
+        />
         
         <div className="flex justify-end">
           <Button variant="primary" onClick={handleSave} disabled={loading}>
