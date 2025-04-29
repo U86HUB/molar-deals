@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -74,7 +73,7 @@ export const userService = {
         const user: UserProfile = {
           id: authUser.id,
           email: authUser.email || '',
-          name: metadata.full_name || profile.full_name || '',
+          name: metadata.full_name || profile?.full_name || '',
           role: (metadata.role as UserRole) || 'Dentist',
           status: authUser.banned ? 'Suspended' : 
                  !authUser.confirmed_at ? 'Pending' : 
@@ -204,33 +203,25 @@ export const userService = {
   async updateUserStatus(userId: string, status: UserStatus): Promise<void> {
     try {
       if (status === 'Suspended') {
-        // Ban the user
+        // Use admin.updateUserById with the correct property
         const { error } = await supabase.auth.admin.updateUserById(
           userId,
-          { banned: true }
+          { user_metadata: { status, is_banned: true } }
         );
         if (error) throw error;
       } else if (status === 'Active' || status === 'Inactive') {
         // Unban the user if they were suspended
         const { error } = await supabase.auth.admin.updateUserById(
           userId,
-          { banned: false }
+          { user_metadata: { status, is_banned: false } }
         );
         if (error) throw error;
       }
       
-      // Update the status in user metadata
-      const { error: metadataError } = await supabase.auth.admin.updateUserById(
-        userId,
-        { user_metadata: { status } }
-      );
-      
-      if (metadataError) throw metadataError;
-      
       toast.success(`User status updated to ${status}`);
     } catch (error) {
       console.error("Error updating user status:", error);
-      toast.error(`Failed to update user status: ${error.message}`);
+      toast.error(`Failed to update user status: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   },
@@ -323,9 +314,9 @@ export const userService = {
       return {
         id: user.id,
         email: user.email || '',
-        name: metadata.full_name || profile.full_name || '',
+        name: metadata.full_name || profile?.full_name || '',
         role: (metadata.role as UserRole) || 'Dentist',
-        status: user.banned ? 'Suspended' : 
+        status: metadata.is_banned ? 'Suspended' : 
                !user.confirmed_at ? 'Pending' : 
                user.last_sign_in_at ? 'Active' : 'Inactive',
         verified: !!user.confirmed_at,
