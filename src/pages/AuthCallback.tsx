@@ -1,6 +1,5 @@
 
-import { Loader2 } from "lucide-react";
-import { useAuthCallback } from "@/hooks/useAuthCallback";
+import { useAuthCallback } from "@/hooks/auth/useAuthCallback";
 import AuthCallbackLoader from "@/components/auth/AuthCallbackLoader";
 import AuthCallbackError from "@/components/auth/AuthCallbackError";
 
@@ -25,10 +24,7 @@ const AuthCallback = () => {
           onGoToLogin={handleGoToLogin} 
         />
       ) : (
-        <>
-          <Loader2 className="animate-spin h-8 w-8 text-primary mb-4" />
-          <p className="text-muted-foreground">Redirecting...</p>
-        </>
+        <AuthCallbackLoader retryCount={retryCount} maxRetries={maxRetries} />
       )}
     </div>
   );

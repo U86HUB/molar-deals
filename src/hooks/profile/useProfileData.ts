@@ -6,7 +6,7 @@ import { ProfileFormData } from "./types";
 import { useLoadProfileData } from "./useLoadProfileData";
 import { useSaveProfileData } from "./useSaveProfileData";
 
-export { ProfileFormData } from "./types";
+export type { ProfileFormData } from "./types";
 
 export function useProfileData() {
   const { user, updateUserProfile } = useAuth();
