@@ -27,22 +27,25 @@ export const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
 // Reverse geocode coordinates to address
 export const reverseGeocode = (
   lat: number, 
-  lng: number,
-  callback: (result: google.maps.GeocoderResult | null, status: google.maps.GeocoderStatus) => void
-): void => {
-  if (isGoogleMapsLoaded()) {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode(
-      { location: { lat, lng } },
-      (results, status) => {
-        if (status === 'OK' && results && results[0]) {
-          callback(results[0], status);
-        } else {
-          callback(null, status);
+  lng: number
+): Promise<google.maps.GeocoderResult | null> => {
+  return new Promise((resolve, reject) => {
+    if (isGoogleMapsLoaded()) {
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode(
+        { location: { lat, lng } },
+        (results, status) => {
+          if (status === 'OK' && results && results[0]) {
+            resolve(results[0]);
+          } else {
+            reject(new Error(`Geocoding failed with status: ${status}`));
+          }
         }
-      }
-    );
-  }
+      );
+    } else {
+      reject(new Error('Google Maps not loaded'));
+    }
+  });
 };
 
 // Extract address components from Google Places result or Geocoder result
@@ -83,4 +86,41 @@ export const extractAddressComponents = (
   }
   
   return addressComponents;
+};
+
+// Get formatted address from place details
+export const getFormattedAddress = (
+  place: google.maps.places.PlaceResult | google.maps.GeocoderResult
+): string => {
+  return place.formatted_address || '';
+};
+
+// Initialize Google Places Autocomplete
+export const initPlacesAutocomplete = (
+  inputElement: HTMLInputElement,
+  options: google.maps.places.AutocompleteOptions = {},
+  callback?: (place: google.maps.places.PlaceResult) => void
+): google.maps.places.Autocomplete | null => {
+  if (!isGoogleMapsLoaded() || !inputElement) return null;
+  
+  const defaultOptions: google.maps.places.AutocompleteOptions = {
+    types: ['address'],
+    fields: ['address_components', 'formatted_address', 'geometry']
+  };
+
+  const autocomplete = new google.maps.places.Autocomplete(
+    inputElement, 
+    { ...defaultOptions, ...options }
+  );
+  
+  if (callback) {
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace();
+      if (place.geometry) {
+        callback(place);
+      }
+    });
+  }
+  
+  return autocomplete;
 };

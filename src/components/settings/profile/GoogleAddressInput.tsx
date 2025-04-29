@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLocationStore } from "@/stores/locationStore";
 import { toast } from "sonner";
-import { extractAddressComponents } from "@/utils/googleMapsUtils";
+import { isGoogleMapsLoaded, extractAddressComponents, initPlacesAutocomplete } from "@/utils/googleMapsUtils";
 
 interface GoogleAddressInputProps {
   googleLoaded: boolean;
@@ -13,53 +13,50 @@ interface GoogleAddressInputProps {
 export const GoogleAddressInput = ({ googleLoaded }: GoogleAddressInputProps) => {
   const { setLocation } = useLocationStore();
   const [inputValue, setInputValue] = useState('');
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   
   // Initialize Google Autocomplete
   useEffect(() => {
     if (googleLoaded && inputRef.current) {
-      const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
-        types: ['address'],
-        fields: ['address_components', 'formatted_address', 'geometry'],
-      });
-      
-      autocomplete.addListener('place_changed', () => {
-        const place = autocomplete.getPlace();
-        if (place.geometry && place.geometry.location) {
-          // Extract address components
-          const addressComponents = extractAddressComponents(place);
-          
-          // Format street address
-          const streetAddress = [
-            addressComponents.streetNumber, 
-            addressComponents.street
-          ].filter(Boolean).join(' ');
-          
-          // Update location store
-          setLocation({
-            addressStructured: {
-              streetAddress,
-              city: addressComponents.city,
-              state: addressComponents.state,
-              postalCode: addressComponents.postalCode,
-              country: addressComponents.country,
-            },
-            coords: {
-              lat: place.geometry.location.lat(),
-              lng: place.geometry.location.lng(),
-            },
-            source: 'google',
-          });
-          
-          // Set the full address in the input
-          setInputValue(place.formatted_address || '');
-          
-          toast.success('Address verified successfully');
+      const autocomplete = initPlacesAutocomplete(
+        inputRef.current, 
+        {
+          types: ['address'],
+          fields: ['address_components', 'formatted_address', 'geometry']
+        },
+        (place) => {
+          if (place.geometry && place.geometry.location) {
+            // Extract address components
+            const addressComponents = extractAddressComponents(place);
+            
+            // Update location store
+            setLocation({
+              addressStructured: {
+                streetAddress: addressComponents.streetAddress || '',
+                city: addressComponents.city || '',
+                state: addressComponents.state || '',
+                postalCode: addressComponents.postalCode || '',
+                country: addressComponents.country || '',
+              },
+              coords: {
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+              },
+              source: 'google',
+            });
+            
+            // Set the full address in the input
+            setInputValue(place.formatted_address || '');
+            
+            toast.success('Address verified successfully');
+          }
         }
-      });
+      );
       
-      autocompleteRef.current = autocomplete;
+      // Return cleanup function
+      return () => {
+        // Clean up if needed
+      };
     }
   }, [googleLoaded, setLocation]);
 
@@ -75,7 +72,9 @@ export const GoogleAddressInput = ({ googleLoaded }: GoogleAddressInputProps) =>
         className="w-full"
       />
       <p className="text-xs text-muted-foreground">
-        Start typing your address and select from the dropdown to verify
+        {googleLoaded 
+          ? 'Start typing your address and select from the dropdown to verify'
+          : 'Google Maps API is not loaded. Please check your API key.'}
       </p>
     </div>
   );

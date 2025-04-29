@@ -4,6 +4,7 @@ import { MapPin } from "lucide-react";
 import { useLocationStore } from "@/stores/locationStore";
 import { reverseGeocode, extractAddressComponents } from "@/utils/googleMapsUtils";
 import { toast } from "sonner";
+import { useState } from "react";
 
 interface GeolocationButtonProps {
   googleLoaded: boolean;
@@ -11,11 +12,14 @@ interface GeolocationButtonProps {
 
 export const GeolocationButton = ({ googleLoaded }: GeolocationButtonProps) => {
   const { setLocation } = useLocationStore();
+  const [isLoading, setIsLoading] = useState(false);
   
   const handleGeolocationRequest = () => {
+    setIsLoading(true);
+    
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const { latitude, longitude } = position.coords;
           
           // First update with coordinates
@@ -26,8 +30,9 @@ export const GeolocationButton = ({ googleLoaded }: GeolocationButtonProps) => {
           
           // If Google Maps is loaded, we can reverse geocode
           if (googleLoaded) {
-            reverseGeocode(latitude, longitude, (place, status) => {
-              if (status === 'OK' && place) {
+            try {
+              const place = await reverseGeocode(latitude, longitude);
+              if (place) {
                 // Extract address components
                 const addressComponents = extractAddressComponents(place);
                 
@@ -44,16 +49,22 @@ export const GeolocationButton = ({ googleLoaded }: GeolocationButtonProps) => {
                 });
                 
                 toast.success('Location detected successfully');
-              } else {
-                toast.error(`Could not detect address from your location: ${status}`);
               }
-            });
+            } catch (error) {
+              console.error('Reverse geocoding error:', error);
+              toast.error(`Could not detect address from your location: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            } finally {
+              setIsLoading(false);
+            }
           } else {
             toast.success('Location coordinates detected');
+            setIsLoading(false);
           }
         },
         (error) => {
           console.error('Geolocation error:', error);
+          setIsLoading(false);
+          
           let errorMessage = 'Could not access your location.';
           
           // Provide more specific error messages based on error code
@@ -75,6 +86,7 @@ export const GeolocationButton = ({ googleLoaded }: GeolocationButtonProps) => {
       );
     } else {
       toast.error('Geolocation is not supported by your browser');
+      setIsLoading(false);
     }
   };
 
@@ -85,9 +97,10 @@ export const GeolocationButton = ({ googleLoaded }: GeolocationButtonProps) => {
       size="sm" 
       onClick={handleGeolocationRequest}
       className="flex items-center"
+      disabled={isLoading}
     >
       <MapPin className="h-4 w-4 mr-2" />
-      Use My Current Location
+      {isLoading ? 'Detecting...' : 'Use My Current Location'}
     </Button>
   );
 };
