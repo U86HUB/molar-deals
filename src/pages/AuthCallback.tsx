@@ -30,13 +30,18 @@ const AuthCallback = () => {
           // Check if the user has set a password
           const userMeta = data.session.user.user_metadata;
           const hasSetPassword = Boolean(userMeta?.has_set_password);
+          const hasCompletedOnboarding = Boolean(userMeta?.onboarding_completed);
 
           if (!hasSetPassword) {
             // Redirect to password setup
             navigate("/settings?tab=account&setup=password");
             toast.info("Welcome! Please set up your account password.");
+          } else if (!hasCompletedOnboarding) {
+            // Redirect to homepage which will show onboarding wizard
+            navigate("/");
+            toast.info("Welcome! Let's set up your profile.");
           } else {
-            // Redirect to dashboard
+            // Redirect to dashboard for fully set up users
             navigate("/dashboard");
             toast.success("Successfully signed in!");
           }

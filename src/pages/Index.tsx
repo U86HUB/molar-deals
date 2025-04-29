@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -12,11 +12,25 @@ import { CookieSettingsButton } from "@/components/common/CookieSettingsButton";
 const Index = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
+  // Check if user needs onboarding when auth state changes
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      // Check if user has completed onboarding (from metadata)
+      const hasCompletedOnboarding = user.user_metadata?.onboarding_completed;
+      
+      if (!hasCompletedOnboarding) {
+        // Show onboarding if not completed
+        setShowOnboarding(true);
+      }
+    }
+  }, [isAuthenticated, user]);
+
   const handleAuthSuccess = () => {
-    setShowOnboarding(true);
+    // We'll show onboarding after auth callback handles
+    // the user session and redirects back to here
   };
 
   const handleOnboardingComplete = () => {
