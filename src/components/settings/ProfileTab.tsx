@@ -6,12 +6,16 @@ import { useProfileData } from "@/hooks/useProfileData";
 import { PersonalInfoCard } from "./profile/PersonalInfoCard";
 import { ClinicInfoCard } from "./profile/ClinicInfoCard";
 import { FormProvider, useForm } from "react-hook-form";
+import { useAuth } from "@/context/AuthContext";
 
 export function ProfileTab() {
+  const { user, isLoading: authLoading } = useAuth();
+  
   const {
     profileData,
     loading,
-    handleSave
+    handleSave,
+    loadProfileData
   } = useProfileData();
   
   const personalMethods = useForm({
@@ -33,6 +37,13 @@ export function ProfileTab() {
       clinicBio: profileData.clinicBio || "",
     }
   });
+  
+  // Load profile data after authentication is confirmed
+  useEffect(() => {
+    if (!authLoading && user) {
+      loadProfileData();
+    }
+  }, [authLoading, user, loadProfileData]);
   
   // Update form when profile data changes (e.g. on initial load)
   useEffect(() => {
