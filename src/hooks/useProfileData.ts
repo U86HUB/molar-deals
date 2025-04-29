@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -78,7 +77,7 @@ export function useProfileData() {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle(); // Change from .single() to .maybeSingle()
         
       if (error) {
         console.error("Error fetching profile:", error);
@@ -127,10 +126,20 @@ export function useProfileData() {
             });
           }
         }
+      } else {
+        // If no profile exists yet, just use the basic user info
+        const userEmail = user.email || "";
+        console.log("No profile data found, using basic user info");
+        
+        // Keep the default values from state initialization
+        setProfileData(prev => ({
+          ...prev,
+          email: userEmail
+        }));
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
-      toast.error("Failed to load profile data");
+      // Don't show an error toast for common cases like no profile found
     }
   }, [user, setLocation]);
   
@@ -142,6 +151,11 @@ export function useProfileData() {
   };
   
   const handleSave = async (formData: ProfileFormData) => {
+    if (!user) {
+      toast.error("You must be logged in to save profile data");
+      return;
+    }
+    
     setLoading(true);
     try {
       // Format full name
@@ -149,7 +163,7 @@ export function useProfileData() {
 
       // Prepare profile data for update
       const profileUpdateData = {
-        id: user?.id || '',
+        id: user.id,
         full_name: fullName,
         first_name: formData.firstName,
         last_name: formData.lastName,
