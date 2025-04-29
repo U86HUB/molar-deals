@@ -30,7 +30,8 @@ console.log("Updated package.json with security overrides");
 
 echo "Package.json updated with security overrides. Please run:"
 echo "rm -rf node_modules package-lock.json"
-echo "npm install"
+echo "npm install --force"
 echo "git add package.json package-lock.json"
 echo "git commit -m \"chore: upgrade deps to fix security alerts\""
 echo "git push"
+
