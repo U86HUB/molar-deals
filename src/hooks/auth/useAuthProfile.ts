@@ -2,6 +2,7 @@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { trackError } from "@/services/errorService";
+import { validatePassword } from "@/utils/passwordUtils";
 
 export const useAuthProfile = () => {
   const updateUserProfile = async (data: { username?: string; full_name?: string; role?: string }) => {
@@ -24,6 +25,14 @@ export const useAuthProfile = () => {
 
   const updateUserPassword = async (password: string) => {
     try {
+      // Validate password before sending to Supabase
+      const isPasswordValid = await validatePassword(password);
+      
+      if (!isPasswordValid) {
+        // The validatePassword function already shows toast messages
+        return false;
+      }
+      
       const { error } = await supabase.auth.updateUser({
         password,
         data: {

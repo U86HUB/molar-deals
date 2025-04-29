@@ -2,6 +2,7 @@
 import { toast } from "sonner";
 import { supabase, diagnoseBrowserNetwork, clearBrowserCache } from "@/integrations/supabase/client";
 import { trackError } from "@/services/errorService";
+import { validatePassword } from "@/utils/passwordUtils";
 
 export const useAuthMethods = () => {
   const signIn = async (email: string, password: string) => {
@@ -33,6 +34,14 @@ export const useAuthMethods = () => {
     }
   ) => {
     try {
+      // Validate password before sending to Supabase
+      const isPasswordValid = await validatePassword(password);
+      
+      if (!isPasswordValid) {
+        // The validatePassword function already shows toast messages
+        return;
+      }
+      
       const { error } = await supabase.auth.signUp({
         email,
         password,
