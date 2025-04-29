@@ -24,7 +24,13 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
-      "@typescript-eslint/no-unused-vars": "warn", // Changed from "off" to "warn"
+      "@typescript-eslint/no-unused-vars": "warn", // Keep it as warning
+      "@typescript-eslint/no-explicit-any": "warn", // Add no-explicit-any rule
+      "@typescript-eslint/strict-boolean-expressions": "warn", // Add strict boolean expressions
+      "@typescript-eslint/no-unnecessary-condition": "warn", // Catch unnecessary conditions
+      "@typescript-eslint/no-unsafe-assignment": "warn", // Prevent unsafe type assignments
+      "@typescript-eslint/no-floating-promises": "warn", // Make sure promises are handled
+      "no-fallthrough": "error", // Prevent fallthrough cases in switch
     },
   }
 );

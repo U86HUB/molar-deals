@@ -9,6 +9,12 @@ import { isProduction } from './config/environment';
 // Set up global error tracking
 setupGlobalErrorTracking();
 
+// Add a comment explaining how to run lint checks
+// To run lint checks: npm run lint
+// This will help catch unused code and imports
+// For CI integration, add this to your workflows:
+// - run: npm run lint -- --max-warnings=0
+
 // Add production optimizations
 if (isProduction) {
   // Disable console.log in production

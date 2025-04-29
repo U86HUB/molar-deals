@@ -4,19 +4,19 @@ import { UserData } from "../types";
 export const validateStep = (step: number, userData: UserData): { valid: boolean; message?: string } => {
   switch (step) {
     case 1: // Personal Information
-      if (!userData.name) {
+      if (!userData.name.trim()) {
         return { valid: false, message: "Please enter your name" };
       }
       return { valid: true };
       
     case 2: // Professional Details
-      if (!userData.specialty) {
+      if (!userData.specialty.trim()) {
         return { valid: false, message: "Please select your specialty" };
       }
       return { valid: true };
       
     case 3: // Location
-      if (!userData.country) {
+      if (!userData.country.trim()) {
         return { valid: false, message: "Please select your country" };
       }
       return { valid: true };
@@ -63,4 +63,26 @@ export const initialUserData: UserData = {
   emailFrequency: "weekly",
   notificationTypes: ["deals", "account"],
   marketingConsent: false,
+};
+
+// Add a function to run a comprehensive validation on user data
+export const validateAllUserData = (userData: UserData): { valid: boolean; errors: Record<string, string> } => {
+  const errors: Record<string, string> = {};
+  
+  // Personal info validation
+  if (!userData.name.trim()) errors.name = "Name is required";
+  if (userData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
+    errors.email = "Please enter a valid email address";
+  }
+  
+  // Professional details validation
+  if (!userData.specialty) errors.specialty = "Specialty is required";
+  
+  // Location validation
+  if (!userData.country) errors.country = "Country is required";
+  
+  return {
+    valid: Object.keys(errors).length === 0,
+    errors
+  };
 };
