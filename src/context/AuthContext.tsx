@@ -1,3 +1,4 @@
+
 import { createContext, useState, useEffect, useContext, ReactNode } from "react";
 import { Session, User, Provider } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -168,8 +169,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         options: {
           shouldCreateUser: true, // Create a new user if they don't exist
           emailRedirectTo: `${origin}/auth/callback`,
-          // Set OTP expiry to 15 minutes (900 seconds) for better security
-          emailOtpExpiresIn: 900
+          // Note: emailOtpExpiresIn is not supported in the current Supabase client version
+          // Default OTP expiry is 60 minutes in Supabase
         },
       });
 

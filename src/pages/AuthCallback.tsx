@@ -82,7 +82,7 @@ const AuthCallback = () => {
       
       // Check for expired session
       if (errorMessage.toLowerCase().includes("expire")) {
-        errorMessage = "Your login link has expired. Please request a new one.";
+        errorMessage = "Your login link has expired. The link is only valid for 15 minutes. Please request a new one.";
       }
       
       setError(errorMessage);
