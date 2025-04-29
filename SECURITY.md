@@ -23,6 +23,7 @@ We've updated the following dependencies to address security vulnerabilities:
 - esbuild: updated to ^0.25.0
 - @babel/runtime: pinned to 7.26.10
 - @babel/helpers: pinned to 7.26.10
+- @hapi/hoek: pinned to 9.0.3
 
 To apply these updates:
 
