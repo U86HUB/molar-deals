@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { isProduction, isDevelopment, logConfig } from "@/config/environment";
 
 interface ErrorData {
   message: string;
@@ -8,12 +9,30 @@ interface ErrorData {
   userId?: string;
   path?: string;
   timestamp?: string;
+  environment?: string;
+  version?: string;
+  browserInfo?: string;
 }
 
 export async function trackError(error: Error, componentName?: string) {
   try {
+    // Skip detailed tracking in development if configured
+    if (isDevelopment && !logConfig.enableRemoteLogging) {
+      console.error('Error in', componentName || 'unknown component', error);
+      return;
+    }
+    
     // Get current user if available
     const { data: { session } } = await supabase.auth.getSession();
+    
+    // Get browser and environment information
+    const browserInfo = {
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      platform: navigator.platform,
+      screenWidth: window.screen.width,
+      screenHeight: window.screen.height,
+    };
     
     // Create error data object
     const errorData: ErrorData = {
@@ -22,7 +41,10 @@ export async function trackError(error: Error, componentName?: string) {
       componentName,
       userId: session?.user?.id,
       path: window.location.pathname,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      environment: isProduction ? 'production' : 'development',
+      version: import.meta.env.PACKAGE_VERSION || 'unknown',
+      browserInfo: JSON.stringify(browserInfo)
     };
     
     // Send error to edge function
@@ -35,7 +57,7 @@ export async function trackError(error: Error, componentName?: string) {
     }
     
     // Also log to console in development
-    if (process.env.NODE_ENV !== 'production') {
+    if (isDevelopment) {
       console.error('Error tracked:', errorData);
     }
   } catch (trackingError) {
@@ -58,4 +80,54 @@ export function setupGlobalErrorTracking() {
       : new Error(String(event.reason));
     trackError(error, 'UnhandledPromiseRejection');
   });
+  
+  // Add performance monitoring
+  if (isProduction && 'performance' in window && 'PerformanceObserver' in window) {
+    try {
+      // Monitor long tasks
+      const longTaskObserver = new PerformanceObserver((list) => {
+        list.getEntries().forEach((entry) => {
+          // Track tasks longer than 100ms
+          if (entry.duration > 100) {
+            console.warn(`Long task detected: ${entry.duration}ms`, entry);
+          }
+        });
+      });
+      longTaskObserver.observe({ entryTypes: ['longtask'] });
+      
+      // Monitor navigation timing
+      if (performance.getEntriesByType) {
+        window.addEventListener('load', () => {
+          setTimeout(() => {
+            const navEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+            if (navEntry && navEntry.domComplete > 3000) {
+              // Track slow loading times (over 3 seconds)
+              console.warn(`Slow page load: ${navEntry.domComplete}ms`);
+            }
+          }, 0);
+        });
+      }
+    } catch (err) {
+      console.error('Error setting up performance monitoring:', err);
+    }
+  }
+}
+
+// Add a function to track feature usage
+export function trackFeatureUsage(featureName: string, metadata?: Record<string, any>) {
+  try {
+    if (isProduction || logConfig.enableRemoteLogging) {
+      supabase.functions.invoke('track-feature-usage', {
+        body: { 
+          feature: featureName,
+          metadata,
+          timestamp: new Date().toISOString()
+        }
+      }).catch((error) => {
+        console.error('Failed to track feature usage:', error);
+      });
+    }
+  } catch (error) {
+    console.error('Error tracking feature usage:', error);
+  }
 }

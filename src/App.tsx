@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -12,6 +13,7 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -42,7 +44,7 @@ const queryClient = new QueryClient({
     queries: {
       retry: 2,
       staleTime: 10 * 1000, // 10 seconds
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: import.meta.env.PROD ? 'always' : false,
       refetchOnReconnect: true,
     },
   },
@@ -66,6 +68,7 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/dashboard" element={
                     <ProtectedRoute allowedRoles={["customer", "admin"]}>

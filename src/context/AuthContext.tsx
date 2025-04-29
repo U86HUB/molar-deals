@@ -1,8 +1,9 @@
 
 import { createContext, useState, useEffect, useContext, ReactNode } from "react";
-import { Session, User } from "@supabase/supabase-js";
+import { Session, User, Provider } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { trackError } from "@/services/errorService";
 
 interface AuthContextProps {
   session: Session | null;
@@ -14,6 +15,7 @@ interface AuthContextProps {
     full_name?: string;
     role?: string;
   }) => Promise<void>;
+  signInWithProvider: (provider: Provider) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   isAuthenticated: boolean;
@@ -26,6 +28,7 @@ const AuthContext = createContext<AuthContextProps>({
   isLoading: true,
   signIn: async () => {},
   signUp: async () => {},
+  signInWithProvider: async () => {},
   signOut: async () => {},
   resetPassword: async () => {},
   isAuthenticated: false,
@@ -38,23 +41,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+    try {
+      // Set up auth state listener first
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (_event, session) => {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setIsLoading(false);
+        }
+      );
+
+      // Then check for existing session
+      supabase.auth.getSession().then(({ data: { session } }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setIsLoading(false);
+      });
+
+      return () => subscription.unsubscribe();
+    } catch (error) {
+      if (error instanceof Error) {
+        trackError(error, 'AuthProvider.useEffect');
       }
-    );
-
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
       setIsLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    }
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -69,6 +79,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast.success("Successfully signed in!");
     } catch (error: any) {
       toast.error(error.message || "Error signing in");
+      if (error instanceof Error) {
+        trackError(error, 'AuthProvider.signIn');
+      }
       throw error;
     }
   };
@@ -99,6 +112,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast.success("Registration successful! Please check your email to confirm your account.");
     } catch (error: any) {
       toast.error(error.message || "Error signing up");
+      if (error instanceof Error) {
+        trackError(error, 'AuthProvider.signUp');
+      }
+      throw error;
+    }
+  };
+
+  const signInWithProvider = async (provider: Provider) => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        }
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.message || "Error signing in with provider");
+      if (error instanceof Error) {
+        trackError(error, 'AuthProvider.signInWithProvider');
+      }
       throw error;
     }
   };
@@ -110,6 +145,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast.success("Successfully signed out!");
     } catch (error: any) {
       toast.error(error.message || "Error signing out");
+      if (error instanceof Error) {
+        trackError(error, 'AuthProvider.signOut');
+      }
       throw error;
     }
   };
@@ -125,6 +163,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast.success("Password reset link sent to your email!");
     } catch (error: any) {
       toast.error(error.message || "Error resetting password");
+      if (error instanceof Error) {
+        trackError(error, 'AuthProvider.resetPassword');
+      }
       throw error;
     }
   };
@@ -140,6 +181,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast.success("Profile updated successfully!");
     } catch (error: any) {
       toast.error(error.message || "Error updating profile");
+      if (error instanceof Error) {
+        trackError(error, 'AuthProvider.updateUserProfile');
+      }
       throw error;
     }
   };
@@ -152,6 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         signIn,
         signUp,
+        signInWithProvider,
         signOut,
         resetPassword,
         isAuthenticated: !!user,
