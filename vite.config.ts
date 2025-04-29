@@ -31,6 +31,7 @@ try {
   const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
   let updated = false;
   
+  // Add scripts if they don't exist
   Object.entries(packageJsonScripts).forEach(([key, value]) => {
     if (!packageJson.scripts[key]) {
       packageJson.scripts[key] = value;
@@ -38,9 +39,18 @@ try {
     }
   });
   
+  // Add or update overrides for security
+  if (!packageJson.overrides) {
+    packageJson.overrides = {};
+  }
+  
+  packageJson.overrides["vite"] = "^6.2.6";
+  packageJson.overrides["esbuild"] = "^0.25.0";
+  updated = true;
+  
   if (updated) {
     fs.writeFileSync('./package.json', JSON.stringify(packageJson, null, 2));
-    console.log('Updated package.json with test scripts');
+    console.log('Updated package.json with scripts and security overrides');
   }
 } catch (error) {
   console.error('Failed to update package.json:', error);
@@ -49,8 +59,9 @@ try {
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: true,
+    host: 'localhost', // Restrict to localhost only for security
     port: 8080,
+    fs: { strict: true }, // Enforce fs.deny rules
   },
   plugins: [
     react(),
