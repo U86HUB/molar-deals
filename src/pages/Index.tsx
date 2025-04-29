@@ -11,24 +11,24 @@ import { CookieSettingsButton } from "@/components/common/CookieSettingsButton";
 const Index = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, session, hasCompletedOnboarding } = useAuth();
   const navigate = useNavigate();
 
   // Check if user needs onboarding when auth state changes
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user && session) {
       // Check if user has completed onboarding (from metadata)
-      const hasCompletedOnboarding = user.user_metadata?.onboarding_completed === true;
-      
-      if (!hasCompletedOnboarding) {
+      if (hasCompletedOnboarding === false) {
         // Show onboarding if not completed
         setShowOnboarding(true);
+      } else {
+        setShowOnboarding(false);
       }
     } else {
       // If not authenticated, make sure onboarding is hidden
       setShowOnboarding(false);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, session, hasCompletedOnboarding]);
 
   const handleAuthSuccess = () => {
     // We'll show onboarding after auth callback handles

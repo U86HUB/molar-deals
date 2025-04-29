@@ -13,7 +13,25 @@ export const useAuthState = () => {
 
   useEffect(() => {
     try {
-      // Set up auth state listener first
+      // Get the current session first
+      supabase.auth.getSession().then(async ({ data }) => {
+        const session = data.session;
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          const hasPassword = await checkHasSetPassword();
+          setHasSetPassword(hasPassword);
+          
+          // Check onboarding status from user metadata
+          const onboardingCompleted = !!session.user.user_metadata?.onboarding_completed;
+          setHasCompletedOnboarding(onboardingCompleted);
+        }
+        
+        setIsLoading(false);
+      });
+      
+      // Set up auth state listener
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (_event, session) => {
           setSession(session);
@@ -23,6 +41,7 @@ export const useAuthState = () => {
             const hasPassword = await checkHasSetPassword();
             setHasSetPassword(hasPassword);
             
+            // Check onboarding status from user metadata
             const onboardingCompleted = !!session.user.user_metadata?.onboarding_completed;
             setHasCompletedOnboarding(onboardingCompleted);
           } else {
@@ -32,22 +51,6 @@ export const useAuthState = () => {
           setIsLoading(false);
         }
       );
-
-      // Then check for existing session
-      supabase.auth.getSession().then(async ({ data: { session } }) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          const hasPassword = await checkHasSetPassword();
-          setHasSetPassword(hasPassword);
-          
-          const onboardingCompleted = !!session.user.user_metadata?.onboarding_completed;
-          setHasCompletedOnboarding(onboardingCompleted);
-        }
-        
-        setIsLoading(false);
-      });
 
       return () => subscription.unsubscribe();
     } catch (error) {
@@ -85,6 +88,6 @@ export const useAuthState = () => {
     hasCompletedOnboarding,
     checkHasSetPassword,
     checkHasCompletedOnboarding,
-    isAuthenticated: !!user
+    isAuthenticated: !!user && !!session
   };
 };

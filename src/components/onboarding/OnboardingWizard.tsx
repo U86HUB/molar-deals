@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -18,7 +17,7 @@ import { validateStep, initialUserData } from "./utils/onboardingUtils";
 import { Database } from "@/integrations/supabase/types";
 
 export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWizardProps) => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [step, setStep] = useState(1);
   const [userData, setUserData] = useState<UserData>(initialUserData);
   const [loading, setLoading] = useState(false);
@@ -79,7 +78,13 @@ export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWiza
   };
 
   const checkProfileExists = async (userId: string): Promise<boolean> => {
+    if (!session) {
+      console.log("No session when checking profile");
+      return false;
+    }
+    
     try {
+      // Directly use the access token from the session
       const { data, error } = await supabase
         .from('profiles')
         .select('id')
@@ -99,13 +104,21 @@ export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWiza
   };
 
   const createUserProfile = async (userId: string): Promise<boolean> => {
+    if (!session) {
+      console.log("No session when creating profile");
+      return false;
+    }
+    
     try {
+      console.log("Creating profile for user:", userId);
+      
+      // Create minimal profile first
       const { error } = await supabase
         .from('profiles')
         .insert({
           id: userId,
-          full_name: userData.name,
-          username: userData.email.split('@')[0]
+          full_name: userData.name || 'User',
+          username: userData.email ? userData.email.split('@')[0] : `user-${Date.now()}`
         });
         
       if (error) {
@@ -123,61 +136,48 @@ export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWiza
   const handleComplete = async () => {
     setLoading(true);
     try {
-      // Save user data to database if user is authenticated
-      if (user?.id) {
-        // First check if profile exists
-        const profileExists = await checkProfileExists(user.id);
-        
-        if (!profileExists) {
-          // Create profile if it doesn't exist
-          const created = await createUserProfile(user.id);
-          if (!created) {
-            throw new Error("Failed to create user profile");
+      if (!user?.id || !session) {
+        throw new Error("User is not authenticated");
+      }
+      
+      // First check if profile exists
+      const profileExists = await checkProfileExists(user.id);
+      console.log("Profile exists:", profileExists);
+      
+      // Create profile if it doesn't exist
+      if (!profileExists) {
+        const created = await createUserProfile(user.id);
+        if (!created) {
+          throw new Error("Failed to create user profile");
+        }
+        console.log("Created new profile");
+      }
+      
+      // Update user metadata with all onboarding information
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: {
+          onboarding_completed: true,
+          has_set_password: true,
+          specialty: userData.specialty,
+          practice_name: userData.practiceName,
+          preferences: userData.dealPreferences,
+          communication_preferences: {
+            email_frequency: userData.emailFrequency,
+            notification_types: userData.notificationTypes,
+            marketing_consent: userData.marketingConsent,
+          },
+          location: {
+            country: userData.country,
+            state: userData.state,
+            city: userData.city,
+            use_geolocation: userData.useGeolocation,
           }
         }
-        
-        // In the profiles table, update the existing record
-        const profileUpdate = {
-          full_name: userData.name,
-          username: userData.email.split('@')[0]
-        };
-        
-        const { error } = await supabase
-          .from('profiles')
-          .update(profileUpdate)
-          .eq('id', user.id);
+      });
           
-        if (error) {
-          console.error("Profile update error:", error);
-          throw error;
-        }
-        
-        // Update user metadata with all onboarding information
-        const { error: metadataError } = await supabase.auth.updateUser({
-          data: {
-            onboarding_completed: true,
-            has_set_password: true,
-            specialty: userData.specialty,
-            practice_name: userData.practiceName,
-            preferences: userData.dealPreferences,
-            communication_preferences: {
-              email_frequency: userData.emailFrequency,
-              notification_types: userData.notificationTypes,
-              marketing_consent: userData.marketingConsent,
-            },
-            location: {
-              country: userData.country,
-              state: userData.state,
-              city: userData.city,
-              use_geolocation: userData.useGeolocation,
-            }
-          }
-        });
-          
-        if (metadataError) {
-          console.error("Metadata update error:", metadataError);
-          throw metadataError;
-        }
+      if (metadataError) {
+        console.error("Metadata update error:", metadataError);
+        throw metadataError;
       }
       
       // Clear onboarding data from localStorage after successful completion
@@ -273,7 +273,7 @@ export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWiza
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden rounded-lg max-h-[90vh] overflow-y-auto" aria-describedby="onboarding-description">
+      <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden rounded-lg max-h-[90vh] overflow-y-auto">
         {/* Add invisible description for accessibility */}
         <DialogDescription id="onboarding-description" className="sr-only">
           Complete your profile setup to customize your DentalDeals experience
