@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { WifiOff, Wifi, AlertTriangle, CheckCircle, RefreshCw } from "lucide-react";
+import { WifiOff, Wifi, AlertTriangle, CheckCircle, RefreshCw, Database } from "lucide-react";
 import { checkSupabaseConnection, clearBrowserCache, diagnoseBrowserNetwork } from "@/integrations/supabase/client";
 
 interface ConnectionStatusProps {
@@ -18,6 +18,7 @@ const ConnectionStatus = ({ onRetry }: ConnectionStatusProps) => {
     auth: boolean;
     db: boolean;
     error?: any;
+    errorMessage?: string;
   }>({
     checked: false,
     success: false,
@@ -50,12 +51,25 @@ const ConnectionStatus = ({ onRetry }: ConnectionStatusProps) => {
       
       // Check Supabase connection
       const result = await checkSupabaseConnection();
+      
+      // Parse error message for specific issues
+      let errorMessage = undefined;
+      if (result.error) {
+        const errorString = String(result.error);
+        if (errorString.includes("raw_app_meta_data")) {
+          errorMessage = "Database schema mismatch: Missing 'raw_app_meta_data' column. This may require a database migration.";
+        } else if (errorString.includes("raw_user_meta_data")) {
+          errorMessage = "Database schema mismatch: Missing 'raw_user_meta_data' column. This may require a database migration.";
+        }
+      }
+      
       setConnectionStatus({
         checked: true,
         success: !!result.success,
         auth: !!result.auth,
         db: !!result.db,
-        error: result.error
+        error: result.error,
+        errorMessage
       });
     } catch (error) {
       console.error("Error checking connection:", error);
@@ -120,6 +134,37 @@ const ConnectionStatus = ({ onRetry }: ConnectionStatusProps) => {
     );
   }
 
+  // If connection failed due to database schema issues
+  if (connectionStatus.checked && connectionStatus.errorMessage) {
+    return (
+      <Alert variant="destructive" className="mb-4">
+        <Database className="h-4 w-4" />
+        <AlertTitle>Database Schema Issue</AlertTitle>
+        <AlertDescription className="space-y-2">
+          <p>{connectionStatus.errorMessage}</p>
+          <p className="text-sm">
+            This requires database migrations to be run using the Supabase CLI:
+          </p>
+          <div className="bg-gray-800 text-gray-200 p-2 rounded text-xs font-mono overflow-x-auto">
+            <p>supabase link --project-ref fyyfrlhcvtxddonnkeoy</p>
+            <p>supabase db push</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={checkConnection}
+              className="mt-2"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Check Again
+            </Button>
+          </div>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   // If connection failed, show error
   if (connectionStatus.checked && !connectionStatus.success) {
     return (
@@ -130,7 +175,7 @@ const ConnectionStatus = ({ onRetry }: ConnectionStatusProps) => {
           <p>We're having trouble connecting to our authentication service.</p>
           {connectionStatus.error && (
             <p className="text-xs text-red-400">
-              {connectionStatus.error.message || "Unknown error"}
+              {connectionStatus.error.message || String(connectionStatus.error)}
             </p>
           )}
           <div className="flex flex-col gap-2">

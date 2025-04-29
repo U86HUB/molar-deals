@@ -58,6 +58,21 @@ export const checkSupabaseConnection = async () => {
     
     if (authError) {
       console.error('Auth check error:', authError);
+      
+      // Check for specific schema issues
+      const errorStr = String(authError);
+      if (errorStr.includes('raw_app_meta_data') || 
+          errorStr.includes('raw_user_meta_data')) {
+        console.error('Database schema issue detected. Migrations likely required.');
+        return { 
+          success: false, 
+          auth: false, 
+          db: false, 
+          error: authError,
+          requiresMigration: true 
+        };
+      }
+      
       // Continue to try the database check anyway
     }
     
