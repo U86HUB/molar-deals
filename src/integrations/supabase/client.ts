@@ -14,5 +14,35 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true,
+    flowType: 'pkce',
+  },
+  global: {
+    fetch: (...args) => {
+      // Add timeout to fetch requests
+      const [resource, config] = args;
+      return fetch(resource, {
+        ...config,
+        signal: config?.signal || (typeof AbortController !== 'undefined' 
+          ? new AbortController().signal 
+          : undefined),
+      });
+    }
+  },
+  realtime: {
+    timeout: 30000, // Increase timeout for realtime connections
   }
 });
+
+// Add diagnostic helpers
+export const checkSupabaseConnection = async () => {
+  try {
+    const { data, error } = await supabase.from('health_check').select('*').limit(1);
+    if (error) throw error;
+    console.log('Supabase connection test successful');
+    return true;
+  } catch (error) {
+    console.error('Supabase connection test failed:', error);
+    return false;
+  }
+};

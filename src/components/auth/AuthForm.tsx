@@ -1,8 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Loader2, AlertCircle } from "lucide-react";
+import { Mail, Loader2, AlertCircle, WifiOff } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -26,6 +26,21 @@ interface AuthFormProps {
 const AuthForm = ({ onSuccess, onRetry, error }: AuthFormProps) => {
   const { signInWithOtp } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  
+  // Monitor network status changes
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
   
   const form = useForm<EmailFormValues>({
     resolver: zodResolver(emailSchema),
@@ -38,7 +53,7 @@ const AuthForm = ({ onSuccess, onRetry, error }: AuthFormProps) => {
     setSubmitting(true);
     
     try {
-      // Check network connectivity
+      // Check network connectivity first with visual feedback
       if (!navigator.onLine) {
         throw new Error("You appear to be offline. Please check your internet connection and try again.");
       }
@@ -47,10 +62,32 @@ const AuthForm = ({ onSuccess, onRetry, error }: AuthFormProps) => {
       onSuccess(values.email);
     } catch (error) {
       // Error handling is done at the parent component level
+      console.log("Login error caught in AuthForm:", error);
     } finally {
       setSubmitting(false);
     }
   };
+
+  // Display offline warning if not connected
+  if (!isOnline) {
+    return (
+      <Alert variant="destructive" className="mb-4">
+        <WifiOff className="h-4 w-4" />
+        <AlertTitle>You're offline</AlertTitle>
+        <AlertDescription>
+          Please check your internet connection and try again.
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="mt-2 w-full"
+            onClick={() => window.location.reload()}
+          >
+            Reload Page
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <Form {...form}>
@@ -98,16 +135,24 @@ const AuthForm = ({ onSuccess, onRetry, error }: AuthFormProps) => {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Authentication Error</AlertTitle>
-            <AlertDescription>
-              {error}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-2 w-full"
-                onClick={onRetry}
-              >
-                Try Again
-              </Button>
+            <AlertDescription className="space-y-2">
+              <p>{error}</p>
+              <div className="flex flex-col gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={onRetry}
+                >
+                  Try Again
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => window.location.reload()}
+                >
+                  Reload Page
+                </Button>
+              </div>
             </AlertDescription>
           </Alert>
         )}

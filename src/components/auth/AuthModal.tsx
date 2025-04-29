@@ -1,9 +1,9 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Loader2, AlertCircle } from "lucide-react";
+import { Mail, Loader2, AlertCircle, WifiOff } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +25,29 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const [otpSent, setOtpSent] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const navigate = useNavigate();
+
+  // Monitor network status
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      setError(null);
+    };
+    
+    const handleOffline = () => {
+      setIsOnline(false);
+      setError("You appear to be offline. Please check your internet connection and try again.");
+    };
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Email schema with validation
   const emailSchema = z.object({
@@ -88,20 +110,48 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
           </DialogTitle>
         </DialogHeader>
 
-        {error && !otpSent && (
+        {!isOnline && !otpSent && (
           <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Authentication Error</AlertTitle>
+            <WifiOff className="h-4 w-4" />
+            <AlertTitle>No Internet Connection</AlertTitle>
             <AlertDescription className="mt-2">
-              {error}
+              You appear to be offline. Please check your internet connection and try again.
               <Button 
                 variant="outline" 
                 size="sm" 
                 className="mt-2 w-full"
-                onClick={handleRetry}
+                onClick={() => window.location.reload()}
               >
-                Try Again
+                Reload Page
               </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {error && !otpSent && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Authentication Error</AlertTitle>
+            <AlertDescription className="space-y-2">
+              <p>{error}</p>
+              <div className="flex flex-col gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2 w-full"
+                  onClick={handleRetry}
+                >
+                  Try Again
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => window.location.reload()}
+                >
+                  Reload Page
+                </Button>
+              </div>
             </AlertDescription>
           </Alert>
         )}
@@ -143,7 +193,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                             placeholder="Enter your email address"
                             className="pl-10"
                             autoComplete="email"
-                            disabled={loading}
+                            disabled={loading || !isOnline}
                           />
                         </FormControl>
                       </div>
@@ -160,7 +210,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   className="w-full" 
                   variant="primary"
                   loading={loading}
-                  disabled={loading}
+                  disabled={loading || !isOnline}
                 >
                   {loading ? (
                     <>
