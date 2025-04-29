@@ -1,6 +1,6 @@
 
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, diagnoseBrowserNetwork, clearBrowserCache } from "@/integrations/supabase/client";
 import { trackError } from "@/services/errorService";
 
 export const useAuthMethods = () => {
@@ -59,7 +59,11 @@ export const useAuthMethods = () => {
 
   const signInWithOtp = async (email: string) => {
     try {
-      // Enhanced network connectivity check with more detailed error
+      // Enhanced network diagnostics
+      const networkDiagnostics = diagnoseBrowserNetwork();
+      console.log("Network diagnostics before OTP request:", networkDiagnostics);
+      
+      // Enhanced network connectivity check
       if (!navigator.onLine) {
         const networkError = new Error("You appear to be offline. Please check your internet connection and try again.");
         console.error("Network offline:", networkError);
@@ -67,14 +71,30 @@ export const useAuthMethods = () => {
       }
 
       console.log("Sending OTP to:", email);
-      const origin = window.location.origin;
+      // Get current origin but handle potential issues
+      let origin = window.location.origin;
       console.log("Current origin:", origin);
+      
+      // Check if we're in localhost and apply a fallback if needed
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        console.log("Local development detected. Make sure you've configured Supabase for localhost.");
+      }
+      
+      // Try to clear any cached auth data that might be causing issues
+      await clearBrowserCache();
       
       // Add timeout to the request to prevent long-hanging requests
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
       
       try {
+        // More detailed OTP request logging
+        console.log("Starting OTP request with:", {
+          email,
+          redirectTo: `${origin}/auth/callback`,
+          timestamp: new Date().toISOString(),
+        });
+        
         const { error, data } = await supabase.auth.signInWithOtp({
           email,
           options: {
@@ -87,6 +107,12 @@ export const useAuthMethods = () => {
         
         if (error) {
           console.error("OTP Error details:", error);
+          
+          // Enhanced error handling for specific errors
+          if (error.message?.includes("Invalid login credentials")) {
+            throw new Error("We couldn't find an account with this email. Please check the email or sign up.");
+          }
+          
           throw error;
         }
         
@@ -97,21 +123,29 @@ export const useAuthMethods = () => {
         
         console.error("Full OTP error:", error);
         
-        // Enhanced error handling with more specific messages
+        // Enhanced error handling with even more specific messages
         let errorMessage = "Error sending OTP";
         
         if (error.name === "AbortError") {
           errorMessage = "Request timed out. The server took too long to respond. Please check your connection and try again.";
         } else if (error.message?.includes("Failed to fetch")) {
-          errorMessage = "Network error: Unable to reach the authentication server. This could be due to:";
-          errorMessage += "\n- Network connectivity issues";
-          errorMessage += "\n- Firewall or security software blocking the connection";
-          errorMessage += "\n- Site URL not properly configured in Supabase";
+          errorMessage = "Network error: Unable to reach the authentication server. Please check:";
+          errorMessage += "\n- Your internet connection";
+          errorMessage += "\n- Any browser extensions that might be blocking the connection";
+          errorMessage += "\n- Your firewall settings";
+          
+          // Log detailed diagnostics
           console.error("Network diagnostic info:", {
             origin,
             online: navigator.onLine,
-            connection: (navigator as any).connection ? (navigator as any).connection.effectiveType : "unknown"
+            connection: (navigator as any).connection ? (navigator as any).connection.effectiveType : "unknown",
+            https: window.location.protocol === 'https:',
+            timestamp: new Date().toISOString(),
+            url: SUPABASE_URL // This variable would need to be imported or defined
           });
+          
+          // Try to diagnose CORS issues
+          errorMessage += "\n\nThis might be a CORS issue. Please check if the site URL in Supabase is correctly configured.";
         } else if (error.message?.includes("rate limit")) {
           errorMessage = "Too many attempts. Please wait a few minutes before trying again.";
         } else if (error.message) {

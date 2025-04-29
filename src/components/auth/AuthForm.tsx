@@ -2,13 +2,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, Loader2, AlertCircle, WifiOff } from "lucide-react";
+import { Mail, Loader2, AlertCircle } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/context/AuthContext";
+import ConnectionStatus from "@/components/auth/ConnectionStatus";
 
 // Email schema with validation
 const emailSchema = z.object({
@@ -27,6 +28,7 @@ const AuthForm = ({ onSuccess, onRetry, error }: AuthFormProps) => {
   const { signInWithOtp } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [showConnectionStatus, setShowConnectionStatus] = useState(false);
   
   // Monitor network status changes
   useEffect(() => {
@@ -41,6 +43,15 @@ const AuthForm = ({ onSuccess, onRetry, error }: AuthFormProps) => {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  // Show connection status if there's an error
+  useEffect(() => {
+    if (error && error.toLowerCase().includes("fetch") || 
+        error?.toLowerCase().includes("network") ||
+        error?.toLowerCase().includes("connection")) {
+      setShowConnectionStatus(true);
+    }
+  }, [error]);
   
   const form = useForm<EmailFormValues>({
     resolver: zodResolver(emailSchema),
@@ -63,29 +74,32 @@ const AuthForm = ({ onSuccess, onRetry, error }: AuthFormProps) => {
     } catch (error) {
       // Error handling is done at the parent component level
       console.log("Login error caught in AuthForm:", error);
+      // Show connection status if it looks like a network error
+      if (error instanceof Error && 
+          (error.message.includes("fetch") || 
+           error.message.includes("network") ||
+           error.message.includes("connection"))) {
+        setShowConnectionStatus(true);
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Display offline warning if not connected
-  if (!isOnline) {
+  // Show connection status component when needed
+  if (showConnectionStatus) {
     return (
-      <Alert variant="destructive" className="mb-4">
-        <WifiOff className="h-4 w-4" />
-        <AlertTitle>You're offline</AlertTitle>
-        <AlertDescription>
-          Please check your internet connection and try again.
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="mt-2 w-full"
-            onClick={() => window.location.reload()}
-          >
-            Reload Page
-          </Button>
-        </AlertDescription>
-      </Alert>
+      <>
+        <ConnectionStatus onRetry={onRetry} />
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="mt-4 w-full"
+          onClick={() => setShowConnectionStatus(false)}
+        >
+          Back to Login Form
+        </Button>
+      </>
     );
   }
 
@@ -144,6 +158,13 @@ const AuthForm = ({ onSuccess, onRetry, error }: AuthFormProps) => {
                   onClick={onRetry}
                 >
                   Try Again
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowConnectionStatus(true)}
+                >
+                  Check Connection
                 </Button>
                 <Button 
                   variant="ghost" 

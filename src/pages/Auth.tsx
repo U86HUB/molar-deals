@@ -6,12 +6,14 @@ import { useAuth } from "@/context/AuthContext";
 import AuthLayout from "@/components/auth/AuthLayout";
 import AuthForm from "@/components/auth/AuthForm";
 import EmailSent from "@/components/auth/EmailSent";
+import SupabaseConfigInfo from "@/components/auth/SupabaseConfigInfo";
 
 const Auth = () => {
   const { isLoading, isAuthenticated, hasSetPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showConfig, setShowConfig] = useState(false);
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,6 +27,16 @@ const Auth = () => {
       navigate(from);
     }
   }, [isAuthenticated, hasSetPassword, navigate, from]);
+
+  // Show config info if there's an error parameter in URL
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const errorParam = searchParams.get('error');
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam));
+      setShowConfig(true);
+    }
+  }, [location]);
 
   const handleEmailSuccess = (email: string) => {
     setOtpSent(true);
@@ -41,6 +53,11 @@ const Auth = () => {
     setEmail("");
   };
 
+  // Toggle showing config info
+  const toggleConfig = () => {
+    setShowConfig(prev => !prev);
+  };
+
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -54,11 +71,24 @@ const Auth = () => {
       {otpSent ? (
         <EmailSent email={email} onBack={handleBackToForm} />
       ) : (
-        <AuthForm 
-          onSuccess={handleEmailSuccess} 
-          onRetry={handleRetry}
-          error={error}
-        />
+        <>
+          <AuthForm 
+            onSuccess={handleEmailSuccess} 
+            onRetry={handleRetry}
+            error={error}
+          />
+          
+          {showConfig && <SupabaseConfigInfo />}
+          
+          <div className="mt-4 text-center">
+            <button
+              onClick={toggleConfig}
+              className="text-sm text-muted-foreground underline hover:text-primary"
+            >
+              {showConfig ? "Hide configuration help" : "Having trouble? View configuration help"}
+            </button>
+          </div>
+        </>
       )}
     </AuthLayout>
   );

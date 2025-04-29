@@ -9,6 +9,22 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+// Check Supabase URL validity
+const isValidUrl = (url: string): boolean => {
+  try {
+    new URL(url);
+    return true;
+  } catch (e) {
+    console.error("Invalid Supabase URL:", url);
+    return false;
+  }
+};
+
+// Validate URL before proceeding
+if (!isValidUrl(SUPABASE_URL)) {
+  console.error("Supabase URL is invalid. Please check your configuration.");
+}
+
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
@@ -16,16 +32,49 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
     detectSessionInUrl: true,
     flowType: 'pkce',
+    debug: true, // Enable debug mode for more detailed logs
   },
   global: {
+    headers: {
+      // Add a custom header to help diagnose CORS issues
+      'X-Client-Info': 'DentalDeals Web App',
+    },
     fetch: (...args) => {
-      // Add timeout to fetch requests
+      // Enhanced fetch with timeout, cache control, and better error handling
       const [resource, config] = args;
-      return fetch(resource, {
+      
+      // Log the request for debugging
+      console.log(`Supabase fetch request to: ${resource}`);
+      
+      // Add cache control headers to prevent stale cache issues
+      const enhancedConfig = {
         ...config,
+        headers: {
+          ...config?.headers,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
         signal: config?.signal || (typeof AbortController !== 'undefined' 
           ? new AbortController().signal 
           : undefined),
+      };
+      
+      // Return fetch with a proper timeout
+      return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          reject(new Error(`Supabase request timeout: ${resource}`));
+        }, 15000); // 15 second timeout
+        
+        fetch(resource, enhancedConfig)
+          .then(response => {
+            clearTimeout(timeoutId);
+            resolve(response);
+          })
+          .catch(error => {
+            clearTimeout(timeoutId);
+            console.error(`Supabase fetch error: ${error.message}`, error);
+            reject(error);
+          });
       });
     }
   },
@@ -34,16 +83,71 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
-// Add diagnostic helpers
+// Enhanced diagnostic helpers with more detailed reporting
 export const checkSupabaseConnection = async () => {
   try {
-    // Using 'profiles' table instead of 'health_check' since it exists in the schema
+    console.log('Testing Supabase connection...');
+    
+    // First try to get the auth configuration, which doesn't need auth
+    const { data: authData, error: authError } = await supabase.auth.getSession();
+    console.log('Auth check result:', authError ? 'Failed' : 'Success');
+    
+    if (authError) {
+      console.error('Auth check error:', authError);
+      // Continue to try the database check anyway
+    }
+    
+    // Then try a database check
+    console.log('Testing database connection...');
     const { data, error } = await supabase.from('profiles').select('id').limit(1);
-    if (error) throw error;
+    
+    if (error) {
+      console.error('Database check failed:', error);
+      throw error;
+    }
+    
     console.log('Supabase connection test successful');
-    return true;
+    return { success: true, auth: !authError, db: !error };
   } catch (error) {
     console.error('Supabase connection test failed:', error);
-    return false;
+    return { success: false, error };
   }
+};
+
+// Add a utility to check browser cache status
+export const clearBrowserCache = async () => {
+  try {
+    if ('caches' in window) {
+      console.log('Clearing browser caches for Supabase domain...');
+      const cacheKeys = await window.caches.keys();
+      const supabaseCaches = cacheKeys.filter(key => 
+        key.includes('supabase') || key.includes(SUPABASE_URL));
+      
+      await Promise.all(
+        supabaseCaches.map(key => window.caches.delete(key))
+      );
+      return true;
+    }
+  } catch (error) {
+    console.error('Failed to clear caches:', error);
+  }
+  return false;
+};
+
+// Utility to diagnose network connectivity
+export const diagnoseBrowserNetwork = () => {
+  const diagnostics = {
+    online: navigator.onLine,
+    connectionType: (navigator as any).connection 
+      ? (navigator as any).connection.effectiveType 
+      : 'unknown',
+    connectionRtt: (navigator as any).connection 
+      ? (navigator as any).connection.rtt 
+      : 'unknown',
+    serviceWorker: 'serviceWorker' in navigator,
+    https: window.location.protocol === 'https:',
+  };
+  
+  console.log('Browser network diagnostics:', diagnostics);
+  return diagnostics;
 };
