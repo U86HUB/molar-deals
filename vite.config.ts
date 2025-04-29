@@ -40,7 +40,7 @@ try {
 export default defineConfig(({ mode }) => ({
   server: {
     host: true,
-    port: Number(process.env.PORT) || 3000,
+    port: 8080,
   },
   plugins: [
     react(),
