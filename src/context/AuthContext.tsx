@@ -14,7 +14,7 @@ const AuthContext = createContext<AuthContextProps>({
   resetPassword: async () => {},
   isAuthenticated: false,
   updateUserProfile: async () => {},
-  updateUserPassword: async () => {},
+  updateUserPassword: async () => false, // Updated to return a boolean (false) by default
   hasSetPassword: false,
   checkHasSetPassword: async () => false,
 });
