@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, Loader2, AlertCircle, WifiOff } from "lucide-react";
@@ -103,11 +103,14 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] rounded-lg p-6">
+      <DialogContent className="sm:max-w-[425px] rounded-lg p-6" aria-describedby="auth-modal-description">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-semibold">
             {otpSent ? "Check your email" : "Welcome to DentalDeals"}
           </DialogTitle>
+          <DialogDescription id="auth-modal-description" className="sr-only">
+            {otpSent ? "Check your email for a magic link to sign in" : "Sign in or create an account to access exclusive dental deals"}
+          </DialogDescription>
         </DialogHeader>
 
         {!isOnline && !otpSent && (

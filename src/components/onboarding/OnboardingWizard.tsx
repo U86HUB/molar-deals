@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -214,7 +214,12 @@ export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWiza
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden rounded-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden rounded-lg max-h-[90vh] overflow-y-auto" aria-describedby="onboarding-description">
+        {/* Add invisible description for accessibility */}
+        <DialogDescription id="onboarding-description" className="sr-only">
+          Complete your profile setup to customize your DentalDeals experience
+        </DialogDescription>
+        
         {/* Progress indicator */}
         <div className="px-6 pt-6">
           <OnboardingProgress currentStep={step} totalSteps={totalSteps} />

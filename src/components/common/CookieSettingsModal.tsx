@@ -1,120 +1,95 @@
 
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Info } from "lucide-react";
 
 interface CookieSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function CookieSettingsModal({ isOpen, onClose }: CookieSettingsModalProps) {
-  const [necessaryCookies, setNecessaryCookies] = useState(true);
-  const [analyticsCookies, setAnalyticsCookies] = useState(true);
-  const [marketingCookies, setMarketingCookies] = useState(false);
-  const [preferenceCookies, setPreferenceCookies] = useState(true);
-
+export const CookieSettingsModal = ({ isOpen, onClose }: CookieSettingsModalProps) => {
+  const [essentialEnabled, setEssentialEnabled] = useState(true);
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
+  const [marketingEnabled, setMarketingEnabled] = useState(false);
+  
   const handleSave = () => {
-    // Here you would typically save the cookie preferences
-    // For now we'll just simulate that with a console log
-    console.log("Cookie preferences saved:", {
-      necessary: necessaryCookies,
-      analytics: analyticsCookies,
-      marketing: marketingCookies,
-      preferences: preferenceCookies,
-    });
+    // Save cookie preferences
+    const preferences = {
+      essential: essentialEnabled,
+      analytics: analyticsEnabled,
+      marketing: marketingEnabled,
+      lastUpdated: new Date().toISOString(),
+    };
     
-    // Close the modal
+    localStorage.setItem("cookiePreferences", JSON.stringify(preferences));
     onClose();
   };
-
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px]" aria-describedby="cookie-settings-description">
         <DialogHeader>
           <DialogTitle>Cookie Settings</DialogTitle>
-          <DialogDescription>
-            Configure your cookie preferences. Necessary cookies are always enabled as they are essential for the website to function properly.
+          <DialogDescription id="cookie-settings-description">
+            Manage your cookie preferences. Essential cookies are required for the website to function properly.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="py-4 space-y-6">
-          <div className="flex items-center justify-between">
+        <div className="space-y-6 py-4">
+          <div className="flex items-start justify-between space-x-4">
             <div>
-              <Label htmlFor="necessary-cookies" className="text-base">Necessary Cookies</Label>
-              <p className="text-sm text-muted-foreground mt-1">
-                These cookies are essential for the website to function properly.
+              <h4 className="font-medium">Essential Cookies</h4>
+              <p className="text-sm text-muted-foreground">
+                Required for the website to function. Cannot be disabled.
+              </p>
+            </div>
+            <Switch checked={essentialEnabled} disabled />
+          </div>
+          
+          <div className="flex items-start justify-between space-x-4">
+            <div>
+              <h4 className="font-medium">Analytics Cookies</h4>
+              <p className="text-sm text-muted-foreground">
+                Help us improve our website by collecting anonymous usage data.
               </p>
             </div>
             <Switch 
-              id="necessary-cookies" 
-              checked={necessaryCookies} 
-              onCheckedChange={setNecessaryCookies}
-              disabled={true}
+              checked={analyticsEnabled} 
+              onCheckedChange={setAnalyticsEnabled} 
+              id="analytics"
+              aria-label="Toggle analytics cookies"
             />
           </div>
           
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between space-x-4">
             <div>
-              <Label htmlFor="analytics-cookies" className="text-base">Analytics Cookies</Label>
-              <p className="text-sm text-muted-foreground mt-1">
-                These cookies allow us to count visits and traffic sources.
+              <h4 className="font-medium">Marketing Cookies</h4>
+              <p className="text-sm text-muted-foreground">
+                Allow us to provide personalized ads and content.
               </p>
             </div>
             <Switch 
-              id="analytics-cookies" 
-              checked={analyticsCookies} 
-              onCheckedChange={setAnalyticsCookies}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="marketing-cookies" className="text-base">Marketing Cookies</Label>
-              <p className="text-sm text-muted-foreground mt-1">
-                These cookies help us to show you relevant advertisements.
-              </p>
-            </div>
-            <Switch 
-              id="marketing-cookies" 
-              checked={marketingCookies} 
-              onCheckedChange={setMarketingCookies}
-            />
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="preference-cookies" className="text-base">Preference Cookies</Label>
-              <p className="text-sm text-muted-foreground mt-1">
-                These cookies enable personalized features on our website.
-              </p>
-            </div>
-            <Switch 
-              id="preference-cookies" 
-              checked={preferenceCookies} 
-              onCheckedChange={setPreferenceCookies}
+              checked={marketingEnabled} 
+              onCheckedChange={setMarketingEnabled}
+              id="marketing"
+              aria-label="Toggle marketing cookies"
             />
           </div>
         </div>
         
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="button" onClick={handleSave}>
-            Save Preferences
-          </Button>
+          <div className="flex items-center text-sm text-muted-foreground mr-auto">
+            <Info className="h-4 w-4 mr-1" />
+            <span>Last updated: {new Date().toLocaleDateString()}</span>
+          </div>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave}>Save Preferences</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
+};
