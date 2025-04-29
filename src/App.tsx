@@ -98,28 +98,7 @@ function App() {
                           </Suspense>
                         </RouteErrorBoundary>
                       } />
-                      <Route path="/auth" element={
-                        <RouteErrorBoundary routeId="auth">
-                          <Suspense fallback={<RouteSkeleton />}>
-                            <Auth />
-                          </Suspense>
-                        </RouteErrorBoundary>
-                      } />
-                      <Route path="/auth/callback" element={
-                        <RouteErrorBoundary routeId="auth-callback">
-                          <Suspense fallback={<RouteSkeleton />}>
-                            <AuthCallback />
-                          </Suspense>
-                        </RouteErrorBoundary>
-                      } />
-                      <Route path="/reset-password" element={
-                        <RouteErrorBoundary routeId="reset-password">
-                          <Suspense fallback={<RouteSkeleton />}>
-                            <ResetPassword />
-                          </Suspense>
-                        </RouteErrorBoundary>
-                      } />
-
+                      
                       {/* Protected customer routes */}
                       <Route path="/dashboard" element={
                         <ProtectedRoute allowedRoles={["customer", "admin"]}>

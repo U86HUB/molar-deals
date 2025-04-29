@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -66,15 +65,30 @@ export default defineConfig(({ mode }) => ({
     fs: { strict: true }, // Enforce fs.deny rules
     hmr: {
       // Fix for __WS_TOKEN__ undefined error
-      clientPort: 443, // Use HTTPS port for websockets when deployed
+      clientPort: mode === 'production' ? 443 : undefined, // Use HTTPS port for websockets when deployed
       host: 'localhost', // Match the host setting
+      overlay: false, // Disable the error overlay - we'll handle errors ourselves
     },
     watch: {
       usePolling: false, // Disable polling for better performance
     },
   },
   plugins: [
-    react(),
+    react({
+      // Add SWC optimization options
+      swcOptions: {
+        jsc: {
+          target: 'es2020',
+          transform: {
+            react: {
+              runtime: 'automatic',
+              development: mode === 'development',
+              refresh: mode === 'development',
+            },
+          },
+        },
+      },
+    }),
     mode === 'development' &&
     componentTagger(),
     // Add visualizer plugin for bundle analysis
@@ -100,5 +114,29 @@ export default defineConfig(({ mode }) => ({
       reporter: ['text', 'json', 'html'],
       exclude: ['node_modules/', 'src/test/setup.ts'],
     },
+  },
+  // Improve build options
+  build: {
+    target: 'es2020',
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: [
+            'react', 
+            'react-dom', 
+            'react-router-dom',
+            '@tanstack/react-query',
+          ],
+          ui: [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-toast',
+            // Other UI components
+          ],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000, // Increase warning limit
   }
 }));
