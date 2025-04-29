@@ -26,5 +26,6 @@ export const shouldEnableHmr = isDevelopment;
 // Log configuration for error tracking
 export const logConfig = {
   enableConsoleErrors: isDevelopment,
-  enableErrorReporting: isProduction
+  enableErrorReporting: isProduction,
+  enableRemoteLogging: isProduction
 };
