@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -318,6 +317,7 @@ export const userService = {
       if (profileError && profileError.code !== 'PGRST116') throw profileError;
       
       const user = data.user;
+      // Fix: Cast profileData to ProfileData type to safely access full_name property
       const profile = profileData as ProfileData | null || {};
       const metadata = user.user_metadata || {};
       
