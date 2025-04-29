@@ -3,7 +3,7 @@ import { renderHook } from '@testing-library/react';
 import { usePrefetchRouteData } from './usePrefetchRouteData';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
-import { vi, describe, it, expect } from 'vitest';
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 // Mock dependencies
 vi.mock('@tanstack/react-query', () => ({
