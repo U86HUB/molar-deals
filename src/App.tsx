@@ -57,7 +57,7 @@ const queryClient = new QueryClient({
 // Static content (like How It Works, Privacy Policy) can have longer stale times
 queryClient.setQueryDefaults(['static-content'], {
   staleTime: 24 * 60 * 60 * 1000, // 24 hours for rarely changing content
-  cacheTime: 30 * 24 * 60 * 60 * 1000, // 30 days
+  gcTime: 30 * 24 * 60 * 60 * 1000, // 30 days
 });
 
 // Deals data should be fresher
