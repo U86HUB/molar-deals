@@ -1,16 +1,22 @@
 
 import { useFormContext } from "react-hook-form";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
-export const PersonalInfoCard = () => {
+interface PersonalInfoCardProps {
+  onSubmit: () => void;
+  loading: boolean;
+}
+
+export const PersonalInfoCard = ({ onSubmit, loading }: PersonalInfoCardProps) => {
   const { register, watch, setValue } = useFormContext();
   
   return (
-    <Card>
+    <Card as="form" onSubmit={onSubmit}>
       <CardHeader>
         <CardTitle>Personal Information</CardTitle>
       </CardHeader>
@@ -111,6 +117,11 @@ export const PersonalInfoCard = () => {
           />
         </div>
       </CardContent>
+      <CardFooter className="flex justify-end">
+        <Button variant="primary" type="submit" disabled={loading}>
+          {loading ? "Saving..." : "Save Changes"}
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

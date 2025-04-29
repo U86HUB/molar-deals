@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useLocationStore, LocationSource } from "@/stores/locationStore";
-import { AddressModeSelector } from './AddressModeSelector';
+import { useLocationStore } from "@/stores/locationStore";
 import { GoogleAddressInput } from './GoogleAddressInput';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +11,7 @@ interface AddressSelectorProps {
 }
 
 export const AddressSelector = ({ googleMapsApiKey }: AddressSelectorProps) => {
-  const { addressStructured, setAddressComponent, source, setLocation, isVerified, setVerified } = useLocationStore();
-  const [addressMode, setAddressMode] = useState<LocationSource>(source || 'google');
+  const { addressStructured, setAddressComponent, setLocation, isVerified, setVerified } = useLocationStore();
   
   // Use the @react-google-maps/api loader for better reliability
   const { isLoaded: googleLoaded, loadError } = useJsApiLoader({
@@ -21,18 +19,8 @@ export const AddressSelector = ({ googleMapsApiKey }: AddressSelectorProps) => {
     libraries: ["places"]
   });
 
-  const handleAddressModeChange = (mode: LocationSource) => {
-    setAddressMode(mode);
-    setLocation({ source: mode });
-    
-    // When switching to manual mode, enable editing fields
-    if (mode === 'manual') {
-      setVerified(true);
-    }
-  };
-
   const isGoogleMapsAvailable = googleLoaded && Boolean(googleMapsApiKey);
-  const fieldsDisabled = addressMode === 'google' && !isVerified;
+  const fieldsDisabled = !isVerified;
 
   return (
     <div className="space-y-4">
@@ -52,18 +40,9 @@ export const AddressSelector = ({ googleMapsApiKey }: AddressSelectorProps) => {
       
       {loadError && (
         <div className="py-2 text-center text-red-500 rounded bg-red-50">
-          Failed to load Google Maps. Please use manual address entry.
+          Failed to load Google Maps. Please contact support.
         </div>
       )}
-      
-      {/* Address Mode Toggle */}
-      <div className="flex items-center justify-end mb-2">
-        <AddressModeSelector 
-          addressMode={addressMode}
-          setAddressMode={handleAddressModeChange}
-          googleMapsAvailable={isGoogleMapsAvailable}
-        />
-      </div>
       
       {/* Structured Address Fields - Always visible */}
       <div className="space-y-4 pt-2 border border-gray-100 bg-gray-50 rounded-md p-4">
@@ -133,7 +112,7 @@ export const AddressSelector = ({ googleMapsApiKey }: AddressSelectorProps) => {
         
         {fieldsDisabled && (
           <p className="text-xs text-muted-foreground italic">
-            Verify via Google or switch to manual mode to edit these fields.
+            Verify address via Google to edit these fields.
           </p>
         )}
       </div>

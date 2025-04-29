@@ -14,27 +14,27 @@ export interface Coordinates {
   lng: number;
 }
 
-export type LocationSource = 'manual' | 'google';
+export type LocationSource = 'google';
 
 export interface LocationState {
   addressStructured?: AddressStructured;
   coords?: Coordinates;
   source?: LocationSource;
-  isVerified: boolean;  // New flag to track if address has been verified
+  isVerified: boolean;  // Flag to track if address has been verified
   
   // Actions
   setLocation: (data: Partial<LocationState>) => void;
   setAddressComponent: (key: keyof AddressStructured, value: string) => void;
   resetLocation: () => void;
-  setVerified: (verified: boolean) => void;  // New action
+  setVerified: (verified: boolean) => void; 
 }
 
 export const useLocationStore = create<LocationState>((set) => ({
   // Initial state
   addressStructured: undefined,
   coords: undefined,
-  source: undefined,
-  isVerified: false,  // New field defaults to false
+  source: 'google',  // Default to Google as the only source
+  isVerified: false,
   
   // Actions
   setLocation: (data) => set((state) => ({
@@ -48,13 +48,14 @@ export const useLocationStore = create<LocationState>((set) => ({
       ...(state.addressStructured || {}),
       [key]: value,
     },
+    isVerified: true, // Set verified when manually editing components
   })),
   
   resetLocation: () => set({
     addressStructured: undefined,
     coords: undefined,
-    source: undefined,
-    isVerified: false,  // Reset verified status
+    source: 'google',
+    isVerified: false,
   }),
 
   setVerified: (verified) => set((state) => ({

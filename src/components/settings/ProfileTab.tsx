@@ -14,17 +14,64 @@ export function ProfileTab() {
     handleSave
   } = useProfileData();
   
-  const methods = useForm({
-    defaultValues: profileData
+  const personalMethods = useForm({
+    defaultValues: {
+      firstName: profileData.firstName,
+      lastName: profileData.lastName,
+      email: profileData.email,
+      phone: profileData.phone,
+      specialty: profileData.specialty,
+      yearsOfExperience: profileData.yearsOfExperience,
+      bio: profileData.bio
+    }
+  });
+  
+  const clinicMethods = useForm({
+    defaultValues: {
+      practiceName: profileData.practiceName,
+      practiceSize: profileData.practiceSize,
+      clinicBio: "",  // New field
+    }
   });
   
   // Update form when profile data changes (e.g. on initial load)
   React.useEffect(() => {
-    methods.reset(profileData);
-  }, [profileData, methods]);
+    personalMethods.reset({
+      firstName: profileData.firstName,
+      lastName: profileData.lastName,
+      email: profileData.email,
+      phone: profileData.phone,
+      specialty: profileData.specialty,
+      yearsOfExperience: profileData.yearsOfExperience,
+      bio: profileData.bio
+    });
+    
+    clinicMethods.reset({
+      practiceName: profileData.practiceName,
+      practiceSize: profileData.practiceSize,
+      clinicBio: profileData.clinicBio || "",  // New field
+    });
+  }, [profileData]);
 
-  const onSubmit = async (data: any) => {
-    await handleSave(data);
+  const onPersonalSubmit = async (data: any) => {
+    await handleSave({
+      ...profileData,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      specialty: data.specialty,
+      yearsOfExperience: data.yearsOfExperience,
+      bio: data.bio
+    });
+  };
+  
+  const onClinicSubmit = async (data: any) => {
+    await handleSave({
+      ...profileData,
+      practiceName: data.practiceName,
+      practiceSize: data.practiceSize,
+      clinicBio: data.clinicBio  // New field
+    });
   };
 
   return (
@@ -37,18 +84,21 @@ export function ProfileTab() {
       </CardHeader>
       
       <CardContent>
-        <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-8">
-            <PersonalInfoCard />
-            <ClinicInfoCard />
-            
-            <div className="flex justify-end">
-              <Button variant="primary" type="submit" disabled={loading}>
-                {loading ? "Saving..." : "Save Changes"}
-              </Button>
-            </div>
-          </form>
-        </FormProvider>
+        <div className="space-y-8">
+          <FormProvider {...personalMethods}>
+            <PersonalInfoCard 
+              onSubmit={personalMethods.handleSubmit(onPersonalSubmit)}
+              loading={loading} 
+            />
+          </FormProvider>
+          
+          <FormProvider {...clinicMethods}>
+            <ClinicInfoCard 
+              onSubmit={clinicMethods.handleSubmit(onClinicSubmit)}
+              loading={loading} 
+            />
+          </FormProvider>
+        </div>
       </CardContent>
     </div>
   );

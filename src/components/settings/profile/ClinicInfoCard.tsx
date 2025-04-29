@@ -1,20 +1,27 @@
 
 import { useFormContext } from "react-hook-form";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { AddressSelector } from "@/components/settings/profile/AddressSelector";
+import { Button } from "@/components/ui/button";
 import { useProfileData } from "@/hooks/useProfileData";
 
 // Get Google Maps API key from environment variables
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 
-export const ClinicInfoCard = () => {
+interface ClinicInfoCardProps {
+  onSubmit: () => void;
+  loading: boolean;
+}
+
+export const ClinicInfoCard = ({ onSubmit, loading }: ClinicInfoCardProps) => {
   const { register, watch, setValue } = useFormContext();
   
   return (
-    <Card>
+    <Card as="form" onSubmit={onSubmit}>
       <CardHeader>
         <CardTitle>Clinic Information</CardTitle>
       </CardHeader>
@@ -49,6 +56,17 @@ export const ClinicInfoCard = () => {
           </div>
         </div>
         
+        {/* Clinic Bio - new field */}
+        <div className="space-y-2">
+          <Label htmlFor="clinicBio">Clinic Bio (Optional)</Label>
+          <Textarea
+            id="clinicBio"
+            {...register("clinicBio")}
+            placeholder="Tell us about your practice"
+            className="min-h-[120px] w-full"
+          />
+        </div>
+        
         {/* Practice Location */}
         <div>
           <Label className="text-base font-medium">Practice Location</Label>
@@ -57,6 +75,11 @@ export const ClinicInfoCard = () => {
           </div>
         </div>
       </CardContent>
+      <CardFooter className="flex justify-end">
+        <Button variant="primary" type="submit" disabled={loading}>
+          {loading ? "Saving..." : "Save Changes"}
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

@@ -15,6 +15,7 @@ export interface ProfileFormData {
   yearsOfExperience: string;
   practiceSize: string;
   bio: string;
+  clinicBio?: string; // New field for clinic bio
 }
 
 export function useProfileData() {
@@ -31,7 +32,8 @@ export function useProfileData() {
     specialty: "General Dentist",
     yearsOfExperience: "0-5",
     practiceSize: "solo",
-    bio: ""
+    bio: "",
+    clinicBio: ""
   });
 
   // Load user data on mount
@@ -48,7 +50,8 @@ export function useProfileData() {
         specialty: user.user_metadata?.specialty || "General Dentist",
         yearsOfExperience: user.user_metadata?.years_of_experience || "0-5",
         practiceSize: user.user_metadata?.practice_size || "solo",
-        bio: user.user_metadata?.bio || ""
+        bio: user.user_metadata?.bio || "",
+        clinicBio: user.user_metadata?.clinic_bio || ""
       });
       
       // Then, set location data in the location store
@@ -101,6 +104,7 @@ export function useProfileData() {
         practice_size: formData.practiceSize,
         phone: formData.phone,
         bio: formData.bio,
+        clinic_bio: formData.clinicBio, // Add the new clinic bio field
         address_structured: addressStructured || null,
         location: locationMetadata,
         location_source: source || 'google'
