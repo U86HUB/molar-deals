@@ -1,4 +1,3 @@
-
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,6 +8,7 @@ import { Helmet, HelmetProvider } from "react-helmet-async";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { CookieSettingsProvider } from "./context/CookieSettingsContext";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -63,70 +63,72 @@ const App = () => (
           <Toaster />
           <Sonner />
           <AuthProvider>
-            <BrowserRouter>
-              <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/dashboard" element={
-                    <ProtectedRoute allowedRoles={["customer", "admin"]}>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/settings" element={
-                    <ProtectedRoute>
-                      <Settings />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/vendor" element={
-                    <ProtectedRoute allowedRoles={["vendor", "admin"]}>
-                      <VendorDashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/referrals" element={
-                    <ProtectedRoute>
-                      <ReferralLeaderboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/admin" element={
-                    <ProtectedRoute allowedRoles={["admin"]}>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/system-health" element={
-                    <ProtectedRoute allowedRoles={["admin"]}>
-                      <SystemHealth />
-                    </ProtectedRoute>
-                  } />
-                  
-                  {/* Existing extra pages */}
-                  <Route path="/how-it-works" element={<HowItWorks />} />
-                  <Route path="/brands" element={<Brands />} />
-                  <Route path="/privacy" element={<Privacy />} />
-                  
-                  {/* New company pages */}
-                  <Route path="/about" element={<About />} />
-                  <Route path="/careers" element={<Careers />} />
-                  <Route path="/press" element={<Press />} />
-                  
-                  {/* New resource pages */}
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/help" element={<HelpCenter />} />
-                  <Route path="/webinars" element={<Webinars />} />
-                  
-                  {/* New legal pages */}
-                  <Route path="/terms" element={<Terms />} />
-                  
-                  {/* Contact */}
-                  <Route path="/contact" element={<Contact />} />
-                  
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </BrowserRouter>
+            <CookieSettingsProvider>
+              <BrowserRouter>
+                <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/dashboard" element={
+                      <ProtectedRoute allowedRoles={["customer", "admin"]}>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/settings" element={
+                      <ProtectedRoute>
+                        <Settings />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/vendor" element={
+                      <ProtectedRoute allowedRoles={["vendor", "admin"]}>
+                        <VendorDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/referrals" element={
+                      <ProtectedRoute>
+                        <ReferralLeaderboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/admin" element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <AdminDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/system-health" element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <SystemHealth />
+                      </ProtectedRoute>
+                    } />
+                    
+                    {/* Existing extra pages */}
+                    <Route path="/how-it-works" element={<HowItWorks />} />
+                    <Route path="/brands" element={<Brands />} />
+                    <Route path="/privacy" element={<Privacy />} />
+                    
+                    {/* New company pages */}
+                    <Route path="/about" element={<About />} />
+                    <Route path="/careers" element={<Careers />} />
+                    <Route path="/press" element={<Press />} />
+                    
+                    {/* New resource pages */}
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/help" element={<HelpCenter />} />
+                    <Route path="/webinars" element={<Webinars />} />
+                    
+                    {/* New legal pages */}
+                    <Route path="/terms" element={<Terms />} />
+                    
+                    {/* Contact */}
+                    <Route path="/contact" element={<Contact />} />
+                    
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+              </BrowserRouter>
+            </CookieSettingsProvider>
           </AuthProvider>
         </TooltipProvider>
       </ErrorBoundary>

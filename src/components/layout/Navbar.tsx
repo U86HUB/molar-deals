@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, Tag, Award, Shield, UserCircle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -20,6 +20,7 @@ interface NavbarProps {
 export const Navbar = ({ onOpenAuth }: NavbarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, signOut, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   
   // Mock admin status - in a real app this would come from auth
   const isAdmin = isAuthenticated && user?.email?.includes('admin');
@@ -87,12 +88,10 @@ export const Navbar = ({ onOpenAuth }: NavbarProps) => {
                     {user?.email}
                   </div>
                   <DropdownMenuSeparator />
-                  <Link to="/settings">
-                    <DropdownMenuItem>
-                      <UserCircle className="mr-2 h-4 w-4" />
-                      Settings
-                    </DropdownMenuItem>
-                  </Link>
+                  <DropdownMenuItem onClick={() => navigate("/settings")}>
+                    <UserCircle className="mr-2 h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
@@ -131,33 +130,37 @@ export const Navbar = ({ onOpenAuth }: NavbarProps) => {
             <div className="pt-3 border-t border-gray-100 space-y-3">
               {isAuthenticated ? (
                 <div className="flex flex-col space-y-3">
-                  <Link to="/dashboard">
-                    <Button className="w-full" variant="primary">My Deals</Button>
-                  </Link>
-                  <Link to="/referrals">
-                    <Button className="w-full flex items-center justify-center" variant="outline">
-                      <Award className="mr-2 h-4 w-4" />
-                      Referrals
-                    </Button>
-                  </Link>
-                  <Link to="/vendor">
-                    <Button className="w-full flex items-center justify-center" variant="outline">
-                      <Tag className="mr-2 h-4 w-4" />
-                      For Vendors
-                    </Button>
-                  </Link>
+                  <Button className="w-full" variant="primary" onClick={() => navigate("/dashboard")}>
+                    My Deals
+                  </Button>
+                  <Button className="w-full flex items-center justify-center" variant="outline" onClick={() => navigate("/referrals")}>
+                    <Award className="mr-2 h-4 w-4" />
+                    Referrals
+                  </Button>
+                  <Button className="w-full flex items-center justify-center" variant="outline" onClick={() => navigate("/vendor")}>
+                    <Tag className="mr-2 h-4 w-4" />
+                    For Vendors
+                  </Button>
                   {isAdmin && (
-                    <Link to="/admin">
-                      <Button className="w-full flex items-center justify-center" variant="secondary">
-                        <Shield className="mr-2 h-4 w-4" />
-                        Admin Panel
-                      </Button>
-                    </Link>
+                    <Button 
+                      className="w-full flex items-center justify-center" 
+                      variant="secondary"
+                      onClick={() => navigate("/admin")}
+                    >
+                      <Shield className="mr-2 h-4 w-4" />
+                      Admin Panel
+                    </Button>
                   )}
-                  <Link to="/settings">
-                    <Button className="w-full" variant="secondary">Settings</Button>
-                  </Link>
-                  <Button className="w-full" variant="outline" onClick={handleSignOut}>Logout</Button>
+                  <Button 
+                    className="w-full" 
+                    variant="secondary"
+                    onClick={() => navigate("/settings")}
+                  >
+                    Settings
+                  </Button>
+                  <Button className="w-full" variant="outline" onClick={handleSignOut}>
+                    Logout
+                  </Button>
                 </div>
               ) : (
                 <>

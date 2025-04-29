@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
@@ -5,7 +6,8 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 import { Check, Star, Users, Package, ArrowRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { CookieSettingsButton } from "@/components/common/CookieSettingsButton";
 
 const Index = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -20,6 +22,10 @@ const Index = () => {
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
     navigate("/dashboard");
+  };
+  
+  const handleHowItWorksClick = () => {
+    navigate("/how-it-works");
   };
 
   return (
@@ -60,7 +66,7 @@ const Index = () => {
                 Get Started Free
               </Button>
             )}
-            <Button size="lg" variant="outline">
+            <Button size="lg" variant="outline" onClick={handleHowItWorksClick}>
               See How It Works
             </Button>
           </div>
@@ -251,36 +257,36 @@ const Index = () => {
             <div>
               <h3 className="font-bold mb-4">Company</h3>
               <ul className="space-y-2">
-                <li><a href="/about" className="text-muted-foreground hover:text-foreground">About</a></li>
-                <li><a href="/careers" className="text-muted-foreground hover:text-foreground">Careers</a></li>
-                <li><a href="/brands" className="text-muted-foreground hover:text-foreground">Brand Partners</a></li>
-                <li><a href="/press" className="text-muted-foreground hover:text-foreground">Press</a></li>
+                <li><Link to="/about" className="text-muted-foreground hover:text-foreground">About</Link></li>
+                <li><Link to="/careers" className="text-muted-foreground hover:text-foreground">Careers</Link></li>
+                <li><Link to="/brands" className="text-muted-foreground hover:text-foreground">Brand Partners</Link></li>
+                <li><Link to="/press" className="text-muted-foreground hover:text-foreground">Press</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="font-bold mb-4">Resources</h3>
               <ul className="space-y-2">
-                <li><a href="/blog" className="text-muted-foreground hover:text-foreground">Blog</a></li>
-                <li><a href="/help" className="text-muted-foreground hover:text-foreground">Help Center</a></li>
-                <li><a href="/webinars" className="text-muted-foreground hover:text-foreground">Webinars</a></li>
-                <li><a href="/how-it-works" className="text-muted-foreground hover:text-foreground">Dental Resources</a></li>
+                <li><Link to="/blog" className="text-muted-foreground hover:text-foreground">Blog</Link></li>
+                <li><Link to="/help" className="text-muted-foreground hover:text-foreground">Help Center</Link></li>
+                <li><Link to="/webinars" className="text-muted-foreground hover:text-foreground">Webinars</Link></li>
+                <li><Link to="/how-it-works" className="text-muted-foreground hover:text-foreground">Dental Resources</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="font-bold mb-4">Legal</h3>
               <ul className="space-y-2">
-                <li><a href="/privacy" className="text-muted-foreground hover:text-foreground">Privacy Policy</a></li>
-                <li><a href="/terms" className="text-muted-foreground hover:text-foreground">Terms of Service</a></li>
-                <li><span className="text-muted-foreground hover:text-foreground cursor-pointer">Cookie Settings</span></li>
+                <li><Link to="/privacy" className="text-muted-foreground hover:text-foreground">Privacy Policy</Link></li>
+                <li><Link to="/terms" className="text-muted-foreground hover:text-foreground">Terms of Service</Link></li>
+                <li><CookieSettingsButton /></li>
               </ul>
             </div>
             <div>
               <h3 className="font-bold mb-4">Connect</h3>
               <ul className="space-y-2">
-                <li><a href="/contact" className="text-muted-foreground hover:text-foreground">Contact Us</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Twitter</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">LinkedIn</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-foreground">Instagram</a></li>
+                <li><Link to="/contact" className="text-muted-foreground hover:text-foreground">Contact Us</Link></li>
+                <li><a href="https://twitter.com/dentaldeals" className="text-muted-foreground hover:text-foreground" target="_blank" rel="noopener noreferrer">Twitter</a></li>
+                <li><a href="https://linkedin.com/company/dentaldeals" className="text-muted-foreground hover:text-foreground" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+                <li><a href="https://instagram.com/dentaldeals" className="text-muted-foreground hover:text-foreground" target="_blank" rel="noopener noreferrer">Instagram</a></li>
               </ul>
             </div>
           </div>
