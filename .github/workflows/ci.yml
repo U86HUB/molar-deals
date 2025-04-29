@@ -75,6 +75,12 @@ jobs:
         run: npm ci
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
+      - name: Build & Preview
+        run: |
+          npm run build
+          npm run preview &
+      - name: Wait for server
+        run: npx wait-on http://localhost:8080
       - name: Run E2E tests
         run: npm run test:e2e
       - name: Upload Playwright report
