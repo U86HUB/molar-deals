@@ -12,7 +12,9 @@ const packageJsonScripts = {
   "test:unit:coverage": "vitest run --coverage",
   "test:e2e": "playwright test",
   "test:e2e:ui": "playwright test --ui",
-  "test": "npm run test:unit && npm run test:e2e"
+  "test": "npm run test:unit && npm run test:e2e",
+  "lint": "eslint . --ext .ts,.tsx",
+  "typecheck": "tsc --noEmit"
 };
 
 // Add scripts to package.json if they don't exist
