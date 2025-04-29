@@ -24,16 +24,42 @@ jobs:
       
       # Set up PostGIS security with RLS
       - name: Apply PostGIS Security
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           echo "Applying PostGIS security settings..."
-          # The SQL commands would be executed here against your database
-          # using a tool like psql, the Supabase CLI, or another DB client
+          # Install PostgreSQL client
+          sudo apt-get update && sudo apt-get install -y postgresql-client
           
-          # Example using Supabase CLI (you would need to configure this):
-          # npx supabase db execute 'ALTER TABLE public.spatial_ref_sys ENABLE ROW LEVEL SECURITY;
-          # CREATE POLICY spatial_ref_sys_select ON public.spatial_ref_sys FOR SELECT TO authenticated USING (auth.role() = '"authenticated"');
-          # CREATE POLICY spatial_ref_sys_no_write ON public.spatial_ref_sys FOR INSERT, UPDATE, DELETE USING (false);
-          # REVOKE ALL ON public.spatial_ref_sys FROM PUBLIC;'
+          # Execute SQL commands to secure the spatial_ref_sys table
+          psql "$SUPABASE_DB_URL" << 'EOSQL'
+          -- 1. Enable RLS on the table
+          ALTER TABLE public.spatial_ref_sys ENABLE ROW LEVEL SECURITY;
+          
+          -- 2. Force RLS to prevent bypass via superuser
+          ALTER TABLE public.spatial_ref_sys FORCE ROW LEVEL SECURITY;
+          
+          -- 3. Revoke all default privileges
+          REVOKE ALL ON public.spatial_ref_sys FROM PUBLIC;
+          
+          -- 4a. Create policy for authenticated users
+          CREATE POLICY spatial_ref_sys_select ON public.spatial_ref_sys 
+            FOR SELECT TO authenticated 
+            USING (auth.role() = 'authenticated');
+          
+          -- 4b. Deny all writes to the table
+          CREATE POLICY spatial_ref_sys_no_write ON public.spatial_ref_sys 
+            FOR INSERT, UPDATE, DELETE 
+            USING (false);
+          
+          -- 5. Grant SELECT privilege to authenticated users
+          GRANT SELECT ON public.spatial_ref_sys TO authenticated;
+          
+          -- Verify RLS is enabled
+          SELECT relname, relrowsecurity 
+          FROM pg_class 
+          WHERE oid = 'public.spatial_ref_sys'::regclass;
+          EOSQL
           
       # This is a placeholder for your actual deployment steps
       # You would replace this with your actual deployment logic
