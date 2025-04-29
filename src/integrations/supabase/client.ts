@@ -37,7 +37,8 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 // Add diagnostic helpers
 export const checkSupabaseConnection = async () => {
   try {
-    const { data, error } = await supabase.from('health_check').select('*').limit(1);
+    // Using 'profiles' table instead of 'health_check' since it exists in the schema
+    const { data, error } = await supabase.from('profiles').select('id').limit(1);
     if (error) throw error;
     console.log('Supabase connection test successful');
     return true;
