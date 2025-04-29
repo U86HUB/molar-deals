@@ -134,9 +134,9 @@ export const AddressSelector = ({ googleMapsApiKey }: AddressSelectorProps) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const { latitude, lng } = position.coords;
+          const { latitude, longitude } = position.coords;
           setLocation({
-            coords: { lat: latitude, lng },
+            coords: { lat: latitude, lng: longitude },
             source: 'geolocation',
           });
           
@@ -144,7 +144,7 @@ export const AddressSelector = ({ googleMapsApiKey }: AddressSelectorProps) => {
           if (googleLoaded && google.maps) {
             const geocoder = new google.maps.Geocoder();
             geocoder.geocode(
-              { location: { lat: latitude, lng } },
+              { location: { lat: latitude, lng: longitude } },
               (results, status) => {
                 if (status === 'OK' && results && results[0]) {
                   // Process the results similar to autocomplete
