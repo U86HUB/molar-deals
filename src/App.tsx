@@ -41,16 +41,33 @@ const Webinars = lazy(() => import("./pages/Webinars"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Contact = lazy(() => import("./pages/Contact"));
 
-// Configure query client with better defaults for production
+// Configure query client with optimized settings for different data types
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 2,
-      staleTime: 10 * 1000, // 10 seconds
+      staleTime: 10 * 1000, // 10 seconds default
       refetchOnWindowFocus: import.meta.env.PROD ? 'always' : false,
       refetchOnReconnect: true,
     },
   },
+});
+
+// Add data-specific query cache configurations
+// Static content (like How It Works, Privacy Policy) can have longer stale times
+queryClient.setQueryDefaults(['static-content'], {
+  staleTime: 24 * 60 * 60 * 1000, // 24 hours for rarely changing content
+  cacheTime: 30 * 24 * 60 * 60 * 1000, // 30 days
+});
+
+// Deals data should be fresher
+queryClient.setQueryDefaults(['deals'], {
+  staleTime: 5 * 60 * 1000, // 5 minutes
+});
+
+// User data should be very fresh
+queryClient.setQueryDefaults(['user-data'], {
+  staleTime: 30 * 1000, // 30 seconds
 });
 
 const App = () => (
