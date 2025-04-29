@@ -75,22 +75,12 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react({
-      // Add SWC optimization options
-      swcOptions: {
-        jsc: {
-          target: 'es2020',
-          transform: {
-            react: {
-              runtime: 'automatic',
-              development: mode === 'development',
-              refresh: mode === 'development',
-            },
-          },
-        },
-      },
+      // Only pass valid SWC options
+      jsxImportSource: "react",
+      devTarget: "es2020",
+      tsDecorators: true,
     }),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
     // Add visualizer plugin for bundle analysis
     mode === 'production' && 
     visualizer({
@@ -136,6 +126,11 @@ export default defineConfig(({ mode }) => ({
           ],
         },
       },
+      // Add external modules that should not be bundled
+      external: [
+        mode !== 'production' ? '@sentry/react' : '',
+        mode !== 'production' ? '@sentry/tracing' : '',
+      ].filter(Boolean),
     },
     chunkSizeWarningLimit: 1000, // Increase warning limit
   }
