@@ -76,32 +76,31 @@ export function useProfileData() {
     }));
   };
   
-  const handleSave = async () => {
+  const handleSave = async (formData: ProfileFormData) => {
     setLoading(true);
     try {
       // Format full name
-      const fullName = `${profileData.firstName} ${profileData.lastName}`.trim();
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
       
       // Create formatted location metadata
       const locationMetadata = {
         country: addressStructured?.country || "",
         state: addressStructured?.state || "",
         city: addressStructured?.city || "",
-        coords: coords || null,
-        use_geolocation: false // Since we've removed geolocation functionality
+        coords: coords || null
       };
       
       // Update user profile with all metadata
       await updateUserProfile({
         full_name: fullName,
-        first_name: profileData.firstName,
-        last_name: profileData.lastName,
-        practice_name: profileData.practiceName,
-        specialty: profileData.specialty,
-        years_of_experience: profileData.yearsOfExperience,
-        practice_size: profileData.practiceSize,
-        phone: profileData.phone,
-        bio: profileData.bio,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        practice_name: formData.practiceName,
+        specialty: formData.specialty,
+        years_of_experience: formData.yearsOfExperience,
+        practice_size: formData.practiceSize,
+        phone: formData.phone,
+        bio: formData.bio,
         address_structured: addressStructured || null,
         location: locationMetadata,
         location_source: source || 'google'
