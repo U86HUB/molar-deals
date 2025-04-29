@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import { useLocationStore } from "@/stores/locationStore";
+import { useLocationStore, AddressStructured, LocationSource } from "@/stores/locationStore";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface ProfileFormData {
@@ -17,6 +17,25 @@ export interface ProfileFormData {
   practiceSize: string;
   bio: string;
   clinicBio?: string;
+}
+
+// Define our own interface for Profiles to avoid modifying read-only types
+interface ProfileData {
+  id: string;
+  first_name: string;
+  last_name: string;
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  practice_name?: string;
+  specialty?: string;
+  years_experience?: string | number;
+  practice_size?: string;
+  bio?: string;
+  clinic_bio?: string;
+  address_structured?: any;
+  coords?: any;
+  location_source?: string;
 }
 
 export function useProfileData() {
@@ -64,7 +83,7 @@ export function useProfileData() {
               phone: data.phone || '',
               practiceName: data.practice_name || '',
               specialty: data.specialty || 'General Dentist',
-              yearsOfExperience: data.years_experience || '0-5', // Note: DB column is years_experience
+              yearsOfExperience: data.years_experience ? String(data.years_experience) : '0-5', // Convert to string
               practiceSize: data.practice_size || 'solo',
               bio: data.bio || '',
               clinicBio: data.clinic_bio || ''
@@ -73,8 +92,8 @@ export function useProfileData() {
             // Set location data in the location store
             if (data.address_structured) {
               setLocation({
-                addressStructured: data.address_structured,
-                source: data.location_source || 'google',
+                addressStructured: data.address_structured as AddressStructured,
+                source: (data.location_source as LocationSource) || 'google',
                 isVerified: true
               });
             }
@@ -119,20 +138,20 @@ export function useProfileData() {
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
 
       // Prepare profile data for update
-      const profileUpdateData = {
+      const profileUpdateData: ProfileData = {
+        id: user?.id || '',
         full_name: fullName,
         first_name: formData.firstName,
         last_name: formData.lastName,
         practice_name: formData.practiceName,
         specialty: formData.specialty,
-        years_experience: formData.yearsOfExperience, // Note: DB column is years_experience
+        years_experience: formData.yearsOfExperience, // This will be passed as a string
         practice_size: formData.practiceSize,
         phone: formData.phone,
         bio: formData.bio,
         clinic_bio: formData.clinicBio,
-        address_structured: addressStructured,
-        location_source: source,
-        has_set_password: true
+        address_structured: addressStructured || undefined,
+        location_source: source || 'google'
       };
       
       // Add coordinates if available

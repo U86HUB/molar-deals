@@ -5,8 +5,28 @@ import { trackError } from "@/services/errorService";
 import { validatePassword } from "@/utils/passwordUtils";
 import { UserMetadata } from "@/components/onboarding/types";
 
+// Define our own interface for profile data
+interface ProfileUpdateData {
+  id?: string;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  specialty?: string;
+  years_experience?: string | number;
+  bio?: string;
+  practice_name?: string;
+  practice_size?: string;
+  clinic_bio?: string;
+  address_structured?: any;
+  coords?: string;
+  location_source?: string;
+  has_set_password?: boolean;
+  onboarding_completed?: boolean;
+}
+
 export const useAuthProfile = () => {
-  const updateUserProfile = async (data: Record<string, any>) => {
+  const updateUserProfile = async (data: ProfileUpdateData) => {
     try {
       // Only store essential auth-related data in user metadata
       const { error: authError } = await supabase.auth.updateUser({
@@ -18,22 +38,31 @@ export const useAuthProfile = () => {
 
       if (authError) throw authError;
       
+      // Get current user ID
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      
+      if (!userId) {
+        throw new Error("User ID not found");
+      }
+      
       // Store the rest of user profile data in the profiles table
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
-          id: (await supabase.auth.getUser()).data.user?.id,
+          id: userId,
           first_name: data.first_name,
           last_name: data.last_name,
+          full_name: data.full_name,
           phone: data.phone,
           specialty: data.specialty,
-          years_experience: data.years_of_experience, // Note: DB column is years_experience
+          years_experience: data.years_experience, // Note: DB column is years_experience
           bio: data.bio,
           practice_name: data.practice_name,
           practice_size: data.practice_size,
           clinic_bio: data.clinic_bio,
           address_structured: data.address_structured,
-          location_source: data.location_source
+          location_source: data.location_source,
+          coords: data.coords
         }, { 
           onConflict: 'id'
         });
