@@ -30,21 +30,22 @@ export const reverseGeocode = (
   lng: number
 ): Promise<google.maps.GeocoderResult | null> => {
   return new Promise((resolve, reject) => {
-    if (isGoogleMapsLoaded()) {
-      const geocoder = new google.maps.Geocoder();
-      geocoder.geocode(
-        { location: { lat, lng } },
-        (results, status) => {
-          if (status === 'OK' && results && results[0]) {
-            resolve(results[0]);
-          } else {
-            reject(new Error(`Geocoding failed with status: ${status}`));
-          }
-        }
-      );
-    } else {
+    if (!isGoogleMapsLoaded()) {
       reject(new Error('Google Maps not loaded'));
+      return;
     }
+
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode(
+      { location: { lat, lng } },
+      (results, status) => {
+        if (status === 'OK' && results && results[0]) {
+          resolve(results[0]);
+        } else {
+          reject(new Error(`Geocoding failed with status: ${status}`));
+        }
+      }
+    );
   });
 };
 
