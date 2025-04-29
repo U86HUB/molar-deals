@@ -22,9 +22,21 @@ jobs:
       - name: Build
         run: npm run build
       
+      # Set up PostGIS security with RLS
+      - name: Apply PostGIS Security
+        run: |
+          echo "Applying PostGIS security settings..."
+          # The SQL commands would be executed here against your database
+          # using a tool like psql, the Supabase CLI, or another DB client
+          
+          # Example using Supabase CLI (you would need to configure this):
+          # npx supabase db execute 'ALTER TABLE public.spatial_ref_sys ENABLE ROW LEVEL SECURITY;
+          # CREATE POLICY spatial_ref_sys_select ON public.spatial_ref_sys FOR SELECT TO authenticated USING (auth.role() = '"authenticated"');
+          # CREATE POLICY spatial_ref_sys_no_write ON public.spatial_ref_sys FOR INSERT, UPDATE, DELETE USING (false);
+          # REVOKE ALL ON public.spatial_ref_sys FROM PUBLIC;'
+          
       # This is a placeholder for your actual deployment steps
       # You would replace this with your actual deployment logic
-      # Examples: Vercel, Netlify, AWS S3, etc.
       - name: Deploy
         run: |
           echo "Deployment would happen here"
