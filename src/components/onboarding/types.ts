@@ -10,6 +10,7 @@ export interface UserData {
   specialty: string;
   yearsOfExperience: string;
   practiceSize: string;
+  bio?: string;
   
   // Location
   country: string; // Can be "GLOBAL" or a country code
@@ -38,4 +39,33 @@ export interface OnboardingWizardProps {
   isOpen: boolean;
   onComplete: () => void;
   onClose: () => void;
+}
+
+// Add a type for our user metadata
+export interface UserMetadata {
+  full_name?: string;
+  username?: string;
+  role?: string;
+  practice_name?: string;
+  specialty?: string;
+  years_of_experience?: string;
+  practice_size?: string;
+  bio?: string;
+  phone?: string;
+  preferences?: string[];
+  price_range_min?: string;
+  price_range_max?: string;
+  preferred_brands?: string[];
+  location?: {
+    country?: string;
+    state?: string;
+    city?: string;
+    use_geolocation?: boolean;
+  };
+  communication_preferences?: {
+    email_frequency?: string;
+    notification_types?: string[];
+    marketing_consent?: boolean;
+  };
+  [key: string]: any;
 }
