@@ -29,6 +29,7 @@ const AuthForm = ({ onSuccess, onRetry, error }: AuthFormProps) => {
   const [submitting, setSubmitting] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showConnectionStatus, setShowConnectionStatus] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
   
   // Monitor network status changes
   useEffect(() => {
@@ -46,11 +47,13 @@ const AuthForm = ({ onSuccess, onRetry, error }: AuthFormProps) => {
 
   // Show connection status if there's an error
   useEffect(() => {
-    if (error && error.toLowerCase().includes("fetch") || 
+    if (error && (error.toLowerCase().includes("fetch") || 
         error?.toLowerCase().includes("network") ||
-        error?.toLowerCase().includes("connection")) {
+        error?.toLowerCase().includes("connection"))) {
       setShowConnectionStatus(true);
     }
+    
+    setLocalError(error);
   }, [error]);
   
   const form = useForm<EmailFormValues>({
@@ -62,6 +65,7 @@ const AuthForm = ({ onSuccess, onRetry, error }: AuthFormProps) => {
 
   const handleLogin = async (values: EmailFormValues) => {
     setSubmitting(true);
+    setLocalError(null);
     
     try {
       // Check network connectivity first with visual feedback
@@ -75,11 +79,25 @@ const AuthForm = ({ onSuccess, onRetry, error }: AuthFormProps) => {
       // Error handling is done at the parent component level
       console.log("Login error caught in AuthForm:", error);
       // Show connection status if it looks like a network error
-      if (error instanceof Error && 
-          (error.message.includes("fetch") || 
+      if (error instanceof Error) {
+        setLocalError(error.message);
+        
+        if (error.message.includes("fetch") || 
            error.message.includes("network") ||
-           error.message.includes("connection"))) {
-        setShowConnectionStatus(true);
+           error.message.includes("connection")) {
+          setShowConnectionStatus(true);
+        }
+        
+        // Show Supabase configuration guidance for database errors
+        if (error.message.includes("Database error") || error.message.includes("authentication setup")) {
+          setLocalError(
+            "There appears to be an issue with the Supabase configuration. This might require admin attention. " +
+            "Possible solutions:\n" +
+            "1. Verify the Supabase project is active and the database is running\n" +
+            "2. Check if there are any pending migrations\n" +
+            "3. Ensure proper URL configuration in Supabase Auth settings"
+          );
+        }
       }
     } finally {
       setSubmitting(false);
@@ -145,12 +163,12 @@ const AuthForm = ({ onSuccess, onRetry, error }: AuthFormProps) => {
           )}
         </Button>
         
-        {error && (
+        {(localError || error) && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Authentication Error</AlertTitle>
             <AlertDescription className="space-y-2">
-              <p>{error}</p>
+              <p className="whitespace-pre-line">{localError || error}</p>
               <div className="flex flex-col gap-2">
                 <Button 
                   variant="outline" 

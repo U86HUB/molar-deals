@@ -120,6 +120,15 @@ export const useAuthMethods = () => {
           // Enhanced error handling for specific errors
           if (error.message?.includes("Invalid login credentials")) {
             throw new Error("We couldn't find an account with this email. Please check the email or sign up.");
+          } else if (error.message?.includes("Database error finding user")) {
+            // This suggests a Supabase configuration issue
+            const setupError = new Error(
+              "There seems to be an issue with the authentication setup. " +
+              "Please check if your Supabase project is properly configured and the database is accessible. " +
+              "This could be due to a database migration issue or permissions problem."
+            );
+            console.error("Supabase auth setup issue:", setupError);
+            throw setupError;
           }
           
           throw error;
@@ -156,6 +165,9 @@ export const useAuthMethods = () => {
           errorMessage += "\n\nThis might be a CORS issue. Please check if the site URL in Supabase is correctly configured.";
         } else if (error.message?.includes("rate limit")) {
           errorMessage = "Too many attempts. Please wait a few minutes before trying again.";
+        } else if (error.message?.includes("Database error finding user")) {
+          errorMessage = "There seems to be an issue with the authentication setup in Supabase. " +
+                         "Please contact the administrator to verify the database configuration.";
         } else if (error.message) {
           errorMessage = error.message;
         }

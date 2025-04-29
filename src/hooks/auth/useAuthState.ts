@@ -3,7 +3,7 @@ import { useSessionState } from "./useSessionState";
 import { useUserMetadata } from "./useUserMetadata";
 
 export const useAuthState = () => {
-  const { session, user, isLoading, isAuthenticated } = useSessionState();
+  const { session, user, isLoading, isAuthenticated, initError } = useSessionState();
   const { 
     hasSetPassword, 
     hasCompletedOnboarding, 
@@ -17,6 +17,7 @@ export const useAuthState = () => {
     user,
     isLoading,
     isAuthenticated,
+    initError,
     
     // User metadata
     hasSetPassword,
