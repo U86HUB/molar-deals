@@ -9,6 +9,7 @@ import EmailSent from "@/components/auth/EmailSent";
 import SupabaseConfigInfo from "@/components/auth/SupabaseConfigInfo";
 import { checkSupabaseConnection, supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getSupabaseConfig } from "@/config/environment";
 
 const Auth = () => {
   const { isLoading, isAuthenticated, hasSetPassword } = useAuth();
@@ -38,9 +39,10 @@ const Auth = () => {
         }
         
         // Log Supabase config for debugging
+        const config = getSupabaseConfig();
         console.log("Supabase client config:", {
-          url: supabase.supabaseUrl,
-          keyAvailable: !!supabase.supabaseKey,
+          url: config.url,
+          keyAvailable: !!config.anonKey,
         });
       } catch (error) {
         console.error("Error checking connection:", error);
