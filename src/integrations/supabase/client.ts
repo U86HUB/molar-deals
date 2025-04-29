@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 // Use environment variables if available, otherwise fall back to hardcoded values
+// IMPORTANT: These are your public keys, so it's okay to include them in client-side code
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://fyyfrlhcvtxddonnkeoy.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5eWZybGhjdnR4ZGRvbm5rZW95Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU4NjU5ODMsImV4cCI6MjA2MTQ0MTk4M30.SOZTo0frLpPY3L0wN2ljV8Axqryct1nkh4CUpotGZz4";
 
@@ -26,6 +27,10 @@ if (!isValidUrl(SUPABASE_URL)) {
   console.error("Supabase URL is invalid. Please check your configuration.");
 }
 
+// Log the URL and key (first few characters) to help with debugging
+console.log("Supabase URL:", SUPABASE_URL);
+console.log("Supabase key available:", SUPABASE_PUBLISHABLE_KEY ? "Yes (starts with: " + SUPABASE_PUBLISHABLE_KEY.substring(0, 5) + "...)" : "No");
+
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
@@ -33,57 +38,16 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
     detectSessionInUrl: true,
     flowType: 'pkce',
-    debug: true, // Enable debug mode for more detailed logs
+    debug: import.meta.env.DEV, // Only enable debug in development
   },
   global: {
     headers: {
-      // Add a custom header to help diagnose CORS issues
       'X-Client-Info': 'DentalDeals Web App',
     },
-    fetch: (...args: [RequestInfo | URL, RequestInit?]): Promise<Response> => {
-      const [resource, config] = args;
-      
-      // Log the request for debugging
-      console.log(`Supabase fetch request to: ${typeof resource === 'string' ? resource : 'object'}`);
-      
-      // Add cache control headers to prevent stale cache issues
-      const enhancedConfig = {
-        ...config,
-        headers: {
-          ...config?.headers,
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-        },
-        signal: config?.signal || (typeof AbortController !== 'undefined' 
-          ? new AbortController().signal 
-          : undefined),
-      };
-      
-      // Return proper Promise<Response>
-      return new Promise<Response>((resolve, reject) => {
-        const timeoutId = setTimeout(() => {
-          reject(new Error(`Supabase request timeout: ${typeof resource === 'string' ? resource : 'object'}`));
-        }, 15000); // 15 second timeout
-        
-        fetch(resource, enhancedConfig)
-          .then(response => {
-            clearTimeout(timeoutId);
-            resolve(response);
-          })
-          .catch(error => {
-            clearTimeout(timeoutId);
-            console.error(`Supabase fetch error: ${error.message}`, error);
-            reject(error);
-          });
-      });
-    }
   },
-  realtime: {
-    timeout: 30000, // Increase timeout for realtime connections
-  }
 });
 
-// Enhanced diagnostic helpers with more detailed reporting
+// Enhanced diagnostic helpers
 export const checkSupabaseConnection = async () => {
   try {
     console.log('Testing Supabase connection...');
