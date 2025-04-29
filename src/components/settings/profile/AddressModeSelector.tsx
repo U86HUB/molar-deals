@@ -22,7 +22,7 @@ export const AddressModeSelector = ({
         type="single" 
         value={addressMode} 
         onValueChange={(value: string) => {
-          if (value && (value === 'manual' || value === 'google')) {
+          if (value && (value === 'google')) {
             setAddressMode(value as LocationSource);
           }
         }}
@@ -39,17 +39,6 @@ export const AddressModeSelector = ({
           )}
         >
           Verify via Google
-        </ToggleGroupItem>
-        <ToggleGroupItem 
-          value="manual"
-          className={cn(
-            "px-4 py-2 rounded-full",
-            addressMode === 'manual' ? 
-              "bg-primary/15 text-primary border-primary" : 
-              "border border-gray-300 text-gray-600"
-          )}
-        >
-          Enter manually
         </ToggleGroupItem>
       </ToggleGroup>
     </div>

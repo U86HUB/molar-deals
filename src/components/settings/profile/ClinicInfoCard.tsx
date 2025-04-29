@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { AddressSelector } from "@/components/settings/profile/AddressSelector";
 import { Button } from "@/components/ui/button";
-import { useProfileData } from "@/hooks/useProfileData";
 
 // Get Google Maps API key from environment variables
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
@@ -21,65 +20,67 @@ export const ClinicInfoCard = ({ onSubmit, loading }: ClinicInfoCardProps) => {
   const { register, watch, setValue } = useFormContext();
   
   return (
-    <Card as="form" onSubmit={onSubmit}>
-      <CardHeader>
-        <CardTitle>Clinic Information</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <Card>
+      <form onSubmit={onSubmit}>
+        <CardHeader>
+          <CardTitle>Clinic Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="practiceName">Practice Name (Optional)</Label>
+              <Input
+                id="practiceName"
+                {...register("practiceName")}
+                placeholder="Practice Name"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="practiceSize">Practice Size (Optional)</Label>
+              <Select 
+                value={watch("practiceSize")} 
+                onValueChange={(value) => setValue("practiceSize", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select practice size" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="solo">Solo Practice</SelectItem>
+                  <SelectItem value="small">Small Group (2-5 dentists)</SelectItem>
+                  <SelectItem value="medium">Medium Group (6-15 dentists)</SelectItem>
+                  <SelectItem value="large">Large Group (16+ dentists)</SelectItem>
+                  <SelectItem value="dso">DSO</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          {/* Clinic Bio - new field */}
           <div className="space-y-2">
-            <Label htmlFor="practiceName">Practice Name (Optional)</Label>
-            <Input
-              id="practiceName"
-              {...register("practiceName")}
-              placeholder="Practice Name"
+            <Label htmlFor="clinicBio">Clinic Bio (Optional)</Label>
+            <Textarea
+              id="clinicBio"
+              {...register("clinicBio")}
+              placeholder="Tell us about your practice"
+              className="min-h-[120px] w-full"
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="practiceSize">Practice Size (Optional)</Label>
-            <Select 
-              value={watch("practiceSize")} 
-              onValueChange={(value) => setValue("practiceSize", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select practice size" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="solo">Solo Practice</SelectItem>
-                <SelectItem value="small">Small Group (2-5 dentists)</SelectItem>
-                <SelectItem value="medium">Medium Group (6-15 dentists)</SelectItem>
-                <SelectItem value="large">Large Group (16+ dentists)</SelectItem>
-                <SelectItem value="dso">DSO</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Practice Location */}
+          <div>
+            <Label className="text-base font-medium">Practice Location</Label>
+            <div className="mt-2">
+              <AddressSelector googleMapsApiKey={GOOGLE_MAPS_API_KEY} />
+            </div>
           </div>
-        </div>
-        
-        {/* Clinic Bio - new field */}
-        <div className="space-y-2">
-          <Label htmlFor="clinicBio">Clinic Bio (Optional)</Label>
-          <Textarea
-            id="clinicBio"
-            {...register("clinicBio")}
-            placeholder="Tell us about your practice"
-            className="min-h-[120px] w-full"
-          />
-        </div>
-        
-        {/* Practice Location */}
-        <div>
-          <Label className="text-base font-medium">Practice Location</Label>
-          <div className="mt-2">
-            <AddressSelector googleMapsApiKey={GOOGLE_MAPS_API_KEY} />
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-end">
-        <Button variant="primary" type="submit" disabled={loading}>
-          {loading ? "Saving..." : "Save Changes"}
-        </Button>
-      </CardFooter>
+        </CardContent>
+        <CardFooter className="flex justify-end">
+          <Button variant="primary" type="submit" disabled={loading}>
+            {loading ? "Saving..." : "Save Changes"}
+          </Button>
+        </CardFooter>
+      </form>
     </Card>
   );
 };

@@ -11,7 +11,7 @@ interface AddressSelectorProps {
 }
 
 export const AddressSelector = ({ googleMapsApiKey }: AddressSelectorProps) => {
-  const { addressStructured, setAddressComponent, setLocation, isVerified, setVerified } = useLocationStore();
+  const { addressStructured, setAddressComponent, isVerified, setVerified } = useLocationStore();
   
   // Use the @react-google-maps/api loader for better reliability
   const { isLoaded: googleLoaded, loadError } = useJsApiLoader({
