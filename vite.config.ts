@@ -39,8 +39,8 @@ try {
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
-    port: 8080,
+    host: true,
+    port: Number(process.env.PORT) || 3000,
   },
   plugins: [
     react(),
@@ -50,7 +50,7 @@ export default defineConfig(({ mode }) => ({
     mode === 'production' && 
     visualizer({
       filename: 'dist/stats.html',
-      open: false,
+      open: true,
       gzipSize: true,
       brotliSize: true,
     }),
