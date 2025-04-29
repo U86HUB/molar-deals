@@ -116,8 +116,8 @@ export const userFetchService = {
       if (profileError && profileError.code !== 'PGRST116') throw profileError;
       
       const user = data.user;
-      // Cast profileData to ProfileData type to safely access full_name property
-      const profile = (profileData as ProfileData | null) || {};
+      // Fix: Cast profileData to ProfileData type with a default empty object that includes the required id
+      const profile = (profileData as ProfileData | null) || { id: userId };
       
       return mapAuthUserToProfile(user, profile);
     } catch (error) {

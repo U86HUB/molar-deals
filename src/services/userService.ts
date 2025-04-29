@@ -2,7 +2,9 @@
 import { userFetchService } from "./user/userFetchService";
 import { userStatsService } from "./user/userStatsService";
 import { userModifyService } from "./user/userModifyService";
-export { UserStatus, UserRole, UserProfile, UserListParams } from "./user/types";
+
+// Re-export types with 'export type' to fix TS1205 error with isolatedModules
+export type { UserStatus, UserRole, UserProfile, UserListParams } from "./user/types";
 
 export const userService = {
   // User fetching methods

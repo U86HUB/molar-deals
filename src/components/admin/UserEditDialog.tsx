@@ -1,14 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { userService, UserProfile, UserRole, UserStatus } from "@/services/userService";
-import { Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DialogHeader } from "./users/dialogs/DialogHeader";
+import { DialogFooter } from "./users/dialogs/DialogFooter";
+import { UserFormContent } from "./users/dialogs/UserFormContent";
 
 interface UserEditDialogProps {
   userId: string | null;
@@ -104,126 +101,33 @@ export const UserEditDialog = ({ userId, isOpen, onClose, onUserUpdated }: UserE
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Edit User</DialogTitle>
-          <DialogDescription>
-            Make changes to the user profile below. Click save when you're done.
-          </DialogDescription>
-        </DialogHeader>
+        <DialogHeader 
+          title="Edit User" 
+          description="Make changes to the user profile below. Click save when you're done."
+        />
 
-        {loading && !user ? (
-          <div className="flex justify-center items-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : error ? (
-          <Alert variant="destructive" className="my-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : (
-          <div className="space-y-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                value={user?.email || ""}
-                disabled
-              />
-              <p className="text-sm text-muted-foreground">
-                Email cannot be changed
-              </p>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="role">Role</Label>
-              <Select 
-                value={role} 
-                onValueChange={(value) => setRole(value as UserRole)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Admin">Admin</SelectItem>
-                  <SelectItem value="Dentist">Dentist</SelectItem>
-                  <SelectItem value="Vendor">Vendor</SelectItem>
-                  <SelectItem value="Staff">Staff</SelectItem>
-                  <SelectItem value="Practice Manager">Practice Manager</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="status">Status</Label>
-              <Select 
-                value={status} 
-                onValueChange={(value) => setStatus(value as UserStatus)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Inactive">Inactive</SelectItem>
-                  <SelectItem value="Suspended">Suspended</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="subscription">Subscription Plan</Label>
-              <Select 
-                value={subscriptionPlan} 
-                onValueChange={setSubscriptionPlan}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a plan" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Free">Free</SelectItem>
-                  <SelectItem value="Basic">Basic</SelectItem>
-                  <SelectItem value="Premium">Premium</SelectItem>
-                  <SelectItem value="Enterprise">Enterprise</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        )}
+        <UserFormContent 
+          user={user}
+          loading={loading}
+          error={error}
+          name={name}
+          setName={setName}
+          role={role}
+          setRole={setRole}
+          status={status}
+          setStatus={setStatus}
+          location={location}
+          setLocation={setLocation}
+          subscriptionPlan={subscriptionPlan}
+          setSubscriptionPlan={setSubscriptionPlan}
+        />
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={loading}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={loading || !user}>
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              "Save Changes"
-            )}
-          </Button>
-        </DialogFooter>
+        <DialogFooter 
+          onCancel={onClose}
+          onSave={handleSave}
+          loading={loading}
+          disabled={!user}
+        />
       </DialogContent>
     </Dialog>
   );
