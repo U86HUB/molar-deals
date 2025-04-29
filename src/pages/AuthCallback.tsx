@@ -37,7 +37,8 @@ const AuthCallback = () => {
         // Auto-retry logic for specific errors that might be temporary
         if ((error.message.includes("Failed to fetch") || 
              error.message.includes("network") ||
-             error.message.includes("timeout")) && 
+             error.message.includes("timeout") ||
+             error.message.includes("expired")) && 
             retryCount < maxRetries) {
           setRetryCount(prev => prev + 1);
           toast.info(`Retrying authentication (${retryCount + 1}/${maxRetries})...`);
@@ -71,13 +72,21 @@ const AuthCallback = () => {
         }
       } else {
         // No session found
-        setError("No session found. Please try signing in again.");
+        setError("No session found. Your login link may have expired. Please try signing in again.");
         navigate("/auth");
       }
     } catch (error: any) {
       console.error("Auth callback error:", error);
-      setError(error?.message || "Authentication failed. Please try again.");
-      toast.error("Authentication failed. Please try again.");
+      
+      let errorMessage = error?.message || "Authentication failed. Please try again.";
+      
+      // Check for expired session
+      if (errorMessage.toLowerCase().includes("expire")) {
+        errorMessage = "Your login link has expired. Please request a new one.";
+      }
+      
+      setError(errorMessage);
+      toast.error(errorMessage);
       setIsLoading(false);
     }
   };

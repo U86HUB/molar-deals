@@ -1,4 +1,3 @@
-
 import { createContext, useState, useEffect, useContext, ReactNode } from "react";
 import { Session, User, Provider } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -169,6 +168,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         options: {
           shouldCreateUser: true, // Create a new user if they don't exist
           emailRedirectTo: `${origin}/auth/callback`,
+          // Set OTP expiry to 15 minutes (900 seconds) for better security
+          emailOtpExpiresIn: 900
         },
       });
 
@@ -178,7 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       console.log("OTP sent successfully:", data);
-      toast.success("OTP sent to your email! Please check your inbox.");
+      toast.success("OTP sent to your email! Please check your inbox. The link will expire in 15 minutes.");
     } catch (error: any) {
       console.error("Full OTP error:", error);
       

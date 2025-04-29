@@ -52,7 +52,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
       await signInWithOtp(values.email);
       setOtpSent(true);
       setEmail(values.email);
-      toast.success("Magic link sent! Please check your email.");
+      toast.success("Magic link sent! Please check your email. The link will expire in 15 minutes.");
     } catch (error: any) {
       console.error("Auth error:", error);
       const errorMessage = error?.message || "Failed to send magic link. Please try again later.";
@@ -115,7 +115,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
               We've sent a magic link to <span className="font-medium">{email}</span>
             </p>
             <p className="text-sm text-muted-foreground">
-              Click the link in the email to sign in to your account
+              Click the link in the email to sign in to your account. The link will expire in 15 minutes.
             </p>
             <Button 
               variant="outline" 
@@ -148,7 +148,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                         </FormControl>
                       </div>
                       <FormDescription className="text-xs text-center">
-                        We'll email you a magic link for password-free sign in
+                        We'll email you a magic link for password-free sign in. The link will expire in 15 minutes.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

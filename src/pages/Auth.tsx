@@ -98,7 +98,7 @@ const Auth = () => {
             <CardHeader>
               <CardTitle>Check your email</CardTitle>
               <CardDescription>
-                We've sent a one-time login link to {email}
+                We've sent a one-time login link to {email}. The link will expire in 15 minutes.
               </CardDescription>
             </CardHeader>
           ) : (
@@ -106,7 +106,7 @@ const Auth = () => {
               <CardHeader>
                 <CardTitle>Sign in with a magic link</CardTitle>
                 <CardDescription>
-                  Enter your email to receive a one-time password
+                  Enter your email to receive a one-time password (expires in 15 minutes)
                 </CardDescription>
               </CardHeader>
               
@@ -168,7 +168,7 @@ const Auth = () => {
               <CardFooter className="flex flex-col space-y-4">
                 <div className="flex items-center w-full justify-center text-sm text-muted-foreground gap-2">
                   <AlertCircle className="h-4 w-4" />
-                  <span>We'll email you a magic link for a password-free sign in</span>
+                  <span>We'll email you a magic link for password-free sign in (valid for 15 minutes)</span>
                 </div>
                 
                 {error && (
