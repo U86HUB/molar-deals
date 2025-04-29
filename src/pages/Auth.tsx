@@ -3,23 +3,22 @@ import { useState, useEffect } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
-import { Loader2, Mail, Lock, User, Check, AlertTriangle } from "lucide-react";
+import { Loader2, Mail, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Separator } from "@/components/ui/separator";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const Auth = () => {
   const { signInWithOtp, isLoading, isAuthenticated, user, hasSetPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -48,15 +47,29 @@ const Auth = () => {
 
   const handleLogin = async (values: z.infer<typeof emailSchema>) => {
     setSubmitting(true);
+    setError(null);
+    
     try {
+      // Check network connectivity
+      if (!navigator.onLine) {
+        throw new Error("You appear to be offline. Please check your internet connection and try again.");
+      }
+      
       await signInWithOtp(values.email);
       setOtpSent(true);
       setEmail(values.email);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.error("Auth error:", error);
+      const errorMessage = error?.message || "Failed to send magic link. Please try again later.";
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleRetry = () => {
+    setError(null);
+    form.handleSubmit(handleLogin)();
   };
 
   if (isLoading) {
@@ -97,6 +110,16 @@ const Auth = () => {
                 </CardDescription>
               </CardHeader>
               
+              {error && (
+                <CardContent className="pt-0 pb-4">
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Authentication Error</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                </CardContent>
+              )}
+              
               <CardContent>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-4">
@@ -115,6 +138,7 @@ const Auth = () => {
                                 placeholder="Enter your email address"
                                 className="pl-10"
                                 autoComplete="email"
+                                disabled={submitting}
                               />
                             </FormControl>
                           </div>
@@ -143,9 +167,20 @@ const Auth = () => {
               
               <CardFooter className="flex flex-col space-y-4">
                 <div className="flex items-center w-full justify-center text-sm text-muted-foreground gap-2">
-                  <AlertTriangle className="h-4 w-4" />
+                  <AlertCircle className="h-4 w-4" />
                   <span>We'll email you a magic link for a password-free sign in</span>
                 </div>
+                
+                {error && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-2 w-full"
+                    onClick={handleRetry}
+                  >
+                    Try Again
+                  </Button>
+                )}
               </CardFooter>
             </>
           )}

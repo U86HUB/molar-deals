@@ -155,19 +155,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithOtp = async (email: string) => {
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      // Check network connectivity
+      if (!navigator.onLine) {
+        throw new Error("You appear to be offline. Please check your internet connection and try again.");
+      }
+
+      console.log("Sending OTP to:", email);
+      const origin = window.location.origin;
+      console.log("Current origin:", origin);
+
+      const { error, data } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: true, // Create a new user if they don't exist
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${origin}/auth/callback`,
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("OTP Error details:", error);
+        throw error;
+      }
       
+      console.log("OTP sent successfully:", data);
       toast.success("OTP sent to your email! Please check your inbox.");
     } catch (error: any) {
-      toast.error(error.message || "Error sending OTP");
+      console.error("Full OTP error:", error);
+      
+      // Provide more helpful error messages based on error types
+      let errorMessage = "Error sending OTP";
+      
+      if (error?.message?.includes("Failed to fetch")) {
+        errorMessage = "Network error: Failed to reach authentication server. Please check your connection and try again.";
+      } else if (error?.message?.includes("rate limit")) {
+        errorMessage = "Too many attempts. Please wait a few minutes before trying again.";
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
+      
       if (error instanceof Error) {
         trackError(error, 'AuthProvider.signInWithOtp');
       }
