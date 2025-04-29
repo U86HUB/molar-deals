@@ -58,6 +58,7 @@ export type Database = {
         Row: {
           address_structured: Json | null
           avatar_url: string | null
+          clinic_bio: string | null
           coords: unknown | null
           created_at: string
           first_name: string | null
@@ -65,6 +66,7 @@ export type Database = {
           id: string
           last_name: string | null
           location_source: string | null
+          personal_bio: string | null
           phone: string | null
           practice_name: string | null
           practice_size: number | null
@@ -77,6 +79,7 @@ export type Database = {
         Insert: {
           address_structured?: Json | null
           avatar_url?: string | null
+          clinic_bio?: string | null
           coords?: unknown | null
           created_at?: string
           first_name?: string | null
@@ -84,6 +87,7 @@ export type Database = {
           id: string
           last_name?: string | null
           location_source?: string | null
+          personal_bio?: string | null
           phone?: string | null
           practice_name?: string | null
           practice_size?: number | null
@@ -96,6 +100,7 @@ export type Database = {
         Update: {
           address_structured?: Json | null
           avatar_url?: string | null
+          clinic_bio?: string | null
           coords?: unknown | null
           created_at?: string
           first_name?: string | null
@@ -103,6 +108,7 @@ export type Database = {
           id?: string
           last_name?: string | null
           location_source?: string | null
+          personal_bio?: string | null
           phone?: string | null
           practice_name?: string | null
           practice_size?: number | null
