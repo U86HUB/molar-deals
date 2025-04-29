@@ -45,9 +45,9 @@ export const reverseGeocode = (
   }
 };
 
-// Extract address components from Google Places result
+// Extract address components from Google Places result or Geocoder result
 export const extractAddressComponents = (
-  place: google.maps.places.PlaceResult
+  place: google.maps.places.PlaceResult | google.maps.GeocoderResult
 ): {[key: string]: string} => {
   const addressComponents: {[key: string]: string} = {};
   
@@ -74,6 +74,13 @@ export const extractAddressComponents = (
         break;
     }
   });
+
+  // Combine street number and street name if both exist
+  if (addressComponents.streetNumber && addressComponents.street) {
+    addressComponents.streetAddress = `${addressComponents.streetNumber} ${addressComponents.street}`;
+  } else if (addressComponents.street) {
+    addressComponents.streetAddress = addressComponents.street;
+  }
   
   return addressComponents;
 };
