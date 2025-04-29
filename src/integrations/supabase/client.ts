@@ -43,7 +43,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
       const [resource, config] = args;
       
       // Log the request for debugging
-      console.log(`Supabase fetch request to: ${resource}`);
+      console.log(`Supabase fetch request to: ${typeof resource === 'string' ? resource : 'object'}`);
       
       // Add cache control headers to prevent stale cache issues
       const enhancedConfig = {
@@ -58,10 +58,10 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
           : undefined),
       };
       
-      // Return fetch with a proper timeout
-      return new Promise((resolve, reject) => {
+      // Return proper Promise<Response>
+      return new Promise<Response>((resolve, reject) => {
         const timeoutId = setTimeout(() => {
-          reject(new Error(`Supabase request timeout: ${resource}`));
+          reject(new Error(`Supabase request timeout: ${typeof resource === 'string' ? resource : 'object'}`));
         }, 15000); // 15 second timeout
         
         fetch(resource, enhancedConfig)

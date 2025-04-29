@@ -39,11 +39,11 @@ export async function getVendorDeals(vendorId: string) {
     const { data, error } = await supabase
       .from("deals")
       .select("*")
-      .eq("vendor_id", vendorId as string)
+      .eq("vendor_id", vendorId)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return data as Deal[];
+    return data as unknown as Deal[];
   } catch (error: any) {
     toast.error(error.message || "Error fetching vendor deals");
     return [];
@@ -52,11 +52,11 @@ export async function getVendorDeals(vendorId: string) {
 
 export async function createDeal(dealData: CreateDealDto, vendorId: string) {
   try {
-    const insertData: DbDealInsert = {
+    const insertData = {
       ...dealData,
       vendor_id: vendorId,
       status: "pending", // New deals start as pending
-    };
+    } as DbDealInsert;
     
     const { data, error } = await supabase
       .from("deals")
@@ -65,7 +65,7 @@ export async function createDeal(dealData: CreateDealDto, vendorId: string) {
 
     if (error) throw error;
     toast.success("Deal submitted for review");
-    return data[0] as Deal;
+    return data[0] as unknown as Deal;
   } catch (error: any) {
     toast.error(error.message || "Error creating deal");
     throw error;
@@ -74,20 +74,20 @@ export async function createDeal(dealData: CreateDealDto, vendorId: string) {
 
 export async function updateDeal(dealId: string, dealData: Partial<CreateDealDto>) {
   try {
-    const updatePayload: DbDealUpdate = {
+    const updatePayload = {
       ...dealData,
       updated_at: new Date().toISOString(),
-    };
+    } as DbDealUpdate;
     
     const { data, error } = await supabase
       .from("deals")
       .update(updatePayload)
-      .eq("id", dealId as string)
+      .eq("id", dealId)
       .select();
 
     if (error) throw error;
     toast.success("Deal updated successfully");
-    return data[0] as Deal;
+    return data[0] as unknown as Deal;
   } catch (error: any) {
     toast.error(error.message || "Error updating deal");
     throw error;
@@ -99,7 +99,7 @@ export async function deleteDeal(dealId: string) {
     const { error } = await supabase
       .from("deals")
       .delete()
-      .eq("id", dealId as string);
+      .eq("id", dealId);
 
     if (error) throw error;
     toast.success("Deal deleted successfully");
@@ -112,20 +112,20 @@ export async function deleteDeal(dealId: string) {
 
 export async function changeDealStatus(dealId: string, status: "active" | "pending" | "expired") {
   try {
-    const updatePayload: DbDealUpdate = {
+    const updatePayload = {
       status,
       updated_at: new Date().toISOString(),
-    };
+    } as DbDealUpdate;
     
     const { data, error } = await supabase
       .from("deals")
       .update(updatePayload)
-      .eq("id", dealId as string)
+      .eq("id", dealId)
       .select();
 
     if (error) throw error;
     toast.success(`Deal ${status === "active" ? "activated" : status === "expired" ? "expired" : "paused"} successfully`);
-    return data[0] as Deal;
+    return data[0] as unknown as Deal;
   } catch (error: any) {
     toast.error(error.message || "Error changing deal status");
     throw error;

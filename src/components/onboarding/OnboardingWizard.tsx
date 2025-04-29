@@ -79,14 +79,15 @@ export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWiza
     try {
       // Save user data to database if user is authenticated
       if (user?.id) {
-        const profileData: Database['public']['Tables']['profiles']['Update'] = {
+        // In the profiles table, we can only update existing records, not insert/upsert with id
+        const profileUpdate = {
           full_name: userData.name,
           username: userData.email.split('@')[0]
         };
         
         const { error } = await supabase
           .from('profiles')
-          .update(profileData)
+          .update(profileUpdate)
           .eq('id', user.id);
           
         if (error) {
