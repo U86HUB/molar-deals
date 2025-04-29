@@ -50,18 +50,16 @@ export const AddressSelector = ({ googleMapsApiKey }: AddressSelectorProps) => {
           </div>
         </div>
         
-        {loadError ? (
+        {loadError && (
           <div className="py-4 text-center text-red-500">
             Failed to load Google Maps. Please try the manual address entry method.
           </div>
+        )}
+        
+        {addressMode === 'google' && isGoogleMapsAvailable && !loadError ? (
+          <GoogleAddressInput googleLoaded={googleLoaded} />
         ) : (
-          <>
-            {addressMode === 'google' && isGoogleMapsAvailable ? (
-              <GoogleAddressInput googleLoaded={googleLoaded} />
-            ) : (
-              <ManualAddressForm />
-            )}
-          </>
+          <ManualAddressForm />
         )}
       </CardContent>
     </Card>

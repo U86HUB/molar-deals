@@ -6,7 +6,7 @@ import { PhotoUploadSection } from "./profile/PhotoUploadSection";
 import { PersonalInfoSection } from "./profile/PersonalInfoSection";
 import { ProfessionalInfoSection } from "./profile/ProfessionalInfoSection";
 
-// Get Google Maps API key from environment variables
+// Get Google Maps API key from environment variables - using the exact env var name
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 
 export function ProfileTab() {
