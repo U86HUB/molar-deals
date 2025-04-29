@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -15,6 +16,15 @@ export interface UserProfile {
   joinedAt?: string;
   location?: string;
   subscriptionPlan?: string;
+}
+
+// Define a type for the profile data from Supabase
+interface ProfileData {
+  id: string;
+  full_name?: string | null;
+  avatar_url?: string | null;
+  username?: string | null;
+  [key: string]: any;
 }
 
 export interface UserListParams {
@@ -67,7 +77,7 @@ export const userService = {
 
       // Combine auth data with profile data
       const users = authUsers.users.map(authUser => {
-        const profile = profiles?.find(p => p.id === authUser.id) || {};
+        const profile = profiles?.find(p => p.id === authUser.id) as ProfileData | undefined;
         const metadata = authUser.user_metadata || {};
         
         const user: UserProfile = {
@@ -308,7 +318,7 @@ export const userService = {
       if (profileError && profileError.code !== 'PGRST116') throw profileError;
       
       const user = data.user;
-      const profile = profileData || {};
+      const profile = profileData as ProfileData | null || {};
       const metadata = user.user_metadata || {};
       
       return {
