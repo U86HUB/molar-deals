@@ -37,7 +37,7 @@ export const AddressSelector = ({ googleMapsApiKey }: AddressSelectorProps) => {
     setLocation({ source: mode });
   };
 
-  const isGoogleMapsAvailable = googleLoaded && googleMapsApiKey;
+  const isGoogleMapsAvailable = googleLoaded && Boolean(googleMapsApiKey);
 
   return (
     <div className="space-y-4">

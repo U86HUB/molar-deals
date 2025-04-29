@@ -3,7 +3,7 @@
 
 // Check if the Google Maps API is available
 export const isGoogleMapsLoaded = (): boolean => {
-  return typeof google !== 'undefined' && google.maps && google.maps.places;
+  return typeof google !== 'undefined' && google.maps && typeof google.maps.places !== 'undefined';
 };
 
 // Load Google Maps script
