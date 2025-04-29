@@ -46,6 +46,8 @@ try {
   
   packageJson.overrides["vite"] = "^6.2.6";
   packageJson.overrides["esbuild"] = "^0.25.0";
+  packageJson.overrides["@babel/runtime"] = "7.26.10";
+  packageJson.overrides["@babel/helpers"] = "7.26.10";
   updated = true;
   
   if (updated) {

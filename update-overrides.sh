@@ -8,7 +8,7 @@ PACKAGE_JSON=$(cat package.json)
 # Check if overrides exists
 if ! echo "$PACKAGE_JSON" | grep -q '"overrides"'; then
   # Add overrides section if it doesn't exist
-  UPDATED_JSON=$(echo "$PACKAGE_JSON" | sed '/"dependencies"/i \  "overrides": {\n    "vite": "^6.2.6",\n    "esbuild": "^0.25.0"\n  },' | sed 's/,//')
+  UPDATED_JSON=$(echo "$PACKAGE_JSON" | sed '/"dependencies"/i \  "overrides": {\n    "vite": "^6.2.6",\n    "esbuild": "^0.25.0",\n    "@babel/runtime": "7.26.10",\n    "@babel/helpers": "7.26.10"\n  },' | sed 's/,//')
 else
   # Update existing overrides
   UPDATED_JSON=$(echo "$PACKAGE_JSON" | sed -E 's/"vite": "[^"]*"/"vite": "^6.2.6"/g')
@@ -16,8 +16,14 @@ else
   if ! echo "$UPDATED_JSON" | grep -q '"esbuild":'; then
     UPDATED_JSON=$(echo "$UPDATED_JSON" | sed -E '/"overrides"/,/\}/s/\}/,\n    "esbuild": "^0.25.0"\n  \}/1')
   fi
+  if ! echo "$UPDATED_JSON" | grep -q '"@babel/runtime":'; then
+    UPDATED_JSON=$(echo "$UPDATED_JSON" | sed -E '/"overrides"/,/\}/s/\}/,\n    "@babel/runtime": "7.26.10"\n  \}/1')
+  fi
+  if ! echo "$UPDATED_JSON" | grep -q '"@babel/helpers":'; then
+    UPDATED_JSON=$(echo "$UPDATED_JSON" | sed -E '/"overrides"/,/\}/s/\}/,\n    "@babel/helpers": "7.26.10"\n  \}/1')
+  fi
 fi
 
 # Write the updated JSON back to package.json
 echo "$UPDATED_JSON" > package.json
-echo "Updated package.json with security overrides for vite and esbuild"
+echo "Updated package.json with security overrides for vite, esbuild, and babel runtime"
