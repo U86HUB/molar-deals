@@ -14,7 +14,9 @@ const packageJsonScripts = {
   "test:e2e:ui": "playwright test --ui",
   "test": "npm run test:unit && npm run test:e2e",
   "lint": "eslint . --ext .ts,.tsx",
-  "typecheck": "tsc --noEmit"
+  "typecheck": "tsc --noEmit",
+  "storybook": "storybook dev -p 6006",
+  "build-storybook": "storybook build"
 };
 
 // Add scripts to package.json if they don't exist
