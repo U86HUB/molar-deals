@@ -5,9 +5,10 @@ import { componentTagger } from "lovable-tagger";
 import { visualizer } from "rollup-plugin-visualizer";
 
 // SECURITY NOTE: 
-// This config includes security patches for vite, esbuild, and babel packages
+// This config includes security patches for vite, esbuild, babel packages, and more
 // Last security update: April 2025
 // See SECURITY.md for details on how to update security overrides
+// Using vite 5.4.18+ to maintain compatibility with lovable-tagger while addressing CVE-2025-32395
 
 // Package scripts are defined in package.json
 // To regenerate the lockfile with security updates:

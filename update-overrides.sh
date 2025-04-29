@@ -18,11 +18,12 @@ const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf8"));
 if (!packageJson.overrides) {
   packageJson.overrides = {};
 }
-packageJson.overrides["vite"] = "^6.2.6";
+packageJson.overrides["vite"] = "^5.4.18";
 packageJson.overrides["esbuild"] = "^0.25.0";
 packageJson.overrides["@babel/runtime"] = "7.26.10";
 packageJson.overrides["@babel/helpers"] = "7.26.10";
 packageJson.overrides["@hapi/hoek"] = "9.0.3";
+packageJson.overrides["nanoid"] = "5.0.9";
 fs.writeFileSync("./package.json", JSON.stringify(packageJson, null, 2));
 console.log("Updated package.json with security overrides");
 '

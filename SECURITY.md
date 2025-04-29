@@ -19,11 +19,12 @@ If you discover a security vulnerability, please follow these steps:
 
 We've updated the following dependencies to address security vulnerabilities:
 
-- vite: updated to ^6.2.6
+- vite: updated to ^5.4.18
 - esbuild: updated to ^0.25.0
 - @babel/runtime: pinned to 7.26.10
 - @babel/helpers: pinned to 7.26.10
 - @hapi/hoek: pinned to 9.0.3
+- nanoid: pinned to 5.0.9
 
 To apply these updates:
 
