@@ -54,7 +54,7 @@ const Dashboard = () => {
               lat: position.coords.latitude, 
               lng: position.coords.longitude 
             },
-            source: 'geolocation'
+            source: 'google' // Changed from 'geolocation' to 'google'
           });
           
           toast.success("Location detected", {

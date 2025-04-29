@@ -25,7 +25,7 @@ export const GeolocationButton = ({ googleLoaded }: GeolocationButtonProps) => {
           // First update with coordinates
           setLocation({
             coords: { lat: latitude, lng: longitude },
-            source: 'geolocation',
+            source: 'google', // Changed from 'geolocation' to 'google'
           });
           
           // If Google Maps is loaded, we can reverse geocode
@@ -45,7 +45,7 @@ export const GeolocationButton = ({ googleLoaded }: GeolocationButtonProps) => {
                     postalCode: addressComponents.postalCode || '',
                     country: addressComponents.country || ''
                   },
-                  source: 'geolocation'
+                  source: 'google' // Changed from 'geolocation' to 'google'
                 });
                 
                 toast.success('Location detected successfully');
