@@ -22,3 +22,9 @@ export const getBaseUrl = () => {
 
 // Check if HMR should be enabled (development only)
 export const shouldEnableHmr = isDevelopment;
+
+// Log configuration for error tracking
+export const logConfig = {
+  enableConsoleErrors: isDevelopment,
+  enableErrorReporting: isProduction
+};
