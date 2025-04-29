@@ -7,14 +7,18 @@ import { visualizer } from "rollup-plugin-visualizer";
 
 // Define package scripts
 const packageJsonScripts = {
+  "dev": "vite",
+  "build": "vite build",
+  "build:dev": "vite build --mode development",
+  "lint": "eslint . --ext .ts,.tsx",
+  "typecheck": "tsc --noEmit",
+  "preview": "vite preview",
   "test:unit": "vitest run",
   "test:unit:watch": "vitest",
   "test:unit:coverage": "vitest run --coverage",
   "test:e2e": "playwright test",
   "test:e2e:ui": "playwright test --ui",
   "test": "npm run test:unit && npm run test:e2e",
-  "lint": "eslint . --ext .ts,.tsx",
-  "typecheck": "tsc --noEmit",
   "storybook": "storybook dev -p 6006",
   "build-storybook": "storybook build"
 };
