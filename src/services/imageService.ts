@@ -1,4 +1,3 @@
-
 import { trackError } from './errorService';
 
 export interface ImageOptimizationOptions {
