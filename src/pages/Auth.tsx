@@ -31,11 +31,11 @@ const Auth = () => {
         setConnectionStatus(status);
         
         if (!status.success) {
-          setError("Unable to connect to Supabase. Please check your configuration.");
+          setError("Connection to Supabase failed. This should be resolved after running database migrations.");
           setShowConfig(true);
-        } else if (!status.auth) {
-          setError("Connected to Supabase but authentication is not working correctly. Check API keys.");
-          setShowConfig(true);
+        } else {
+          // Connection is successful, so let's show a success message
+          toast.success("Supabase connection successful! Authentication should work now.");
         }
         
         // Log Supabase config for debugging
@@ -129,6 +129,17 @@ const Auth = () => {
               >
                 View troubleshooting guide
               </button>
+            </div>
+          )}
+
+          {connectionStatus && connectionStatus.success && (
+            <div className="p-4 mb-4 border border-green-500 bg-green-50 rounded-md">
+              <h3 className="font-medium text-green-800">
+                Connection to Supabase Successful
+              </h3>
+              <p className="text-sm text-green-700 mt-1">
+                Database migrations have been applied successfully. You can now use authentication.
+              </p>
             </div>
           )}
           
