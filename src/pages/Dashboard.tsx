@@ -7,10 +7,15 @@ import { FeaturedDeal } from "@/components/dashboard/FeaturedDeal";
 import { DealsTabs } from "@/components/dashboard/DealsTabs";
 import { mockDeals } from "@/data/mockDeals";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
+import { useLocationStore } from "@/stores/locationStore";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const userIsPremium = false; // In a real app, this would come from auth context
   const queryClient = useQueryClient();
+  const { user, isAuthenticated } = useAuth();
+  const { addressStructured, coords, setLocation } = useLocationStore();
   
   // Prefetch related data that user will likely need soon
   useEffect(() => {
@@ -32,6 +37,35 @@ const Dashboard = () => {
       }
     });
   }, [queryClient]);
+
+  // Check if we should prompt for geolocation
+  useEffect(() => {
+    // Only prompt for geolocation if:
+    // 1. User is authenticated
+    // 2. We don't already have their address or coordinates
+    // 3. They haven't previously been asked (we could use localStorage to track this)
+    if (isAuthenticated && !addressStructured && !coords && navigator.geolocation) {
+      // Ask for permission to use geolocation
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // Success - store coordinates
+          setLocation({
+            coords: { 
+              lat: position.coords.latitude, 
+              lng: position.coords.longitude 
+            },
+            source: 'geolocation'
+          });
+          
+          toast.success("Location detected", {
+            description: "We'll show deals near your location"
+          });
+        },
+        // Silently fail if user denies geolocation
+        () => {}
+      );
+    }
+  }, [isAuthenticated, addressStructured, coords, setLocation]);
 
   return (
     <div className="min-h-screen bg-background">

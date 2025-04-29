@@ -2,11 +2,13 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
-import { LocationData } from "@/components/shared/LocationSelector";
+import { useLocationStore } from "@/stores/locationStore";
 
 export interface ProfileFormData {
   name: string;
   email: string;
+  firstName: string;
+  lastName: string;
   phone: string;
   practiceName: string;
   specialty: string;
@@ -17,10 +19,13 @@ export interface ProfileFormData {
 
 export function useProfileData() {
   const { user, updateUserProfile } = useAuth();
+  const { addressStructured, coords, source, setLocation } = useLocationStore();
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState<ProfileFormData>({
     name: "",
     email: "",
+    firstName: "",
+    lastName: "",
     phone: "",
     practiceName: "",
     specialty: "General Dentist",
@@ -28,22 +33,16 @@ export function useProfileData() {
     practiceSize: "solo",
     bio: ""
   });
-  
-  const [locationData, setLocationData] = useState<LocationData>({
-    locationType: "country",
-    countryCode: "",
-    state: "",
-    city: "",
-    streetAddress: "",
-    postalCode: ""
-  });
 
   // Load user data on mount
   useEffect(() => {
     if (user) {
+      // First, set basic profile data
       setProfileData({
         name: user.user_metadata?.full_name || "",
         email: user.email || "",
+        firstName: user.user_metadata?.first_name || "",
+        lastName: user.user_metadata?.last_name || "",
         phone: user.user_metadata?.phone || "",
         practiceName: user.user_metadata?.practice_name || "",
         specialty: user.user_metadata?.specialty || "General Dentist",
@@ -52,16 +51,51 @@ export function useProfileData() {
         bio: user.user_metadata?.bio || ""
       });
       
-      setLocationData({
-        locationType: "country",
-        countryCode: user.user_metadata?.location?.country || "",
-        state: user.user_metadata?.location?.state || "",
-        city: user.user_metadata?.location?.city || "",
-        streetAddress: user.user_metadata?.street_address || "",
-        postalCode: user.user_metadata?.postal_code || ""
-      });
+      // Then, set location data in the location store
+      if (user.user_metadata?.address_structured) {
+        setLocation({
+          addressStructured: user.user_metadata.address_structured,
+          source: user.user_metadata?.location_source || 'manual'
+        });
+      }
+      
+      // If we have coords stored, set them as well
+      if (user.user_metadata?.location?.coords) {
+        setLocation({
+          coords: user.user_metadata.location.coords
+        });
+      }
     }
-  }, [user]);
+  }, [user, setLocation]);
+  
+  // Check if user needs geolocation on first load
+  useEffect(() => {
+    // If no address is set and geolocation is available, try to get the user's location
+    if (user && 
+        !addressStructured && 
+        !user.user_metadata?.address_structured && 
+        !user.user_metadata?.location?.coords && 
+        navigator.geolocation) {
+          
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            coords: { 
+              lat: position.coords.latitude, 
+              lng: position.coords.longitude 
+            },
+            source: 'geolocation'
+          });
+          
+          toast.success("Location detected", {
+            description: "We'll show deals near your location"
+          });
+        },
+        // Silently fail if user denies geolocation
+        () => {}
+      );
+    }
+  }, [user, addressStructured, setLocation]);
   
   const handleProfileDataChange = (field: string, value: string) => {
     setProfileData(prev => ({
@@ -70,36 +104,37 @@ export function useProfileData() {
     }));
   };
   
-  const handleBioChange = (bio: string) => {
-    setProfileData(prev => ({
-      ...prev,
-      bio
-    }));
-  };
-  
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Format location data
+      // Format full name
+      const fullName = `${profileData.firstName} ${profileData.lastName}`.trim();
+      
+      // Create formatted location metadata
       const locationMetadata = {
-        country: locationData.countryCode || "",
-        state: locationData.state || "",
-        city: locationData.city || "",
-        use_geolocation: false
+        country: addressStructured?.country || "",
+        state: addressStructured?.state || "",
+        city: addressStructured?.city || "",
+        coords: coords || null,
+        use_geolocation: source === 'geolocation'
       };
       
+      // Update user profile with all metadata
       await updateUserProfile({
-        full_name: profileData.name,
+        full_name: fullName,
+        first_name: profileData.firstName,
+        last_name: profileData.lastName,
         practice_name: profileData.practiceName,
         specialty: profileData.specialty,
         years_of_experience: profileData.yearsOfExperience,
         practice_size: profileData.practiceSize,
         phone: profileData.phone,
         bio: profileData.bio,
-        street_address: locationData.streetAddress || "",
-        postal_code: locationData.postalCode || "",
-        location: locationMetadata
+        address_structured: addressStructured || null,
+        location: locationMetadata,
+        location_source: source || 'manual'
       });
+      
       toast.success("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -111,11 +146,8 @@ export function useProfileData() {
 
   return {
     profileData,
-    locationData,
     loading,
-    setLocationData,
     handleProfileDataChange,
-    handleBioChange,
     handleSave
   };
 }

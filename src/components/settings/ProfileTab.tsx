@@ -3,9 +3,8 @@ import { Button } from "@/components/ui/button";
 import { CardHeader, CardContent } from "@/components/ui/card";
 import { useProfileData } from "@/hooks/useProfileData";
 import { PhotoUploadSection } from "./profile/PhotoUploadSection";
-import { BasicInfoSection } from "./profile/BasicInfoSection";
-import { LocationSection } from "./profile/LocationSection";
-import { BioSection } from "./profile/BioSection";
+import { PersonalInfoSection } from "./profile/PersonalInfoSection";
+import { ProfessionalInfoSection } from "./profile/ProfessionalInfoSection";
 
 // Get Google Maps API key from environment variables
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
@@ -13,11 +12,8 @@ const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 export function ProfileTab() {
   const {
     profileData,
-    locationData,
     loading,
-    setLocationData,
     handleProfileDataChange,
-    handleBioChange,
     handleSave
   } = useProfileData();
   
@@ -29,24 +25,25 @@ export function ProfileTab() {
           Update your personal information and how it appears to others
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-8">
         <PhotoUploadSection name={profileData.name} />
         
-        <BasicInfoSection 
-          profileData={profileData} 
-          onChange={handleProfileDataChange} 
-        />
+        <div className="border-b pb-6">
+          <h3 className="text-lg font-medium mb-4">Personal Information</h3>
+          <PersonalInfoSection 
+            profileData={profileData} 
+            onChange={handleProfileDataChange} 
+          />
+        </div>
         
-        <LocationSection 
-          locationData={locationData}
-          onChange={setLocationData}
-          googleMapsApiKey={GOOGLE_MAPS_API_KEY}
-        />
-        
-        <BioSection 
-          bio={profileData.bio}
-          onChange={handleBioChange}
-        />
+        <div>
+          <h3 className="text-lg font-medium mb-4">Professional Information</h3>
+          <ProfessionalInfoSection 
+            profileData={profileData}
+            onChange={handleProfileDataChange}
+            googleMapsApiKey={GOOGLE_MAPS_API_KEY}
+          />
+        </div>
         
         <div className="flex justify-end">
           <Button variant="primary" onClick={handleSave} disabled={loading}>
