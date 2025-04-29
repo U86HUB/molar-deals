@@ -8,8 +8,10 @@ export const useAuthProvider = () => {
     session, 
     user, 
     isLoading, 
-    hasSetPassword, 
-    checkHasSetPassword, 
+    hasSetPassword,
+    hasCompletedOnboarding,
+    checkHasSetPassword,
+    checkHasCompletedOnboarding,
     isAuthenticated 
   } = useAuthState();
   
@@ -23,6 +25,7 @@ export const useAuthProvider = () => {
     isLoading,
     isAuthenticated,
     hasSetPassword,
+    hasCompletedOnboarding,
     
     // Auth methods
     signIn,
@@ -35,5 +38,6 @@ export const useAuthProvider = () => {
     updateUserPassword,
     resetPassword,
     checkHasSetPassword,
+    checkHasCompletedOnboarding,
   };
 };

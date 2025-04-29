@@ -14,9 +14,11 @@ const AuthContext = createContext<AuthContextProps>({
   resetPassword: async () => {},
   isAuthenticated: false,
   updateUserProfile: async () => {},
-  updateUserPassword: async () => false, // Updated to return a boolean (false) by default
+  updateUserPassword: async () => false,
   hasSetPassword: false,
+  hasCompletedOnboarding: null,
   checkHasSetPassword: async () => false,
+  checkHasCompletedOnboarding: () => false,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {

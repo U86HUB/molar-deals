@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
@@ -19,12 +18,15 @@ const Index = () => {
   useEffect(() => {
     if (isAuthenticated && user) {
       // Check if user has completed onboarding (from metadata)
-      const hasCompletedOnboarding = user.user_metadata?.onboarding_completed;
+      const hasCompletedOnboarding = user.user_metadata?.onboarding_completed === true;
       
       if (!hasCompletedOnboarding) {
         // Show onboarding if not completed
         setShowOnboarding(true);
       }
+    } else {
+      // If not authenticated, make sure onboarding is hidden
+      setShowOnboarding(false);
     }
   }, [isAuthenticated, user]);
 

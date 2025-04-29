@@ -26,6 +26,8 @@ export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWiza
 
   // Load saved progress from localStorage if available
   useEffect(() => {
+    if (!isOpen) return; // Don't load data if wizard isn't open
+    
     const savedProgress = localStorage.getItem("onboardingProgress");
     const savedData = localStorage.getItem("onboardingData");
     
@@ -41,13 +43,15 @@ export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWiza
     if (user?.email) {
       setUserData(prev => ({ ...prev, email: user.email || "" }));
     }
-  }, [user]);
+  }, [user, isOpen]);
 
   // Save progress to localStorage when it changes
   useEffect(() => {
-    localStorage.setItem("onboardingProgress", step.toString());
-    localStorage.setItem("onboardingData", JSON.stringify(userData));
-  }, [step, userData]);
+    if (isOpen) {
+      localStorage.setItem("onboardingProgress", step.toString());
+      localStorage.setItem("onboardingData", JSON.stringify(userData));
+    }
+  }, [step, userData, isOpen]);
 
   const updateUserData = <K extends keyof UserData>(field: K, value: UserData[K]) => {
     setUserData((prev) => ({ ...prev, [field]: value }));
@@ -74,12 +78,65 @@ export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWiza
     }
   };
 
+  const checkProfileExists = async (userId: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', userId)
+        .single();
+        
+      if (error && error.code !== 'PGRST116') {
+        console.error("Error checking profile:", error);
+        return false;
+      }
+      
+      return !!data;
+    } catch (error) {
+      console.error("Exception checking profile:", error);
+      return false;
+    }
+  };
+
+  const createUserProfile = async (userId: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .insert({
+          id: userId,
+          full_name: userData.name,
+          username: userData.email.split('@')[0]
+        });
+        
+      if (error) {
+        console.error("Error creating profile:", error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Exception creating profile:", error);
+      return false;
+    }
+  };
+
   const handleComplete = async () => {
     setLoading(true);
     try {
       // Save user data to database if user is authenticated
       if (user?.id) {
-        // In the profiles table, we can only update existing records, not insert/upsert with id
+        // First check if profile exists
+        const profileExists = await checkProfileExists(user.id);
+        
+        if (!profileExists) {
+          // Create profile if it doesn't exist
+          const created = await createUserProfile(user.id);
+          if (!created) {
+            throw new Error("Failed to create user profile");
+          }
+        }
+        
+        // In the profiles table, update the existing record
         const profileUpdate = {
           full_name: userData.name,
           username: userData.email.split('@')[0]
@@ -91,6 +148,7 @@ export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWiza
           .eq('id', user.id);
           
         if (error) {
+          console.error("Profile update error:", error);
           throw error;
         }
         
@@ -117,6 +175,7 @@ export const OnboardingWizard = ({ isOpen, onComplete, onClose }: OnboardingWiza
         });
           
         if (metadataError) {
+          console.error("Metadata update error:", metadataError);
           throw metadataError;
         }
       }

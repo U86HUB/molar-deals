@@ -9,6 +9,7 @@ export const useAuthState = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasSetPassword, setHasSetPassword] = useState(false);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
 
   useEffect(() => {
     try {
@@ -21,6 +22,11 @@ export const useAuthState = () => {
           if (session?.user) {
             const hasPassword = await checkHasSetPassword();
             setHasSetPassword(hasPassword);
+            
+            const onboardingCompleted = !!session.user.user_metadata?.onboarding_completed;
+            setHasCompletedOnboarding(onboardingCompleted);
+          } else {
+            setHasCompletedOnboarding(null);
           }
           
           setIsLoading(false);
@@ -35,6 +41,9 @@ export const useAuthState = () => {
         if (session?.user) {
           const hasPassword = await checkHasSetPassword();
           setHasSetPassword(hasPassword);
+          
+          const onboardingCompleted = !!session.user.user_metadata?.onboarding_completed;
+          setHasCompletedOnboarding(onboardingCompleted);
         }
         
         setIsLoading(false);
@@ -63,12 +72,19 @@ export const useAuthState = () => {
     }
   };
 
+  const checkHasCompletedOnboarding = (): boolean => {
+    if (!user) return false;
+    return !!user.user_metadata?.onboarding_completed;
+  };
+
   return {
     session,
     user,
     isLoading,
     hasSetPassword,
+    hasCompletedOnboarding,
     checkHasSetPassword,
+    checkHasCompletedOnboarding,
     isAuthenticated: !!user
   };
 };
