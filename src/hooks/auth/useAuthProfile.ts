@@ -1,9 +1,7 @@
-
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { trackError } from "@/services/errorService";
 import { validatePassword } from "@/utils/passwordUtils";
-import { UserMetadata } from "@/components/onboarding/types";
 
 // Define our own interface for profile data
 interface ProfileUpdateData {
