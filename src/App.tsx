@@ -19,6 +19,7 @@ const VendorDashboard = lazy(() => import("./pages/VendorDashboard"));
 const ReferralLeaderboard = lazy(() => import("./pages/ReferralLeaderboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const SystemHealth = lazy(() => import("./pages/SystemHealth"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 // Existing pages
 const HowItWorks = lazy(() => import("./pages/HowItWorks"));
@@ -65,8 +66,9 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/dashboard" element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["customer", "admin"]}>
                       <Dashboard />
                     </ProtectedRoute>
                   } />
@@ -76,7 +78,7 @@ const App = () => (
                     </ProtectedRoute>
                   } />
                   <Route path="/vendor" element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["vendor", "admin"]}>
                       <VendorDashboard />
                     </ProtectedRoute>
                   } />
@@ -86,12 +88,12 @@ const App = () => (
                     </ProtectedRoute>
                   } />
                   <Route path="/admin" element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["admin"]}>
                       <AdminDashboard />
                     </ProtectedRoute>
                   } />
                   <Route path="/system-health" element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={["admin"]}>
                       <SystemHealth />
                     </ProtectedRoute>
                   } />

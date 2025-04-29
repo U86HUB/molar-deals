@@ -12,10 +12,12 @@ interface AuthContextProps {
   signUp: (email: string, password: string, userData?: {
     username?: string;
     full_name?: string;
+    role?: string;
   }) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   isAuthenticated: boolean;
+  updateUserProfile: (data: { username?: string; full_name?: string; role?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps>({
@@ -27,6 +29,7 @@ const AuthContext = createContext<AuthContextProps>({
   signOut: async () => {},
   resetPassword: async () => {},
   isAuthenticated: false,
+  updateUserProfile: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -76,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     userData?: {
       username?: string;
       full_name?: string;
+      role?: string;
     }
   ) => {
     try {
@@ -83,7 +87,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
         password,
         options: {
-          data: userData,
+          data: {
+            ...userData,
+            role: userData?.role || "customer", // Default role
+          },
         },
       });
 
@@ -122,6 +129,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateUserProfile = async (data: { username?: string; full_name?: string; role?: string }) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: data
+      });
+
+      if (error) throw error;
+      
+      toast.success("Profile updated successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Error updating profile");
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -133,6 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut,
         resetPassword,
         isAuthenticated: !!user,
+        updateUserProfile,
       }}
     >
       {children}
