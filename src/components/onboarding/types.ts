@@ -12,10 +12,12 @@ export interface UserData {
   practiceSize: string;
   bio?: string;
   
-  // Location
+  // Location and Address
   country: string; // Can be "GLOBAL" or a country code
   state: string;
   city: string;
+  streetAddress: string;
+  postalCode: string;
   useGeolocation: boolean;
   
   // Preferences
@@ -56,6 +58,8 @@ export interface UserMetadata {
   price_range_min?: string;
   price_range_max?: string;
   preferred_brands?: string[];
+  street_address?: string;
+  postal_code?: string;
   location?: {
     country?: string;
     state?: string;

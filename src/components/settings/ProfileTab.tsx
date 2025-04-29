@@ -10,6 +10,7 @@ import { CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { specialties } from "@/components/onboarding/data/onboardingOptions";
+import { LocationSelector, LocationData } from "@/components/shared/LocationSelector";
 
 export function ProfileTab() {
   const { user, updateUserProfile } = useAuth();
@@ -25,6 +26,15 @@ export function ProfileTab() {
     bio: user?.user_metadata?.bio || ""
   });
   
+  const [locationData, setLocationData] = useState<LocationData>({
+    locationType: "country",
+    countryCode: user?.user_metadata?.location?.country || "",
+    state: user?.user_metadata?.location?.state || "",
+    city: user?.user_metadata?.location?.city || "",
+    streetAddress: user?.user_metadata?.street_address || "",
+    postalCode: user?.user_metadata?.postal_code || ""
+  });
+  
   useEffect(() => {
     if (user) {
       setProfileData({
@@ -37,12 +47,29 @@ export function ProfileTab() {
         practiceSize: user.user_metadata?.practice_size || "solo",
         bio: user.user_metadata?.bio || ""
       });
+      
+      setLocationData({
+        locationType: "country",
+        countryCode: user.user_metadata?.location?.country || "",
+        state: user.user_metadata?.location?.state || "",
+        city: user.user_metadata?.location?.city || "",
+        streetAddress: user.user_metadata?.street_address || "",
+        postalCode: user.user_metadata?.postal_code || ""
+      });
     }
   }, [user]);
   
   const handleSave = async () => {
     setLoading(true);
     try {
+      // Format location data
+      const locationMetadata = {
+        country: locationData.countryCode || "",
+        state: locationData.state || "",
+        city: locationData.city || "",
+        use_geolocation: false
+      };
+      
       await updateUserProfile({
         full_name: profileData.name,
         practice_name: profileData.practiceName,
@@ -50,7 +77,10 @@ export function ProfileTab() {
         years_of_experience: profileData.yearsOfExperience,
         practice_size: profileData.practiceSize,
         phone: profileData.phone,
-        bio: profileData.bio
+        bio: profileData.bio,
+        street_address: locationData.streetAddress || "",
+        postal_code: locationData.postalCode || "",
+        location: locationMetadata
       });
       toast.success("Profile updated successfully!");
     } catch (error) {
@@ -184,6 +214,21 @@ export function ProfileTab() {
               </SelectContent>
             </Select>
           </div>
+        </div>
+        
+        <div className="space-y-2">
+          <h3 className="text-base font-medium">Location & Address</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Enter the location and address of your practice
+          </p>
+          
+          <LocationSelector 
+            value={locationData}
+            onChange={setLocationData}
+            allowGlobal={false}
+            allowRegion={false}
+            showAddress={true}
+          />
         </div>
         
         <div className="space-y-2">

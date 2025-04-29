@@ -63,7 +63,7 @@ export const ReviewStep = ({ userData, updateUserData, setStep }: ReviewStepProp
       <div className="bg-secondary/50 p-4 rounded-lg mb-2">
         <h4 className="font-medium mb-4 flex items-center">
           <MapPin className="h-5 w-5 mr-2 text-primary" />
-          Location
+          Location & Address
         </h4>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -71,8 +71,20 @@ export const ReviewStep = ({ userData, updateUserData, setStep }: ReviewStepProp
             <p>{userData.country}</p>
           </div>
           <div>
+            <p className="text-sm text-muted-foreground">State</p>
+            <p>{userData.state || "Not specified"}</p>
+          </div>
+          <div>
             <p className="text-sm text-muted-foreground">City</p>
             <p>{userData.city || "Not specified"}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Street Address</p>
+            <p>{userData.streetAddress || "Not specified"}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Postal Code</p>
+            <p>{userData.postalCode || "Not specified"}</p>
           </div>
         </div>
         <Button 

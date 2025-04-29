@@ -164,6 +164,8 @@ export const useOnboardingWizard = (isOpen: boolean, onComplete: () => void) => 
           price_range_max: userData.priceRangeMax,
           preferred_brands: userData.preferredBrands,
           phone: userData.phone,
+          street_address: userData.streetAddress,
+          postal_code: userData.postalCode,
           communication_preferences: {
             email_frequency: userData.emailFrequency,
             notification_types: notificationTypes,

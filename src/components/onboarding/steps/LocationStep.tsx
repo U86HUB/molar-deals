@@ -42,7 +42,9 @@ export const LocationStep = ({ userData, updateUserData }: StepProps) => {
     locationType: "country",
     countryCode: userData.country,
     state: userData.state,
-    city: userData.city
+    city: userData.city,
+    streetAddress: userData.streetAddress,
+    postalCode: userData.postalCode
   };
 
   const handleLocationChange = (location: LocationData) => {
@@ -50,10 +52,14 @@ export const LocationStep = ({ userData, updateUserData }: StepProps) => {
       updateUserData("country", "GLOBAL");
       updateUserData("state", "");
       updateUserData("city", "");
+      updateUserData("streetAddress", "");
+      updateUserData("postalCode", "");
     } else if (location.locationType === "country" && location.countryCode) {
       updateUserData("country", location.countryCode);
       updateUserData("state", location.state || "");
       updateUserData("city", location.city || "");
+      updateUserData("streetAddress", location.streetAddress || "");
+      updateUserData("postalCode", location.postalCode || "");
     }
   };
 
@@ -113,10 +119,20 @@ export const LocationStep = ({ userData, updateUserData }: StepProps) => {
         </div>
       </div>
       
-      <LocationSelector 
-        value={locationData} 
-        onChange={handleLocationChange} 
-      />
+      <div className="space-y-4">
+        <h4 className="font-medium">Clinic Location & Address</h4>
+        <p className="text-sm text-muted-foreground">
+          Please provide your clinic's location and address information
+        </p>
+        
+        <LocationSelector 
+          value={locationData} 
+          onChange={handleLocationChange}
+          allowGlobal={false}
+          allowRegion={false}
+          showAddress={true}
+        />
+      </div>
     </div>
   );
 };

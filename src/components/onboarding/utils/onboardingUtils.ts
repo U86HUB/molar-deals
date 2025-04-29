@@ -51,6 +51,8 @@ export const initialUserData: UserData = {
   country: "USA",
   state: "",
   city: "",
+  streetAddress: "",
+  postalCode: "",
   useGeolocation: false,
   
   dealPreferences: [],

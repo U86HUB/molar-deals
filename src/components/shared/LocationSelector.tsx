@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { globalOption, regions, getRegionById, getAllCountries, getCountryByCode } from "@/data/regionsAndCountries";
+import { getAllCountries, getCountryByCode } from "@/data/regionsAndCountries";
 
 export interface LocationData {
   locationType: "global" | "region" | "country";
@@ -11,25 +11,37 @@ export interface LocationData {
   countryCode?: string;
   state?: string;
   city?: string;
+  streetAddress?: string;
+  postalCode?: string;
 }
 
 interface LocationSelectorProps {
   value: LocationData;
   onChange: (value: LocationData) => void;
   showCityState?: boolean;
+  showAddress?: boolean;
+  allowGlobal?: boolean;
+  allowRegion?: boolean;
 }
 
-export const LocationSelector = ({ value, onChange, showCityState = true }: LocationSelectorProps) => {
+export const LocationSelector = ({ 
+  value, 
+  onChange, 
+  showCityState = true, 
+  showAddress = false,
+  allowGlobal = true,
+  allowRegion = true
+}: LocationSelectorProps) => {
   const [selectedType, setSelectedType] = useState<"global" | "region" | "country">(value.locationType || "global");
   const [selectedRegion, setSelectedRegion] = useState<string>(value.regionId || "");
   const [selectedCountry, setSelectedCountry] = useState<string>(value.countryCode || "");
   
   // Initialize with provided values
   useEffect(() => {
-    setSelectedType(value.locationType || "global");
+    setSelectedType(value.locationType || (allowGlobal ? "global" : "country"));
     setSelectedRegion(value.regionId || "");
     setSelectedCountry(value.countryCode || "");
-  }, [value]);
+  }, [value, allowGlobal]);
 
   // Update parent component when selections change
   useEffect(() => {
@@ -38,7 +50,9 @@ export const LocationSelector = ({ value, onChange, showCityState = true }: Loca
       regionId: selectedType === "region" ? selectedRegion : undefined,
       countryCode: selectedType === "country" ? selectedCountry : undefined,
       state: value.state,
-      city: value.city
+      city: value.city,
+      streetAddress: value.streetAddress,
+      postalCode: value.postalCode
     };
     
     onChange(newValue);
@@ -61,33 +75,17 @@ export const LocationSelector = ({ value, onChange, showCityState = true }: Loca
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Label>Location Type</Label>
-        <Select value={selectedType} onValueChange={(value: "global" | "region" | "country") => handleTypeChange(value)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select location type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="global">{globalOption.name}</SelectItem>
-            <SelectItem value="region">Specific Region</SelectItem>
-            <SelectItem value="country">Specific Country</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {selectedType === "region" && (
+      {(allowGlobal || allowRegion) && (
         <div className="space-y-2">
-          <Label>Region</Label>
-          <Select value={selectedRegion} onValueChange={handleRegionChange}>
+          <Label>Location Type</Label>
+          <Select value={selectedType} onValueChange={(value: "global" | "region" | "country") => handleTypeChange(value)}>
             <SelectTrigger>
-              <SelectValue placeholder="Select a region" />
+              <SelectValue placeholder="Select location type" />
             </SelectTrigger>
             <SelectContent>
-              {regions.map((region) => (
-                <SelectItem key={region.id} value={region.id}>
-                  {region.name}
-                </SelectItem>
-              ))}
+              {allowGlobal && <SelectItem value="global">Global (All Countries)</SelectItem>}
+              {allowRegion && <SelectItem value="region">Specific Region</SelectItem>}
+              <SelectItem value="country">Specific Country</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -111,26 +109,48 @@ export const LocationSelector = ({ value, onChange, showCityState = true }: Loca
         </div>
       )}
 
-      {showCityState && selectedType === "country" && selectedCountry === "USA" && (
+      {showCityState && selectedType === "country" && (
         <div className="space-y-2">
-          <Label>State</Label>
+          <Label>State/Province</Label>
           <Input
             value={value.state || ""}
             onChange={(e) => onChange({ ...value, state: e.target.value })}
-            placeholder="Select or enter your state"
+            placeholder="Enter your state or province"
           />
         </div>
       )}
 
       {showCityState && selectedType === "country" && (
         <div className="space-y-2">
-          <Label>City (Optional)</Label>
+          <Label>City</Label>
           <Input
             value={value.city || ""}
             onChange={(e) => onChange({ ...value, city: e.target.value })}
             placeholder="Enter your city"
           />
         </div>
+      )}
+
+      {showAddress && selectedType === "country" && (
+        <>
+          <div className="space-y-2">
+            <Label>Street Address</Label>
+            <Input
+              value={value.streetAddress || ""}
+              onChange={(e) => onChange({ ...value, streetAddress: e.target.value })}
+              placeholder="Enter your street address"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Postal/ZIP Code</Label>
+            <Input
+              value={value.postalCode || ""}
+              onChange={(e) => onChange({ ...value, postalCode: e.target.value })}
+              placeholder="Enter your postal code"
+            />
+          </div>
+        </>
       )}
     </div>
   );
