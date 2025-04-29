@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { trackError } from "@/services/errorService";
 import { validatePassword } from "@/utils/passwordUtils";
+import { UserMetadata } from "@/components/onboarding/types";
 
 export const useAuthProfile = () => {
   const updateUserProfile = async (data: Record<string, any>) => {

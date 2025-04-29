@@ -16,7 +16,7 @@ export interface AuthContextProps {
   signOut: () => Promise<void>;
   
   // Profile methods
-  updateUserProfile: (data: { username?: string; full_name?: string; role?: string }) => Promise<void>;
+  updateUserProfile: (data: Record<string, any>) => Promise<void>;
   updateUserPassword: (password: string) => Promise<boolean>;
   resetPassword: (email: string) => Promise<void>;
   checkHasSetPassword: () => Promise<boolean>;
