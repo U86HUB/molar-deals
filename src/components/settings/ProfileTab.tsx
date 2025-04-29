@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useProfileData } from "@/hooks/useProfileData";
+import { useProfileData } from "@/hooks/profile/useProfileData";
 import { PersonalInfoCard } from "./profile/PersonalInfoCard";
 import { ClinicInfoCard } from "./profile/ClinicInfoCard";
 import { FormProvider, useForm } from "react-hook-form";
