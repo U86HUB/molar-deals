@@ -1,4 +1,3 @@
-
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -12,6 +11,8 @@ import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { CookieSettingsProvider } from "./context/CookieSettingsContext";
 import { RouteSkeleton } from "./components/ui/route-skeleton";
+import HmrErrorRecovery from './components/HmrErrorRecovery';
+import { isProduction } from './config/environment';
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -70,216 +71,223 @@ queryClient.setQueryDefaults(['user-data'], {
   staleTime: 30 * 1000, // 30 seconds
 });
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <HelmetProvider>
-      <Helmet>
-        <title>DentalDeals - Exclusive Deals for Dental Professionals</title>
-        <meta name="description" content="Find the best deals on dental supplies and equipment for your practice." />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      </Helmet>
-      {/* Global error boundary - catches app-level errors only */}
-      <ErrorBoundary>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <AuthProvider>
-            <CookieSettingsProvider>
-              <BrowserRouter>
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={
-                    <RouteErrorBoundary routeId="index">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <Index />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  <Route path="/auth" element={
-                    <RouteErrorBoundary routeId="auth">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <Auth />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  <Route path="/auth/callback" element={
-                    <RouteErrorBoundary routeId="auth-callback">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <AuthCallback />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  <Route path="/reset-password" element={
-                    <RouteErrorBoundary routeId="reset-password">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <ResetPassword />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
+function App() {
+  return (
+    <>
+      <QueryClientProvider client={queryClient}>
+        <HelmetProvider>
+          <Helmet>
+            <title>DentalDeals - Exclusive Deals for Dental Professionals</title>
+            <meta name="description" content="Find the best deals on dental supplies and equipment for your practice." />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          </Helmet>
+          {/* Global error boundary - catches app-level errors only */}
+          <ErrorBoundary>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <AuthProvider>
+                <CookieSettingsProvider>
+                  <BrowserRouter>
+                    <Routes>
+                      {/* Public routes */}
+                      <Route path="/" element={
+                        <RouteErrorBoundary routeId="index">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <Index />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      <Route path="/auth" element={
+                        <RouteErrorBoundary routeId="auth">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <Auth />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      <Route path="/auth/callback" element={
+                        <RouteErrorBoundary routeId="auth-callback">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <AuthCallback />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      <Route path="/reset-password" element={
+                        <RouteErrorBoundary routeId="reset-password">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <ResetPassword />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
 
-                  {/* Protected customer routes */}
-                  <Route path="/dashboard" element={
-                    <ProtectedRoute allowedRoles={["customer", "admin"]}>
-                      <RouteErrorBoundary routeId="dashboard">
-                        <Suspense fallback={<RouteSkeleton type="dashboard" />}>
-                          <Dashboard />
-                        </Suspense>
-                      </RouteErrorBoundary>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/settings" element={
-                    <ProtectedRoute>
-                      <RouteErrorBoundary routeId="settings">
-                        <Suspense fallback={<RouteSkeleton />}>
-                          <Settings />
-                        </Suspense>
-                      </RouteErrorBoundary>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/referrals" element={
-                    <ProtectedRoute>
-                      <RouteErrorBoundary routeId="referrals">
-                        <Suspense fallback={<RouteSkeleton />}>
-                          <ReferralLeaderboard />
-                        </Suspense>
-                      </RouteErrorBoundary>
-                    </ProtectedRoute>
-                  } />
+                      {/* Protected customer routes */}
+                      <Route path="/dashboard" element={
+                        <ProtectedRoute allowedRoles={["customer", "admin"]}>
+                          <RouteErrorBoundary routeId="dashboard">
+                            <Suspense fallback={<RouteSkeleton type="dashboard" />}>
+                              <Dashboard />
+                            </Suspense>
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/settings" element={
+                        <ProtectedRoute>
+                          <RouteErrorBoundary routeId="settings">
+                            <Suspense fallback={<RouteSkeleton />}>
+                              <Settings />
+                            </Suspense>
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/referrals" element={
+                        <ProtectedRoute>
+                          <RouteErrorBoundary routeId="referrals">
+                            <Suspense fallback={<RouteSkeleton />}>
+                              <ReferralLeaderboard />
+                            </Suspense>
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      } />
 
-                  {/* Protected vendor routes */}
-                  <Route path="/vendor" element={
-                    <ProtectedRoute allowedRoles={["vendor", "admin"]}>
-                      <RouteErrorBoundary routeId="vendor">
-                        <Suspense fallback={<RouteSkeleton type="vendor" />}>
-                          <VendorDashboard />
-                        </Suspense>
-                      </RouteErrorBoundary>
-                    </ProtectedRoute>
-                  } />
+                      {/* Protected vendor routes */}
+                      <Route path="/vendor" element={
+                        <ProtectedRoute allowedRoles={["vendor", "admin"]}>
+                          <RouteErrorBoundary routeId="vendor">
+                            <Suspense fallback={<RouteSkeleton type="vendor" />}>
+                              <VendorDashboard />
+                            </Suspense>
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      } />
 
-                  {/* Protected admin routes */}
-                  <Route path="/admin" element={
-                    <ProtectedRoute allowedRoles={["admin"]}>
-                      <RouteErrorBoundary routeId="admin">
-                        <Suspense fallback={<RouteSkeleton type="admin" />}>
-                          <AdminDashboard />
-                        </Suspense>
-                      </RouteErrorBoundary>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/system-health" element={
-                    <ProtectedRoute allowedRoles={["admin"]}>
-                      <RouteErrorBoundary routeId="system-health">
-                        <Suspense fallback={<RouteSkeleton type="admin" />}>
-                          <SystemHealth />
-                        </Suspense>
-                      </RouteErrorBoundary>
-                    </ProtectedRoute>
-                  } />
-                  
-                  {/* Public info pages */}
-                  <Route path="/how-it-works" element={
-                    <RouteErrorBoundary routeId="how-it-works">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <HowItWorks />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  <Route path="/brands" element={
-                    <RouteErrorBoundary routeId="brands">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <Brands />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  <Route path="/privacy" element={
-                    <RouteErrorBoundary routeId="privacy">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <Privacy />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  
-                  {/* New company pages */}
-                  <Route path="/about" element={
-                    <RouteErrorBoundary routeId="about">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <About />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  <Route path="/careers" element={
-                    <RouteErrorBoundary routeId="careers">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <Careers />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  <Route path="/press" element={
-                    <RouteErrorBoundary routeId="press">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <Press />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  
-                  {/* New resource pages */}
-                  <Route path="/blog" element={
-                    <RouteErrorBoundary routeId="blog">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <Blog />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  <Route path="/help" element={
-                    <RouteErrorBoundary routeId="help">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <HelpCenter />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  <Route path="/webinars" element={
-                    <RouteErrorBoundary routeId="webinars">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <Webinars />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  
-                  {/* New legal pages */}
-                  <Route path="/terms" element={
-                    <RouteErrorBoundary routeId="terms">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <Terms />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  
-                  {/* Contact */}
-                  <Route path="/contact" element={
-                    <RouteErrorBoundary routeId="contact">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <Contact />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                  
-                  {/* Catch-all not found route */}
-                  <Route path="*" element={
-                    <RouteErrorBoundary routeId="not-found">
-                      <Suspense fallback={<RouteSkeleton />}>
-                        <NotFound />
-                      </Suspense>
-                    </RouteErrorBoundary>
-                  } />
-                </Routes>
-              </BrowserRouter>
-            </CookieSettingsProvider>
-          </AuthProvider>
-        </TooltipProvider>
-      </ErrorBoundary>
-    </HelmetProvider>
-  </QueryClientProvider>
-);
+                      {/* Protected admin routes */}
+                      <Route path="/admin" element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                          <RouteErrorBoundary routeId="admin">
+                            <Suspense fallback={<RouteSkeleton type="admin" />}>
+                              <AdminDashboard />
+                            </Suspense>
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/system-health" element={
+                        <ProtectedRoute allowedRoles={["admin"]}>
+                          <RouteErrorBoundary routeId="system-health">
+                            <Suspense fallback={<RouteSkeleton type="admin" />}>
+                              <SystemHealth />
+                            </Suspense>
+                          </RouteErrorBoundary>
+                        </ProtectedRoute>
+                      } />
+                      
+                      {/* Public info pages */}
+                      <Route path="/how-it-works" element={
+                        <RouteErrorBoundary routeId="how-it-works">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <HowItWorks />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      <Route path="/brands" element={
+                        <RouteErrorBoundary routeId="brands">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <Brands />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      <Route path="/privacy" element={
+                        <RouteErrorBoundary routeId="privacy">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <Privacy />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      
+                      {/* New company pages */}
+                      <Route path="/about" element={
+                        <RouteErrorBoundary routeId="about">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <About />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      <Route path="/careers" element={
+                        <RouteErrorBoundary routeId="careers">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <Careers />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      <Route path="/press" element={
+                        <RouteErrorBoundary routeId="press">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <Press />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      
+                      {/* New resource pages */}
+                      <Route path="/blog" element={
+                        <RouteErrorBoundary routeId="blog">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <Blog />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      <Route path="/help" element={
+                        <RouteErrorBoundary routeId="help">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <HelpCenter />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      <Route path="/webinars" element={
+                        <RouteErrorBoundary routeId="webinars">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <Webinars />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      
+                      {/* New legal pages */}
+                      <Route path="/terms" element={
+                        <RouteErrorBoundary routeId="terms">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <Terms />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      
+                      {/* Contact */}
+                      <Route path="/contact" element={
+                        <RouteErrorBoundary routeId="contact">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <Contact />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                      
+                      {/* Catch-all not found route */}
+                      <Route path="*" element={
+                        <RouteErrorBoundary routeId="not-found">
+                          <Suspense fallback={<RouteSkeleton />}>
+                            <NotFound />
+                          </Suspense>
+                        </RouteErrorBoundary>
+                      } />
+                    </Routes>
+                  </BrowserRouter>
+                </CookieSettingsProvider>
+              </AuthProvider>
+            </TooltipProvider>
+          </ErrorBoundary>
+        </HelmetProvider>
+      </QueryClientProvider>
+      
+      {/* Only include HmrErrorRecovery in development mode */}
+      {!isProduction && <HmrErrorRecovery />}
+    </>
+  );
+}
 
 export default App;

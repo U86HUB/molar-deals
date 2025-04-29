@@ -64,6 +64,14 @@ export default defineConfig(({ mode }) => ({
     host: 'localhost', // Restrict to localhost only for security
     port: 8080,
     fs: { strict: true }, // Enforce fs.deny rules
+    hmr: {
+      // Fix for __WS_TOKEN__ undefined error
+      clientPort: 443, // Use HTTPS port for websockets when deployed
+      host: 'localhost', // Match the host setting
+    },
+    watch: {
+      usePolling: false, // Disable polling for better performance
+    },
   },
   plugins: [
     react(),
