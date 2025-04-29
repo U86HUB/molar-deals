@@ -146,17 +146,27 @@ export const useOnboardingWizard = (isOpen: boolean, onComplete: () => void) => 
         console.log("Created new profile");
       }
       
+      // Format notification types into an array
+      const notificationTypes = userData.notificationTypes;
+      
       // Update user metadata with all onboarding information
       const { error: metadataError } = await supabase.auth.updateUser({
         data: {
           onboarding_completed: true,
           has_set_password: true,
+          full_name: userData.name,
           specialty: userData.specialty,
           practice_name: userData.practiceName,
+          years_of_experience: userData.yearsOfExperience,
+          practice_size: userData.practiceSize,
           preferences: userData.dealPreferences,
+          price_range_min: userData.priceRangeMin,
+          price_range_max: userData.priceRangeMax,
+          preferred_brands: userData.preferredBrands,
+          phone: userData.phone,
           communication_preferences: {
             email_frequency: userData.emailFrequency,
-            notification_types: userData.notificationTypes,
+            notification_types: notificationTypes,
             marketing_consent: userData.marketingConsent,
           },
           location: {

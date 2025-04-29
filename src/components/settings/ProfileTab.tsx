@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,16 +8,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
+import { specialties } from "@/components/onboarding/data/onboardingOptions";
 
 export function ProfileTab() {
+  const { user, updateUserProfile } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: user?.user_metadata?.full_name || "",
+    email: user?.email || "",
+    phone: user?.user_metadata?.phone || "",
+    practiceName: user?.user_metadata?.practice_name || "",
+    specialty: user?.user_metadata?.specialty || "General Dentist",
+    yearsOfExperience: user?.user_metadata?.years_of_experience || "0-5",
+    practiceSize: user?.user_metadata?.practice_size || "solo",
+    bio: user?.user_metadata?.bio || ""
+  });
   
-  const handleSave = () => {
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: user.user_metadata?.full_name || "",
+        email: user.email || "",
+        phone: user.user_metadata?.phone || "",
+        practiceName: user.user_metadata?.practice_name || "",
+        specialty: user.user_metadata?.specialty || "General Dentist",
+        yearsOfExperience: user.user_metadata?.years_of_experience || "0-5",
+        practiceSize: user.user_metadata?.practice_size || "solo",
+        bio: user.user_metadata?.bio || ""
+      });
+    }
+  }, [user]);
+  
+  const handleSave = async () => {
     setLoading(true);
-    setTimeout(() => {
-      toast.success("Settings saved successfully!");
+    try {
+      await updateUserProfile({
+        full_name: profileData.name,
+        practice_name: profileData.practiceName,
+        specialty: profileData.specialty,
+        years_of_experience: profileData.yearsOfExperience,
+        practice_size: profileData.practiceSize,
+        phone: profileData.phone,
+        bio: profileData.bio
+      });
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
   
   return (
@@ -32,7 +74,9 @@ export function ProfileTab() {
           <div>
             <Avatar className="h-24 w-24">
               <AvatarImage src="" alt="Profile" />
-              <AvatarFallback className="text-3xl">JD</AvatarFallback>
+              <AvatarFallback className="text-3xl">
+                {profileData.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) || "?"}
+              </AvatarFallback>
             </Avatar>
           </div>
           
@@ -55,34 +99,88 @@ export function ProfileTab() {
         <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
-            <Input id="name" defaultValue="Dr. Jane Doe" />
+            <Input 
+              id="name" 
+              value={profileData.name}
+              onChange={e => setProfileData({...profileData, name: e.target.value})}
+            />
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
-            <Input id="email" defaultValue="jane.doe@example.com" readOnly />
+            <Input id="email" value={profileData.email} readOnly />
             <p className="text-xs text-muted-foreground">
               Your email cannot be changed
             </p>
           </div>
           
           <div className="space-y-2">
+            <Label htmlFor="phone">Phone Number</Label>
+            <Input 
+              id="phone" 
+              value={profileData.phone}
+              onChange={e => setProfileData({...profileData, phone: e.target.value})}
+            />
+          </div>
+          
+          <div className="space-y-2">
             <Label htmlFor="practice">Practice Name</Label>
-            <Input id="practice" defaultValue="Doe Dental Clinic" />
+            <Input 
+              id="practice" 
+              value={profileData.practiceName}
+              onChange={e => setProfileData({...profileData, practiceName: e.target.value})}
+            />
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="specialty">Specialty</Label>
-            <Select defaultValue="General Dentist">
+            <Select 
+              value={profileData.specialty}
+              onValueChange={value => setProfileData({...profileData, specialty: value})}
+            >
               <SelectTrigger id="specialty">
                 <SelectValue placeholder="Select specialty" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="General Dentist">General Dentist</SelectItem>
-                <SelectItem value="Orthodontist">Orthodontist</SelectItem>
-                <SelectItem value="Endodontist">Endodontist</SelectItem>
-                <SelectItem value="Periodontist">Periodontist</SelectItem>
-                <SelectItem value="Prosthodontist">Prosthodontist</SelectItem>
+                {specialties.map(specialty => (
+                  <SelectItem key={specialty} value={specialty}>{specialty}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="yearsOfExperience">Years of Experience</Label>
+            <Select 
+              value={profileData.yearsOfExperience}
+              onValueChange={value => setProfileData({...profileData, yearsOfExperience: value})}
+            >
+              <SelectTrigger id="yearsOfExperience">
+                <SelectValue placeholder="Select years of experience" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0-5">0-5 years</SelectItem>
+                <SelectItem value="6-10">6-10 years</SelectItem>
+                <SelectItem value="11-20">11-20 years</SelectItem>
+                <SelectItem value="20+">20+ years</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="practiceSize">Practice Size</Label>
+            <Select 
+              value={profileData.practiceSize}
+              onValueChange={value => setProfileData({...profileData, practiceSize: value})}
+            >
+              <SelectTrigger id="practiceSize">
+                <SelectValue placeholder="Select practice size" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="solo">Solo Practice</SelectItem>
+                <SelectItem value="small">Small Group (2-5 dentists)</SelectItem>
+                <SelectItem value="medium">Medium Group (6-20 dentists)</SelectItem>
+                <SelectItem value="large">Large Group / DSO (20+ dentists)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -92,7 +190,8 @@ export function ProfileTab() {
           <Label htmlFor="bio">Professional Bio</Label>
           <Textarea
             id="bio"
-            defaultValue="General dentist with over 10 years of experience, specializing in cosmetic dentistry and Invisalign. Passionate about providing comfortable and comprehensive dental care."
+            value={profileData.bio}
+            onChange={e => setProfileData({...profileData, bio: e.target.value})}
             rows={4}
           />
           <p className="text-xs text-muted-foreground">
@@ -101,8 +200,8 @@ export function ProfileTab() {
         </div>
         
         <div className="flex justify-end">
-          <Button variant="primary" onClick={handleSave} loading={loading}>
-            Save Changes
+          <Button variant="primary" onClick={handleSave} disabled={loading}>
+            {loading ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </CardContent>

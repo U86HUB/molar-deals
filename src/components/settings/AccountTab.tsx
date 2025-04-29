@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { CardHeader, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -12,15 +11,36 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { LocationSelector, LocationData } from "@/components/shared/LocationSelector";
 
 export function AccountTab() {
-  const { updateUserPassword, hasSetPassword, user } = useAuth();
-  const [country, setCountry] = useState(localStorage.getItem("userCountry") || "");
+  const { updateUserPassword, hasSetPassword, user, updateUserProfile } = useAuth();
+  const [locationData, setLocationData] = useState<LocationData>({
+    locationType: "global",
+    regionId: "",
+    countryCode: "",
+    state: "",
+    city: ""
+  });
   const [loading, setLoading] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [searchParams] = useSearchParams();
   const showPasswordSetup = searchParams.get("setup") === "password" || !hasSetPassword;
+
+  useEffect(() => {
+    // Initialize location data from user metadata
+    if (user?.user_metadata?.location) {
+      const { country, state, city, use_geolocation } = user.user_metadata.location;
+      
+      setLocationData({
+        locationType: country === "GLOBAL" ? "global" : country ? "country" : "global",
+        countryCode: country !== "GLOBAL" ? country : undefined,
+        state,
+        city
+      });
+    }
+  }, [user]);
   
   // Password validation schema
   const passwordSchema = z.object({
@@ -43,35 +63,31 @@ export function AccountTab() {
     }
   });
   
-  // List of countries
-  const countries = [
-    { value: "USA", label: "United States" },
-    { value: "CAN", label: "Canada" },
-    { value: "UK", label: "United Kingdom" },
-    { value: "AUS", label: "Australia" },
-    { value: "DEU", label: "Germany" },
-    { value: "FRA", label: "France" },
-    { value: "ESP", label: "Spain" },
-    { value: "ITA", label: "Italy" },
-    { value: "JPN", label: "Japan" },
-    { value: "BRA", label: "Brazil" },
-    { value: "GLOBAL", label: "Global (All Deals)" }
-  ];
-  
-  const handleSaveCountry = () => {
+  const handleSaveLocation = async () => {
     try {
       setLoading(true);
-      // Save country to localStorage with basic encryption
-      const timestamp = new Date().getTime();
-      localStorage.setItem("userCountry", country);
-      localStorage.setItem("userCountryTimestamp", timestamp.toString());
       
-      setTimeout(() => {
-        setLoading(false);
-        toast.success("Country preference saved successfully!");
-      }, 800);
+      // Convert LocationData to the format expected by user metadata
+      const locationMetadata = {
+        country: locationData.locationType === "global" 
+          ? "GLOBAL" 
+          : locationData.locationType === "region"
+            ? locationData.regionId
+            : locationData.countryCode,
+        state: locationData.state || null,
+        city: locationData.city || null,
+        use_geolocation: false // Always false when set manually
+      };
+      
+      await updateUserProfile({ 
+        location: locationMetadata 
+      });
+      
+      toast.success("Location settings saved successfully!");
     } catch (error) {
-      toast.error("Failed to save country preference");
+      console.error("Error saving location:", error);
+      toast.error("Failed to save location settings");
+    } finally {
       setLoading(false);
     }
   };
@@ -177,26 +193,20 @@ export function AccountTab() {
             <Globe className="h-5 w-5 text-muted-foreground" />
             <h3 className="text-base font-medium">Location Settings</h3>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Set your country to see deals specific to your location. Choose "Global" to see all deals.
+          <p className="text-sm text-muted-foreground mb-4">
+            Set your location preferences to see deals relevant to your area. 
+            Choose "Global" to see all deals worldwide.
           </p>
-          <div className="space-y-2">
-            <Label htmlFor="country">Country</Label>
-            <div className="flex gap-3">
-              <Select value={country} onValueChange={setCountry}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select your country" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countries.map((country) => (
-                    <SelectItem key={country.value} value={country.value}>
-                      {country.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button onClick={handleSaveCountry} loading={loading}>Save</Button>
-            </div>
+          
+          <LocationSelector 
+            value={locationData}
+            onChange={setLocationData}
+          />
+          
+          <div className="flex justify-end mt-4">
+            <Button onClick={handleSaveLocation} disabled={loading}>
+              {loading ? "Saving..." : "Save Location"}
+            </Button>
           </div>
         </div>
         

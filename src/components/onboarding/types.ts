@@ -12,7 +12,7 @@ export interface UserData {
   practiceSize: string;
   
   // Location
-  country: string;
+  country: string; // Can be "GLOBAL" or a country code
   state: string;
   city: string;
   useGeolocation: boolean;

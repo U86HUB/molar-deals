@@ -1,13 +1,11 @@
 
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Check, MapPin } from "lucide-react";
+import { MapPin, Check } from "lucide-react";
 import { toast } from "sonner";
 import { StepProps } from "../types";
-import { countries, usStates } from "../data/onboardingOptions";
+import { LocationSelector, LocationData } from "@/components/shared/LocationSelector";
 
 export const LocationStep = ({ userData, updateUserData }: StepProps) => {
   const [geolocationStatus, setGeolocationStatus] = useState<"idle" | "requesting" | "granted" | "denied">(
@@ -36,6 +34,26 @@ export const LocationStep = ({ userData, updateUserData }: StepProps) => {
     } else {
       toast.error("Geolocation is not supported by your browser.");
       setGeolocationStatus("denied");
+    }
+  };
+
+  // Convert from userData format to LocationSelector format
+  const locationData: LocationData = {
+    locationType: "country",
+    countryCode: userData.country,
+    state: userData.state,
+    city: userData.city
+  };
+
+  const handleLocationChange = (location: LocationData) => {
+    if (location.locationType === "global") {
+      updateUserData("country", "GLOBAL");
+      updateUserData("state", "");
+      updateUserData("city", "");
+    } else if (location.locationType === "country" && location.countryCode) {
+      updateUserData("country", location.countryCode);
+      updateUserData("state", location.state || "");
+      updateUserData("city", location.city || "");
     }
   };
 
@@ -95,55 +113,10 @@ export const LocationStep = ({ userData, updateUserData }: StepProps) => {
         </div>
       </div>
       
-      <div className="space-y-3">
-        <Label htmlFor="country">Country</Label>
-        <Select
-          value={userData.country}
-          onValueChange={(value) => updateUserData("country", value)}
-        >
-          <SelectTrigger id="country">
-            <SelectValue placeholder="Select your country" />
-          </SelectTrigger>
-          <SelectContent>
-            {countries.map((country) => (
-              <SelectItem key={country} value={country}>
-                {country}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
-      {userData.country === "USA" && (
-        <div className="space-y-3">
-          <Label htmlFor="state">State</Label>
-          <Select
-            value={userData.state}
-            onValueChange={(value) => updateUserData("state", value)}
-          >
-            <SelectTrigger id="state">
-              <SelectValue placeholder="Select your state" />
-            </SelectTrigger>
-            <SelectContent>
-              {usStates.map((state) => (
-                <SelectItem key={state} value={state}>
-                  {state}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-      
-      <div className="space-y-3">
-        <Label htmlFor="city">City</Label>
-        <Input
-          id="city"
-          value={userData.city}
-          onChange={(e) => updateUserData("city", e.target.value)}
-          placeholder="Your city"
-        />
-      </div>
+      <LocationSelector 
+        value={locationData} 
+        onChange={handleLocationChange} 
+      />
     </div>
   );
 };

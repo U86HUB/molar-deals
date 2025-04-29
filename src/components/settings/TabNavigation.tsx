@@ -37,6 +37,12 @@ export function TabNavigation({ activeTab, setActiveTab }: TabNavigationProps) {
               Notification Preferences
             </TabsTrigger>
             <TabsTrigger
+              value="preferences"
+              className="justify-start py-3 px-4 text-left"
+            >
+              Deal Preferences
+            </TabsTrigger>
+            <TabsTrigger
               value="referrals"
               className="justify-start py-3 px-4 text-left"
             >

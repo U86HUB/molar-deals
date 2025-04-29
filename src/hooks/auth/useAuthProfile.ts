@@ -5,7 +5,7 @@ import { trackError } from "@/services/errorService";
 import { validatePassword } from "@/utils/passwordUtils";
 
 export const useAuthProfile = () => {
-  const updateUserProfile = async (data: { username?: string; full_name?: string; role?: string }) => {
+  const updateUserProfile = async (data: Record<string, any>) => {
     try {
       const { error } = await supabase.auth.updateUser({
         data
