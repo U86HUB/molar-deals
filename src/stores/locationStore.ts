@@ -14,7 +14,7 @@ export interface Coordinates {
   lng: number;
 }
 
-export type LocationSource = 'manual' | 'google' | 'geolocation';
+export type LocationSource = 'manual' | 'google';
 
 export interface LocationState {
   addressStructured?: AddressStructured;

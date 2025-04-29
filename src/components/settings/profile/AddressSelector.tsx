@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { useLocationStore, LocationSource } from "@/stores/locationStore";
-import { GeolocationButton } from './GeolocationButton';
 import { AddressModeSelector } from './AddressModeSelector';
 import { GoogleAddressInput } from './GoogleAddressInput';
 import { ManualAddressForm } from './ManualAddressForm';
@@ -15,7 +14,7 @@ interface AddressSelectorProps {
 
 export const AddressSelector = ({ googleMapsApiKey }: AddressSelectorProps) => {
   const { source, setLocation } = useLocationStore();
-  const [addressMode, setAddressMode] = useState<LocationSource>(source || 'manual');
+  const [addressMode, setAddressMode] = useState<LocationSource>(source || 'google');
   
   // Use the @react-google-maps/api loader for better reliability
   const { isLoaded: googleLoaded, loadError } = useJsApiLoader({
@@ -37,17 +36,12 @@ export const AddressSelector = ({ googleMapsApiKey }: AddressSelectorProps) => {
   return (
     <Card>
       <CardContent className="space-y-4 p-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-          <GeolocationButton googleLoaded={googleLoaded} />
-          
-          <div className="flex items-center">
-            <span className="text-sm text-muted-foreground mx-2">or</span>
-            <AddressModeSelector 
-              addressMode={addressMode}
-              setAddressMode={handleAddressModeChange}
-              googleMapsAvailable={isGoogleMapsAvailable}
-            />
-          </div>
+        <div className="flex items-center justify-end mb-4">
+          <AddressModeSelector 
+            addressMode={addressMode}
+            setAddressMode={handleAddressModeChange}
+            googleMapsAvailable={isGoogleMapsAvailable}
+          />
         </div>
         
         {loadError && (

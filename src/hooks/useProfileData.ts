@@ -55,7 +55,7 @@ export function useProfileData() {
       if (user.user_metadata?.address_structured) {
         setLocation({
           addressStructured: user.user_metadata.address_structured,
-          source: user.user_metadata?.location_source || 'manual'
+          source: user.user_metadata?.location_source || 'google' // Default to google instead of manual
         });
       }
       
@@ -67,35 +67,6 @@ export function useProfileData() {
       }
     }
   }, [user, setLocation]);
-  
-  // Check if user needs geolocation on first load
-  useEffect(() => {
-    // If no address is set and geolocation is available, try to get the user's location
-    if (user && 
-        !addressStructured && 
-        !user.user_metadata?.address_structured && 
-        !user.user_metadata?.location?.coords && 
-        navigator.geolocation) {
-          
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            coords: { 
-              lat: position.coords.latitude, 
-              lng: position.coords.longitude 
-            },
-            source: 'geolocation'
-          });
-          
-          toast.success("Location detected", {
-            description: "We'll show deals near your location"
-          });
-        },
-        // Silently fail if user denies geolocation
-        () => {}
-      );
-    }
-  }, [user, addressStructured, setLocation]);
   
   const handleProfileDataChange = (field: string, value: string) => {
     setProfileData(prev => ({
@@ -116,7 +87,7 @@ export function useProfileData() {
         state: addressStructured?.state || "",
         city: addressStructured?.city || "",
         coords: coords || null,
-        use_geolocation: source === 'geolocation'
+        use_geolocation: false // Since we've removed geolocation functionality
       };
       
       // Update user profile with all metadata
@@ -132,7 +103,7 @@ export function useProfileData() {
         bio: profileData.bio,
         address_structured: addressStructured || null,
         location: locationMetadata,
-        location_source: source || 'manual'
+        location_source: source || 'google'  // Default to google instead of manual
       });
       
       toast.success("Profile updated successfully!");

@@ -24,7 +24,7 @@ export const GoogleAddressInput = ({ googleLoaded }: GoogleAddressInputProps) =>
         // Extract address components
         const addressComponents = extractAddressComponents(place);
         
-        // Update location store
+        // Update location store with both structured address AND coordinates
         setLocation({
           addressStructured: {
             streetAddress: addressComponents.streetAddress || '',
