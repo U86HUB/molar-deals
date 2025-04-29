@@ -15,11 +15,14 @@ interface AuthContextProps {
     full_name?: string;
     role?: string;
   }) => Promise<void>;
-  signInWithProvider: (provider: Provider) => Promise<void>;
+  signInWithOtp: (email: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   isAuthenticated: boolean;
   updateUserProfile: (data: { username?: string; full_name?: string; role?: string }) => Promise<void>;
+  updateUserPassword: (password: string) => Promise<void>;
+  hasSetPassword: boolean;
+  checkHasSetPassword: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextProps>({
@@ -28,33 +31,49 @@ const AuthContext = createContext<AuthContextProps>({
   isLoading: true,
   signIn: async () => {},
   signUp: async () => {},
-  signInWithProvider: async () => {},
+  signInWithOtp: async () => {},
   signOut: async () => {},
   resetPassword: async () => {},
   isAuthenticated: false,
   updateUserProfile: async () => {},
+  updateUserPassword: async () => {},
+  hasSetPassword: false,
+  checkHasSetPassword: async () => false,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasSetPassword, setHasSetPassword] = useState(false);
 
   useEffect(() => {
     try {
       // Set up auth state listener first
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        (_event, session) => {
+        async (_event, session) => {
           setSession(session);
           setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            const hasPassword = await checkHasSetPassword();
+            setHasSetPassword(hasPassword);
+          }
+          
           setIsLoading(false);
         }
       );
 
       // Then check for existing session
-      supabase.auth.getSession().then(({ data: { session } }) => {
+      supabase.auth.getSession().then(async ({ data: { session } }) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          const hasPassword = await checkHasSetPassword();
+          setHasSetPassword(hasPassword);
+        }
+        
         setIsLoading(false);
       });
 
@@ -66,6 +85,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     }
   }, []);
+
+  const checkHasSetPassword = async (): Promise<boolean> => {
+    if (!user) return false;
+    
+    try {
+      // We use a custom user metadata field to track if password has been set
+      return !!user.user_metadata?.has_set_password;
+    } catch (error) {
+      if (error instanceof Error) {
+        trackError(error, 'AuthProvider.checkHasSetPassword');
+      }
+      return false;
+    }
+  };
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -103,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           data: {
             ...userData,
             role: userData?.role || "customer", // Default role
+            has_set_password: true, // Mark that the user has set a password during signup
           },
         },
       });
@@ -119,20 +153,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signInWithProvider = async (provider: Provider) => {
+  const signInWithOtp = async (email: string) => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        }
+          shouldCreateUser: true, // Create a new user if they don't exist
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
 
       if (error) throw error;
+      
+      toast.success("OTP sent to your email! Please check your inbox.");
     } catch (error: any) {
-      toast.error(error.message || "Error signing in with provider");
+      toast.error(error.message || "Error sending OTP");
       if (error instanceof Error) {
-        trackError(error, 'AuthProvider.signInWithProvider');
+        trackError(error, 'AuthProvider.signInWithOtp');
       }
       throw error;
     }
@@ -173,7 +210,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateUserProfile = async (data: { username?: string; full_name?: string; role?: string }) => {
     try {
       const { error } = await supabase.auth.updateUser({
-        data: data
+        data
       });
 
       if (error) throw error;
@@ -188,6 +225,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // New method to update user password
+  const updateUserPassword = async (password: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password,
+        data: {
+          has_set_password: true
+        }
+      });
+
+      if (error) throw error;
+      
+      setHasSetPassword(true);
+      toast.success("Password set successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Error setting password");
+      if (error instanceof Error) {
+        trackError(error, 'AuthProvider.updateUserPassword');
+      }
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -196,11 +256,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         signIn,
         signUp,
-        signInWithProvider,
+        signInWithOtp,
         signOut,
         resetPassword,
         isAuthenticated: !!user,
         updateUserProfile,
+        updateUserPassword,
+        hasSetPassword,
+        checkHasSetPassword,
       }}
     >
       {children}
