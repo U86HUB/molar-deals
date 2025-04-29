@@ -73,9 +73,13 @@ export function useProfileData() {
             .eq('id', user.id)
             .single();
             
-          if (error) throw error;
+          if (error) {
+            console.error("Error fetching profile:", error);
+            return;
+          }
           
           if (data) {
+            console.log("Profile data loaded:", data);
             // Set profile data from the profiles table
             setProfileData({
               name: `${data.first_name || ''} ${data.last_name || ''}`.trim(),
@@ -150,7 +154,7 @@ export function useProfileData() {
         years_experience: formData.yearsOfExperience, // Will be converted to number in updateUserProfile
         practice_size: formData.practiceSize,
         phone: formData.phone,
-        bio: formData.bio, // Will be mapped to professional_bio
+        professional_bio: formData.bio, // Map bio to professional_bio
         clinic_bio: formData.clinicBio,
         address_structured: addressStructured || undefined,
         location_source: source || 'google'
@@ -161,6 +165,8 @@ export function useProfileData() {
         ...profileUpdateData,
         coords: `POINT(${coords.lng} ${coords.lat})`
       } : profileUpdateData;
+
+      console.log("Saving profile data:", profileDataWithCoords);
 
       // Update user profile
       await updateUserProfile(profileDataWithCoords);

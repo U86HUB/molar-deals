@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProfileData } from "@/hooks/useProfileData";
@@ -30,12 +30,13 @@ export function ProfileTab() {
     defaultValues: {
       practiceName: profileData.practiceName,
       practiceSize: profileData.practiceSize,
-      clinicBio: "",  // New field
+      clinicBio: profileData.clinicBio || "",
     }
   });
   
   // Update form when profile data changes (e.g. on initial load)
-  React.useEffect(() => {
+  useEffect(() => {
+    console.log("Resetting form with data:", profileData);
     personalMethods.reset({
       firstName: profileData.firstName,
       lastName: profileData.lastName,
@@ -49,11 +50,12 @@ export function ProfileTab() {
     clinicMethods.reset({
       practiceName: profileData.practiceName,
       practiceSize: profileData.practiceSize,
-      clinicBio: profileData.clinicBio || "",  // New field
+      clinicBio: profileData.clinicBio || "",
     });
   }, [profileData]);
 
   const onPersonalSubmit = async (data: any) => {
+    console.log("Submitting personal info:", data);
     await handleSave({
       ...profileData,
       firstName: data.firstName,
@@ -66,11 +68,12 @@ export function ProfileTab() {
   };
   
   const onClinicSubmit = async (data: any) => {
+    console.log("Submitting clinic info:", data);
     await handleSave({
       ...profileData,
       practiceName: data.practiceName,
       practiceSize: data.practiceSize,
-      clinicBio: data.clinicBio  // New field
+      clinicBio: data.clinicBio
     });
   };
 

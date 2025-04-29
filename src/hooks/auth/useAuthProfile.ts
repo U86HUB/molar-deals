@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { trackError } from "@/services/errorService";
 import { validatePassword } from "@/utils/passwordUtils";
+import { Json } from "@/integrations/supabase/types";
 
 // Define our own interface for profile data
 interface ProfileUpdateData {
@@ -13,11 +14,11 @@ interface ProfileUpdateData {
   phone?: string;
   specialty?: string;
   years_experience?: string | number;
-  bio?: string;
+  professional_bio?: string; // Changed from bio to match DB field
   practice_name?: string;
-  practice_size?: string;
+  practice_size?: string | number;
   clinic_bio?: string;
-  address_structured?: any;
+  address_structured?: Json | null;
   coords?: string;
   location_source?: string;
   has_set_password?: boolean;
@@ -44,6 +45,31 @@ export const useAuthProfile = () => {
         throw new Error("User ID not found");
       }
       
+      // Convert years_experience to number if it's a string
+      const yearsExperience = typeof data.years_experience === 'string' ? 
+        parseInt(data.years_experience) || null : data.years_experience;
+      
+      // Convert practice_size to number if it's a string
+      const practiceSize = typeof data.practice_size === 'string' ? 
+        parseInt(data.practice_size) || null : data.practice_size;
+      
+      console.log("Upserting profile:", {
+        id: userId,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        full_name: data.full_name,
+        phone: data.phone,
+        specialty: data.specialty,
+        years_experience: yearsExperience,
+        professional_bio: data.professional_bio,
+        practice_name: data.practice_name,
+        practice_size: practiceSize,
+        clinic_bio: data.clinic_bio,
+        address_structured: data.address_structured,
+        location_source: data.location_source,
+        coords: data.coords
+      });
+      
       // Store the rest of user profile data in the profiles table
       const { error: profileError } = await supabase
         .from('profiles')
@@ -54,11 +80,10 @@ export const useAuthProfile = () => {
           full_name: data.full_name,
           phone: data.phone,
           specialty: data.specialty,
-          years_experience: typeof data.years_experience === 'string' ? 
-            parseInt(data.years_experience) || null : data.years_experience, // Convert to number for DB
-          professional_bio: data.bio, // Map bio to professional_bio
+          years_experience: yearsExperience, 
+          professional_bio: data.professional_bio, // Keep the same field name as in the DB
           practice_name: data.practice_name,
-          practice_size: data.practice_size ? parseInt(data.practice_size) : null,
+          practice_size: practiceSize,
           clinic_bio: data.clinic_bio,
           address_structured: data.address_structured,
           location_source: data.location_source,
@@ -67,7 +92,10 @@ export const useAuthProfile = () => {
           onConflict: 'id'
         });
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Profile update error:", profileError);
+        throw profileError;
+      }
       
       toast.success("Profile updated successfully!");
     } catch (error: any) {
