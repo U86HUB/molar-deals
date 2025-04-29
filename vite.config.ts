@@ -5,6 +5,37 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { visualizer } from "rollup-plugin-visualizer";
 
+// Define package scripts
+const packageJsonScripts = {
+  "test:unit": "vitest run",
+  "test:unit:watch": "vitest",
+  "test:unit:coverage": "vitest run --coverage",
+  "test:e2e": "playwright test",
+  "test:e2e:ui": "playwright test --ui",
+  "test": "npm run test:unit && npm run test:e2e"
+};
+
+// Add scripts to package.json if they don't exist
+try {
+  const fs = require('fs');
+  const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+  let updated = false;
+  
+  Object.entries(packageJsonScripts).forEach(([key, value]) => {
+    if (!packageJson.scripts[key]) {
+      packageJson.scripts[key] = value;
+      updated = true;
+    }
+  });
+  
+  if (updated) {
+    fs.writeFileSync('./package.json', JSON.stringify(packageJson, null, 2));
+    console.log('Updated package.json with test scripts');
+  }
+} catch (error) {
+  console.error('Failed to update package.json:', error);
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -29,4 +60,14 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Add test configuration for Vitest
+  test: {
+    globals: true,
+    environment: 'happy-dom',
+    setupFiles: ['./src/test/setup.ts'],
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+      exclude: ['node_modules/', 'src/test/setup.ts'],
+    },
+  }
 }));
