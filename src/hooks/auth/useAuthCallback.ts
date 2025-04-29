@@ -22,7 +22,7 @@ export const useAuthCallback = () => {
     delay 
   } = useExponentialBackoff();
 
-  const handleAuthCallback = useCallback(async (isRetry = false) => {
+  const handleAuthCallback = useCallback(async (isRetry = false): Promise<void> => {
     try {
       if (isRetry) {
         console.log(`Retry attempt ${retryCount} of ${maxRetries}...`);
@@ -92,9 +92,10 @@ export const useAuthCallback = () => {
       }
     } catch (error: any) {
       // Error handling is now delegated to the useAuthErrorHandler hook
-      return errorHandler.handleError(error, isRetry);
+      errorHandler.handleError(error, isRetry);
+      return;
     }
-  }, [navigate, retryCount, maxRetries, canRetry, retry, resetRetry, delay, parseHashParams]);
+  }, [navigate, retryCount, maxRetries, resetRetry, parseHashParams]);
 
   // Create the error handler with the necessary dependencies
   const errorHandler = useAuthErrorHandler({

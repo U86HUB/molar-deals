@@ -20,7 +20,7 @@ export const useAuthErrorHandler = ({
   delay
 }: UseAuthErrorHandlerProps) => {
 
-  const handleError = useCallback((error: any, isRetry: boolean): boolean => {
+  const handleError = useCallback((error: any, isRetry: boolean): void => {
     console.error(`Auth callback error (${isRetry ? 'retry' : 'initial'}):`, error);
     
     let errorMessage = error?.message || "Authentication failed. Please try again.";
@@ -47,7 +47,7 @@ export const useAuthErrorHandler = ({
           setIsLoading(false);
         }
       }, delay);
-      return true;
+      return;
     }
     
     // Format error message for better user experience
@@ -64,8 +64,6 @@ export const useAuthErrorHandler = ({
     setError(errorMessage);
     toast.error(errorMessage);
     setIsLoading(false);
-    
-    return false;
   }, [canRetry, delay, handleAuthCallback, retry, setError, setIsLoading]);
 
   return { handleError };
