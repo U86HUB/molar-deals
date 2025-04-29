@@ -19,7 +19,7 @@ export interface ProfileFormData {
 
 export function useProfileData() {
   const { user, updateUserProfile } = useAuth();
-  const { addressStructured, coords, source, setLocation } = useLocationStore();
+  const { addressStructured, coords, source, setLocation, isVerified, setVerified } = useLocationStore();
   const [loading, setLoading] = useState(false);
   const [profileData, setProfileData] = useState<ProfileFormData>({
     name: "",
@@ -55,7 +55,8 @@ export function useProfileData() {
       if (user.user_metadata?.address_structured) {
         setLocation({
           addressStructured: user.user_metadata.address_structured,
-          source: user.user_metadata?.location_source || 'google' // Default to google instead of manual
+          source: user.user_metadata?.location_source || 'google',
+          isVerified: true // Consider existing data as verified
         });
       }
       
@@ -103,7 +104,7 @@ export function useProfileData() {
         bio: profileData.bio,
         address_structured: addressStructured || null,
         location: locationMetadata,
-        location_source: source || 'google'  // Default to google instead of manual
+        location_source: source || 'google'
       });
       
       toast.success("Profile updated successfully!");

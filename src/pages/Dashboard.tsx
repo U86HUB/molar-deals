@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -54,7 +53,8 @@ const Dashboard = () => {
               lat: position.coords.latitude, 
               lng: position.coords.longitude 
             },
-            source: 'google' // Changed from 'geolocation' to 'google'
+            source: 'google',
+            isVerified: true // Mark as verified since we got coordinates
           });
           
           toast.success("Location detected", {

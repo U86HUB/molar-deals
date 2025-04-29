@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,7 +13,7 @@ interface ProfessionalInfoSectionProps {
 
 export const ProfessionalInfoSection = ({ profileData, onChange, googleMapsApiKey }: ProfessionalInfoSectionProps) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="practiceName">Practice Name</Label>
         <Input
@@ -96,8 +95,7 @@ export const ProfessionalInfoSection = ({ profileData, onChange, googleMapsApiKe
         />
       </div>
       
-      <div className="space-y-2 pt-2">
-        <Label>Practice Location</Label>
+      <div className="space-y-2 pt-4">
         <AddressSelector googleMapsApiKey={googleMapsApiKey} />
       </div>
     </div>

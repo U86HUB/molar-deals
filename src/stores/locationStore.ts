@@ -20,11 +20,13 @@ export interface LocationState {
   addressStructured?: AddressStructured;
   coords?: Coordinates;
   source?: LocationSource;
+  isVerified: boolean;  // New flag to track if address has been verified
   
   // Actions
   setLocation: (data: Partial<LocationState>) => void;
   setAddressComponent: (key: keyof AddressStructured, value: string) => void;
   resetLocation: () => void;
+  setVerified: (verified: boolean) => void;  // New action
 }
 
 export const useLocationStore = create<LocationState>((set) => ({
@@ -32,6 +34,7 @@ export const useLocationStore = create<LocationState>((set) => ({
   addressStructured: undefined,
   coords: undefined,
   source: undefined,
+  isVerified: false,  // New field defaults to false
   
   // Actions
   setLocation: (data) => set((state) => ({
@@ -51,5 +54,11 @@ export const useLocationStore = create<LocationState>((set) => ({
     addressStructured: undefined,
     coords: undefined,
     source: undefined,
+    isVerified: false,  // Reset verified status
   }),
+
+  setVerified: (verified) => set((state) => ({
+    ...state,
+    isVerified: verified,
+  })),
 }));

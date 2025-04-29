@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useLocationStore } from "@/stores/locationStore";
 import { toast } from "sonner";
 import { extractAddressComponents } from "@/utils/googleMapsUtils";
@@ -9,9 +8,10 @@ import { Autocomplete } from '@react-google-maps/api';
 
 interface GoogleAddressInputProps {
   googleLoaded: boolean;
+  onVerification?: () => void;
 }
 
-export const GoogleAddressInput = ({ googleLoaded }: GoogleAddressInputProps) => {
+export const GoogleAddressInput = ({ googleLoaded, onVerification }: GoogleAddressInputProps) => {
   const { setLocation } = useLocationStore();
   const [inputValue, setInputValue] = useState('');
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
@@ -38,10 +38,16 @@ export const GoogleAddressInput = ({ googleLoaded }: GoogleAddressInputProps) =>
             lng: place.geometry.location.lng(),
           },
           source: 'google',
+          isVerified: true, // Mark as verified
         });
         
         // Set the full address in the input
         setInputValue(place.formatted_address || '');
+        
+        // Call the verification callback
+        if (onVerification) {
+          onVerification();
+        }
         
         toast.success('Address verified successfully');
       }
@@ -49,8 +55,7 @@ export const GoogleAddressInput = ({ googleLoaded }: GoogleAddressInputProps) =>
   };
 
   return (
-    <div className="space-y-2">
-      <Label htmlFor="googleAddress">Verify Address</Label>
+    <div>
       {googleLoaded ? (
         <Autocomplete
           onLoad={(autocomplete) => {
@@ -80,11 +85,6 @@ export const GoogleAddressInput = ({ googleLoaded }: GoogleAddressInputProps) =>
           disabled
         />
       )}
-      <p className="text-xs text-muted-foreground">
-        {googleLoaded 
-          ? 'Start typing your address and select from the dropdown to verify'
-          : 'Google Maps API is loading. Please wait...'}
-      </p>
     </div>
   );
 };
