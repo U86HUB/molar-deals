@@ -13,11 +13,10 @@
     <meta name="theme-color" content="#1E40AF" />
     <link rel="apple-touch-icon" href="/logo192.png" />
     
-    <!-- Security headers -->
+    <!-- Security headers - Removed overly restrictive CSP for development -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta http-equiv="X-Frame-Options" content="DENY" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.gpteng.co; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; connect-src 'self' https://*.lovable.dev https://*.supabase.co" />
-
+    <!-- Removed X-Frame-Options meta tag as it should be set via HTTP headers -->
+    
     <!-- Open Graph tags for social sharing -->
     <meta property="og:title" content="DentalDeals" />
     <meta property="og:description" content="Exclusive deals for dental professionals" />
