@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Table, 
   TableBody, 
@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Filter, User, Shield, Check, X, FileSearch } from "lucide-react";
+import { Search, Filter, User, Shield, Check, X, FileSearch, Loader2, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -37,22 +37,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-// Expanded mock data for users with more details
-const mockUsers = Array.from({ length: 30 }, (_, i) => ({
-  id: `USR-${1000 + i}`,
-  name: `${["John", "Jane", "Michael", "Sarah", "Robert", "Emily", "David", "Lisa", "Thomas", "Amanda"][i % 10]} ${["Smith", "Johnson", "Williams", "Brown", "Jones", "Davis", "Miller", "Wilson", "Moore", "Taylor"][i % 10]}`,
-  email: `user${i + 1}@example.com`,
-  role: ["Admin", "Dentist", "Vendor", "Staff", "Practice Manager"][i % 5],
-  status: ["Active", "Inactive", "Pending", "Suspended"][i % 4],
-  verified: i % 3 === 0,
-  lastActive: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toLocaleDateString(),
-  joinedAt: new Date(Date.now() - Math.floor(Math.random() * 365) * 24 * 60 * 60 * 1000).toLocaleDateString(),
-  location: [`New York, NY`, `Los Angeles, CA`, `Chicago, IL`, `Houston, TX`, `Phoenix, AZ`, `Philadelphia, PA`, `San Antonio, TX`, `San Diego, CA`, `Dallas, TX`, `San Jose, CA`][i % 10],
-  subscriptionPlan: ["Free", "Basic", "Premium", "Enterprise"][i % 4],
-  dealsViewed: Math.floor(Math.random() * 50),
-  dealsPurchased: Math.floor(Math.random() * 10),
-}));
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { userService, UserProfile, UserRole, UserStatus } from "@/services/userService";
+import { UserEditDialog } from "./UserEditDialog";
+import { toast } from "sonner";
 
 const statusColors = {
   'Active': 'bg-green-100 text-green-700',
@@ -70,45 +58,68 @@ const UserManagementTab = () => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const usersPerPage = 10;
   
-  // Filter users based on search term
-  let filteredUsers = mockUsers.filter(user => 
-    (user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.id.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // State for users data
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  // Apply status filter
-  if (statusFilter) {
-    filteredUsers = filteredUsers.filter(user => user.status === statusFilter);
-  }
+  // User statistics
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    newUsers: 0,
+    verificationRate: 0
+  });
   
-  // Apply role filter
-  if (roleFilter) {
-    filteredUsers = filteredUsers.filter(user => user.role === roleFilter);
-  }
-  
-  // Apply sorting
-  if (sortField) {
-    filteredUsers = [...filteredUsers].sort((a, b) => {
-      const fieldA = a[sortField as keyof typeof a];
-      const fieldB = b[sortField as keyof typeof b];
+  // User edit dialog
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  // Load users on component mount and when filters change
+  useEffect(() => {
+    loadUsers();
+  }, [currentPage, searchTerm, statusFilter, roleFilter, sortField, sortDirection]);
+
+  // Load user stats
+  useEffect(() => {
+    loadUserStats();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
       
-      if (typeof fieldA === 'string' && typeof fieldB === 'string') {
-        return sortDirection === 'asc' 
-          ? fieldA.localeCompare(fieldB) 
-          : fieldB.localeCompare(fieldA);
-      }
+      const result = await userService.getUsers({
+        page: currentPage,
+        perPage: usersPerPage,
+        searchTerm,
+        statusFilter,
+        roleFilter,
+        sortField,
+        sortDirection
+      });
       
-      return 0;
-    });
-  }
-  
-  // Paginate users
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+      setUsers(result.users);
+      setTotalUsers(result.totalCount);
+    } catch (err) {
+      console.error("Error loading users:", err);
+      setError(err instanceof Error ? err.message : "Failed to load users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadUserStats = async () => {
+    try {
+      const userStats = await userService.getUserStats();
+      setStats(userStats);
+    } catch (err) {
+      console.error("Error loading user stats:", err);
+      toast.error("Failed to load user statistics");
+    }
+  };
 
   const resetFilters = () => {
     setStatusFilter(undefined);
@@ -125,6 +136,49 @@ const UserManagementTab = () => {
       setSortDirection("asc");
     }
   };
+
+  const handleEditUser = (userId: string) => {
+    setSelectedUserId(userId);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleVerifyUser = async (userId: string, verified: boolean) => {
+    try {
+      await userService.updateUserVerification(userId, verified);
+      loadUsers();
+    } catch (err) {
+      console.error("Error updating verification:", err);
+    }
+  };
+
+  const handleStatusChange = async (userId: string, status: UserStatus) => {
+    try {
+      await userService.updateUserStatus(userId, status);
+      loadUsers();
+    } catch (err) {
+      console.error("Error updating status:", err);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+      try {
+        await userService.deleteUser(userId);
+        loadUsers();
+        loadUserStats();
+      } catch (err) {
+        console.error("Error deleting user:", err);
+      }
+    }
+  };
+
+  const handleUserUpdated = () => {
+    loadUsers();
+    loadUserStats();
+  };
+
+  // Calculate total pages for pagination
+  const totalPages = Math.ceil(totalUsers / usersPerPage);
 
   return (
     <div className="space-y-6">
@@ -146,7 +200,7 @@ const UserManagementTab = () => {
             <CardTitle className="text-lg">Total Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{mockUsers.length}</p>
+            <p className="text-3xl font-bold">{stats.totalUsers}</p>
             <p className="text-sm text-muted-foreground mt-2">Across all roles</p>
           </CardContent>
         </Card>
@@ -155,7 +209,7 @@ const UserManagementTab = () => {
             <CardTitle className="text-lg">Active Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{mockUsers.filter(user => user.status === 'Active').length}</p>
+            <p className="text-3xl font-bold">{stats.activeUsers}</p>
             <p className="text-sm text-muted-foreground mt-2">Currently active accounts</p>
           </CardContent>
         </Card>
@@ -164,12 +218,7 @@ const UserManagementTab = () => {
             <CardTitle className="text-lg">New Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{mockUsers.filter(user => {
-              const joinedDate = new Date(user.joinedAt);
-              const thirtyDaysAgo = new Date();
-              thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-              return joinedDate > thirtyDaysAgo;
-            }).length}</p>
+            <p className="text-3xl font-bold">{stats.newUsers}</p>
             <p className="text-sm text-muted-foreground mt-2">Joined in the last 30 days</p>
           </CardContent>
         </Card>
@@ -178,7 +227,7 @@ const UserManagementTab = () => {
             <CardTitle className="text-lg">Verification Rate</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{Math.round((mockUsers.filter(user => user.verified).length / mockUsers.length) * 100)}%</p>
+            <p className="text-3xl font-bold">{stats.verificationRate}%</p>
             <p className="text-sm text-muted-foreground mt-2">Of users have verified accounts</p>
           </CardContent>
         </Card>
@@ -237,6 +286,13 @@ const UserManagementTab = () => {
             </div>
           </div>
           
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
           <div className="border rounded-md overflow-hidden">
             <Table>
               <TableHeader>
@@ -262,11 +318,20 @@ const UserManagementTab = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentUsers.length > 0 ? (
-                  currentUsers.map((user) => (
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      <div className="flex justify-center items-center">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+                        <span>Loading users...</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : users.length > 0 ? (
+                  users.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.id}</TableCell>
-                      <TableCell>{user.name}</TableCell>
+                      <TableCell className="font-medium">{user.id.slice(0, 8)}...</TableCell>
+                      <TableCell>{user.name || 'N/A'}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
                         <Badge variant={
@@ -278,7 +343,7 @@ const UserManagementTab = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[user.status as keyof typeof statusColors]}`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[user.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-700'}`}>
                           {user.status}
                         </span>
                       </TableCell>
@@ -299,17 +364,27 @@ const UserManagementTab = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>User Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>View Profile</DropdownMenuItem>
-                            <DropdownMenuItem>Edit User</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditUser(user.id)}>
+                              Edit User
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => 
+                              handleStatusChange(user.id, user.status === 'Active' ? 'Inactive' : 'Active')
+                            }>
                               {user.status === 'Active' ? 'Deactivate' : 'Activate'} Account
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => 
+                              handleVerifyUser(user.id, !user.verified)
+                            }>
                               {user.verified ? 'Remove Verification' : 'Verify Account'}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">Delete User</DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="text-red-600"
+                              onClick={() => handleDeleteUser(user.id)}
+                            >
+                              Delete User
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -359,6 +434,17 @@ const UserManagementTab = () => {
           </Pagination>
         </CardContent>
       </Card>
+
+      {/* Edit User Dialog */}
+      <UserEditDialog 
+        userId={selectedUserId}
+        isOpen={isEditDialogOpen}
+        onClose={() => {
+          setIsEditDialogOpen(false);
+          setSelectedUserId(null);
+        }}
+        onUserUpdated={handleUserUpdated}
+      />
     </div>
   );
 };
