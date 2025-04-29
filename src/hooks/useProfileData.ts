@@ -4,7 +4,9 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { useLocationStore, AddressStructured, LocationSource } from "@/stores/locationStore";
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
+// Define custom interfaces for our profile data
 export interface ProfileFormData {
   name: string;
   email: string;
@@ -19,23 +21,23 @@ export interface ProfileFormData {
   clinicBio?: string;
 }
 
-// Define our own interface for Profiles to avoid modifying read-only types
-interface ProfileData {
+// Interface for database profile structure
+interface DbProfile {
   id: string;
-  first_name: string;
-  last_name: string;
-  full_name?: string;
-  email?: string;
-  phone?: string;
-  practice_name?: string;
-  specialty?: string;
-  years_experience?: string | number;
-  practice_size?: string;
-  bio?: string;
-  clinic_bio?: string;
+  first_name: string | null;
+  last_name: string | null;
+  full_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  practice_name?: string | null;
+  specialty?: string | null;
+  years_experience?: number | null;
+  practice_size?: number | null;
+  professional_bio?: string | null; // This is 'bio' in our form
+  clinic_bio?: string | null;
   address_structured?: any;
   coords?: any;
-  location_source?: string;
+  location_source?: string | null;
 }
 
 export function useProfileData() {
@@ -84,8 +86,8 @@ export function useProfileData() {
               practiceName: data.practice_name || '',
               specialty: data.specialty || 'General Dentist',
               yearsOfExperience: data.years_experience ? String(data.years_experience) : '0-5', // Convert to string
-              practiceSize: data.practice_size || 'solo',
-              bio: data.bio || '',
+              practiceSize: data.practice_size ? String(data.practice_size) : 'solo',
+              bio: data.professional_bio || '', // Map professional_bio to bio
               clinicBio: data.clinic_bio || ''
             });
             
@@ -138,17 +140,17 @@ export function useProfileData() {
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
 
       // Prepare profile data for update
-      const profileUpdateData: ProfileData = {
+      const profileUpdateData = {
         id: user?.id || '',
         full_name: fullName,
         first_name: formData.firstName,
         last_name: formData.lastName,
         practice_name: formData.practiceName,
         specialty: formData.specialty,
-        years_experience: formData.yearsOfExperience, // This will be passed as a string
+        years_experience: formData.yearsOfExperience, // Will be converted to number in updateUserProfile
         practice_size: formData.practiceSize,
         phone: formData.phone,
-        bio: formData.bio,
+        bio: formData.bio, // Will be mapped to professional_bio
         clinic_bio: formData.clinicBio,
         address_structured: addressStructured || undefined,
         location_source: source || 'google'
