@@ -1,86 +1,75 @@
 
-import { Suspense } from "react";
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useRoutes } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import { AuthProvider } from "./context/AuthContext";
-import { CookieSettingsProvider } from "./context/CookieSettingsContext";
-import HmrErrorRecovery from './components/HmrErrorRecovery';
-import { isProduction } from './config/environment';
-import { appRoutes } from "./routes/appRoutes";
-import { MockAuthBanner } from "./components/auth/MockAuthBanner";
 
-// Configure query client with optimized settings for different data types
+// Lazy load pages for better performance
+const Index = lazy(() => import("./pages/Index"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Settings = lazy(() => import("./pages/Settings"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const VendorDashboard = lazy(() => import("./pages/VendorDashboard"));
+const ReferralLeaderboard = lazy(() => import("./pages/ReferralLeaderboard"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+
+// New pages
+const HowItWorks = lazy(() => import("./pages/HowItWorks"));
+const Brands = lazy(() => import("./pages/Brands"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+
+// Configure query client with better defaults for production
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 2,
-      staleTime: 10 * 1000, // 10 seconds default
-      refetchOnWindowFocus: import.meta.env.PROD ? 'always' : false,
+      staleTime: 10 * 1000, // 10 seconds
+      refetchOnWindowFocus: false,
       refetchOnReconnect: true,
     },
   },
 });
 
-// Add data-specific query cache configurations
-// Static content (like How It Works, Privacy Policy) can have longer stale times
-queryClient.setQueryDefaults(['static-content'], {
-  staleTime: 24 * 60 * 60 * 1000, // 24 hours for rarely changing content
-  gcTime: 30 * 24 * 60 * 60 * 1000, // 30 days
-});
-
-// Deals data should be fresher
-queryClient.setQueryDefaults(['deals'], {
-  staleTime: 5 * 60 * 1000, // 5 minutes
-});
-
-// User data should be very fresh
-queryClient.setQueryDefaults(['user-data'], {
-  staleTime: 30 * 1000, // 30 seconds
-});
-
-// Router component that uses our route configuration
-const AppRouter = () => {
-  const routes = useRoutes(appRoutes);
-  return routes;
-};
-
-function App() {
-  return (
-    <>
-      <QueryClientProvider client={queryClient}>
-        <HelmetProvider>
-          <Helmet>
-            <title>DentalDeals - Exclusive Deals for Dental Professionals</title>
-            <meta name="description" content="Find the best deals on dental supplies and equipment for your practice." />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          </Helmet>
-          {/* Global error boundary - catches app-level errors only */}
-          <ErrorBoundary>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <AuthProvider>
-                <CookieSettingsProvider>
-                  <BrowserRouter>
-                    <MockAuthBanner />
-                    <AppRouter />
-                  </BrowserRouter>
-                </CookieSettingsProvider>
-              </AuthProvider>
-            </TooltipProvider>
-          </ErrorBoundary>
-        </HelmetProvider>
-      </QueryClientProvider>
-      
-      {/* Only include HmrErrorRecovery in development mode */}
-      {!isProduction && <HmrErrorRecovery />}
-    </>
-  );
-}
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <HelmetProvider>
+      <Helmet>
+        <title>DentalDeals - Exclusive Deals for Dental Professionals</title>
+        <meta name="description" content="Find the best deals on dental supplies and equipment for your practice." />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </Helmet>
+      <ErrorBoundary>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/vendor" element={<VendorDashboard />} />
+                <Route path="/referrals" element={<ReferralLeaderboard />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                
+                {/* New routes for critical missing pages */}
+                <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/brands" element={<Brands />} />
+                <Route path="/privacy" element={<Privacy />} />
+                
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ErrorBoundary>
+    </HelmetProvider>
+  </QueryClientProvider>
+);
 
 export default App;

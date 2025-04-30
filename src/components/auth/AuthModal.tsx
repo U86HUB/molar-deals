@@ -1,17 +1,11 @@
 
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Mail, Loader2, AlertCircle, WifiOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Mail, ArrowRight, Shield } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { Form, FormControl, FormField, FormItem, FormDescription, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -20,252 +14,211 @@ interface AuthModalProps {
 }
 
 export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
-  const { signInWithOtp } = useAuth();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [otpSent, setOtpSent] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>("login");
   const [email, setEmail] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
-  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
-  const [retryCount, setRetryCount] = useState<number>(0);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [secureLogin, setSecureLogin] = useState<boolean>(true);
 
-  // Monitor network status
-  useEffect(() => {
-    const handleOnline = () => {
-      setIsOnline(true);
-      setError(null);
-    };
-    
-    const handleOffline = () => {
-      setIsOnline(false);
-      setError("You appear to be offline. Please check your internet connection and try again.");
-    };
-    
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
-  // Email schema with validation
-  const emailSchema = z.object({
-    email: z.string().email({ message: "Please enter a valid email address" }),
-  });
-
-  const form = useForm<z.infer<typeof emailSchema>>({
-    resolver: zodResolver(emailSchema),
-    defaultValues: {
-      email: "",
-    },
-  });
-
-  const handleSubmit = async (values: z.infer<typeof emailSchema>) => {
-    setLoading(true);
-    setError(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    try {
-      // Check network connectivity first
-      if (!navigator.onLine) {
-        throw new Error("You appear to be offline. Please check your internet connection and try again.");
-      }
-      
-      await signInWithOtp(values.email);
-      setOtpSent(true);
-      setEmail(values.email);
-      toast.success("Magic link sent! Please check your email. The link will expire in 15 minutes.");
-    } catch (error: any) {
-      console.error("Auth error:", error);
-      
-      // Format error message for better user experience
-      let errorMessage = error?.message || "Failed to send magic link. Please try again later.";
-      
-      if (errorMessage.includes("Database error finding user")) {
-        errorMessage = "Sign-ups appear to be disabled in Supabase. Please enable them in the Supabase Dashboard under Auth → Settings → General → Enable sign-ups.";
-      } else if (errorMessage.includes("permission denied")) {
-        errorMessage = "Database permission issue detected. Please ensure Row Level Security (RLS) policies are properly configured.";
-      }
-      
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
+    if (!email) {
+      toast.error("Please enter your email address");
+      return;
     }
-  };
-
-  const handleClose = () => {
-    if (otpSent) {
-      onSuccess();
+    
+    if (!validateEmail(email)) {
+      toast.error("Please enter a valid email address");
+      return;
     }
-    setOtpSent(false);
-    setEmail("");
-    setError(null);
-    form.reset();
-    onClose();
-  };
 
-  const handleRetry = () => {
-    setRetryCount(prev => prev + 1);
-    setError(null);
-    form.handleSubmit(handleSubmit)();
-  };
-
-  const checkConnectionStatus = async () => {
     setLoading(true);
+    // Simulating auth request with security measures
     try {
-      // Simple fetch to check connection to Supabase
-      const response = await fetch(import.meta.env.VITE_SUPABASE_URL || "https://fyyfrlhcvtxddonnkeoy.supabase.co", {
-        method: "HEAD",
-        mode: "no-cors"
-      });
+      // Simulate network request
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      setIsOnline(true);
-      setError(null);
-      toast.success("Connection restored!");
+      toast.success(`Magic link sent to ${email}. Check your inbox!`);
+      
+      // In a real app, we'd wait for the user to click the link
+      // For now, we'll just simulate a successful login
+      if (secureLogin) {
+        setTimeout(() => {
+          onSuccess();
+          onClose();
+        }, 1500);
+      }
     } catch (error) {
-      setIsOnline(false);
-      setError("Still experiencing connection issues. Please check your internet connection and try again.");
+      toast.error("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] rounded-lg p-6" aria-describedby="auth-modal-description">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px] rounded-lg p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-semibold">
-            {otpSent ? "Check your email" : "Welcome to DentalDeals"}
+            {activeTab === "login" ? "Welcome back" : "Join DentalDeals"}
           </DialogTitle>
-          <DialogDescription id="auth-modal-description">
-            {otpSent ? "Check your email for a magic link to sign in" : "Sign in or create an account to access exclusive dental deals"}
-          </DialogDescription>
         </DialogHeader>
 
-        {!isOnline && !otpSent && (
-          <Alert variant="destructive" className="mb-4">
-            <WifiOff className="h-4 w-4" />
-            <AlertTitle>No Internet Connection</AlertTitle>
-            <AlertDescription className="mt-2">
-              You appear to be offline. Please check your internet connection and try again.
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-2 w-full"
-                onClick={checkConnectionStatus}
-              >
-                Check Connection
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
+        <Tabs defaultValue="login" className="mt-5" onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="login">Login</TabsTrigger>
+            <TabsTrigger value="register">Register</TabsTrigger>
+          </TabsList>
 
-        {error && !otpSent && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Authentication Error</AlertTitle>
-            <AlertDescription className="space-y-2">
-              <p>{error}</p>
-              <div className="flex flex-col gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-2 w-full"
-                  onClick={handleRetry}
-                >
-                  Try Again {retryCount > 0 ? `(${retryCount})` : ''}
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full"
-                  onClick={() => window.location.reload()}
-                >
-                  Reload Page
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => navigate("/auth")}
-                >
-                  Go to Auth Page
-                </Button>
-              </div>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {otpSent ? (
-          <div className="text-center py-8 space-y-4">
-            <div className="mx-auto bg-primary/10 rounded-full w-16 h-16 flex items-center justify-center">
-              <Mail className="h-8 w-8 text-primary" />
-            </div>
-            <p className="text-md">
-              We've sent a magic link to <span className="font-medium">{email}</span>
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Click the link in the email to sign in to your account. The link will expire in 15 minutes.
-            </p>
-            <Button 
-              variant="outline" 
-              className="w-full mt-4"
-              onClick={handleClose}
-            >
-              Close
-            </Button>
-          </div>
-        ) : (
-          <div className="mt-6 space-y-6">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="email"
-                            placeholder="Enter your email address"
-                            className="pl-10"
-                            autoComplete="email"
-                            disabled={loading || !isOnline}
-                          />
-                        </FormControl>
-                      </div>
-                      <FormDescription className="text-xs text-center">
-                        We'll email you a magic link for password-free sign in. The link will expire in 15 minutes.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+          <TabsContent value="login" className="mt-6 space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium">Email</label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="doctor@dental.com"
+                  className="rounded-md"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
                 />
-                
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  variant="primary"
-                  disabled={loading || !isOnline}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending Magic Link...
-                    </>
-                  ) : (
-                    "Continue with Email"
-                  )}
-                </Button>
-              </form>
-            </Form>
-          </div>
-        )}
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="secure-login"
+                  checked={secureLogin}
+                  onChange={(e) => setSecureLogin(e.target.checked)}
+                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <label htmlFor="secure-login" className="text-sm text-gray-600 flex items-center">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Enable secure login session
+                </label>
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full" 
+                variant="primary"
+                loading={loading}
+                disabled={loading}
+              >
+                {!loading && <Mail className="mr-2 h-4 w-4" />}
+                Send Magic Link
+              </Button>
+            </form>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">or continue with</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Button variant="outline" className="w-full">
+                <svg className="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                  <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
+                  <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
+                  <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
+                  <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
+                </svg>
+                Google
+              </Button>
+              <Button variant="outline" className="w-full">
+                <svg className="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z" />
+                </svg>
+                Apple
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="register" className="mt-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="reg-email" className="text-sm font-medium">Email</label>
+                <Input 
+                  id="reg-email" 
+                  type="email" 
+                  placeholder="doctor@dental.com"
+                  className="rounded-md"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="secure-registration"
+                  checked={secureLogin}
+                  onChange={(e) => setSecureLogin(e.target.checked)}
+                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <label htmlFor="secure-registration" className="text-sm text-gray-600 flex items-center">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Create secure account session
+                </label>
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full" 
+                variant="primary"
+                loading={loading}
+                disabled={loading}
+              >
+                {!loading && <ArrowRight className="mr-2 h-4 w-4" />}
+                Create Account
+              </Button>
+              
+              <p className="text-xs text-center text-gray-500">
+                By signing up, you agree to our <a href="#" className="text-primary hover:underline">Terms</a> and <a href="#" className="text-primary hover:underline">Privacy Policy</a>
+              </p>
+            </form>
+            
+            <div className="relative mt-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">or continue with</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-6">
+              <Button variant="outline" className="w-full">
+                <svg className="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                  <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
+                  <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
+                  <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
+                  <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
+                </svg>
+                Google
+              </Button>
+              <Button variant="outline" className="w-full">
+                <svg className="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z" />
+                </svg>
+                Apple
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

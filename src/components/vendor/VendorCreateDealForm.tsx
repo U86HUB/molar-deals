@@ -12,60 +12,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { X, CalendarIcon, Info, Loader2 } from "lucide-react";
+import { X, CalendarIcon, Info } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { createDeal } from "@/services/dealService";
-import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 interface VendorCreateDealFormProps {
   onClose: () => void;
-  onSuccess?: () => void;
 }
 
-export const VendorCreateDealForm = ({ onClose, onSuccess }: VendorCreateDealFormProps) => {
-  const { user } = useAuth();
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
-  const [description, setDescription] = useState('');
-  const [url, setUrl] = useState('');
-  const [date, setDate] = useState<Date | undefined>(undefined);
-  const [discountValue, setDiscountValue] = useState('');
-  const [location, setLocation] = useState('GLOBAL');
+export const VendorCreateDealForm = ({ onClose }: VendorCreateDealFormProps) => {
+  const [date, setDate] = useState<Date>();
   const [makePremium, setMakePremium] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!user?.id) return;
-    
-    setIsSubmitting(true);
-    
-    try {
-      // Parse discount value to get percentage
-      const discountPercentage = parseInt(discountValue.replace(/\D/g, ''));
-      
-      await createDeal({
-        title,
-        description,
-        category,
-        discount_percentage: isNaN(discountPercentage) ? undefined : discountPercentage,
-        expiry_date: date ? date.toISOString() : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        country: location,
-        image_url: url.startsWith('http') ? url : undefined,
-      }, user.id);
-      
-      onSuccess?.();
-      onClose();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    toast.success("Deal submitted for review");
+    onClose();
   };
   
   return (
@@ -89,19 +56,13 @@ export const VendorCreateDealForm = ({ onClose, onSuccess }: VendorCreateDealFor
             <Input 
               id="dealTitle" 
               placeholder="Enter a catchy title for your deal" 
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
               required
             />
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="category">Category</Label>
-            <Select 
-              value={category} 
-              onValueChange={setCategory}
-              required
-            >
+            <Select required>
               <SelectTrigger id="category">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
@@ -121,8 +82,6 @@ export const VendorCreateDealForm = ({ onClose, onSuccess }: VendorCreateDealFor
           <Textarea 
             id="description" 
             placeholder="Describe your deal in detail" 
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
             required
             rows={3}
           />
@@ -135,8 +94,6 @@ export const VendorCreateDealForm = ({ onClose, onSuccess }: VendorCreateDealFor
               id="url" 
               placeholder="https://example.com/your-deal" 
               type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
               required
             />
           </div>
@@ -176,19 +133,13 @@ export const VendorCreateDealForm = ({ onClose, onSuccess }: VendorCreateDealFor
             <Input 
               id="discountValue" 
               placeholder="e.g. 20% or BOGO" 
-              value={discountValue}
-              onChange={(e) => setDiscountValue(e.target.value)}
               required
             />
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="location">Target Location</Label>
-            <Select 
-              value={location} 
-              onValueChange={setLocation}
-              defaultValue="GLOBAL"
-            >
+            <Select defaultValue="GLOBAL">
               <SelectTrigger id="location">
                 <SelectValue placeholder="Select location" />
               </SelectTrigger>
@@ -228,17 +179,8 @@ export const VendorCreateDealForm = ({ onClose, onSuccess }: VendorCreateDealFor
         </div>
         
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              "Submit Deal for Review"
-            )}
-          </Button>
+          <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+          <Button type="submit">Submit Deal for Review</Button>
         </div>
       </form>
     </div>

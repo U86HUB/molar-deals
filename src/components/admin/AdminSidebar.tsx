@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { 
   PackageOpen, Users, TrendingUp, ChartBar, Settings, User,
-  FileSearch, BriefcaseBusiness, ActivityIcon
+  ShieldCheck, BriefcaseBusiness, FileSearch
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -10,14 +10,6 @@ import { Badge } from "@/components/ui/badge";
 interface AdminSidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
-}
-
-interface MenuItem {
-  id: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  badge?: string;
-  disabled?: boolean;
 }
 
 export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
@@ -28,22 +20,21 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
         { id: "deals", label: "Deals Management", icon: PackageOpen },
         { id: "vendors", label: "Vendor Management", icon: BriefcaseBusiness },
         { id: "users", label: "User Management", icon: User, badge: "Enhanced" }
-      ] as MenuItem[]
+      ]
     },
     {
       title: "Platform",
       items: [
         { id: "referrals", label: "Referral Management", icon: Users },
         { id: "analytics", label: "Analytics & Insights", icon: ChartBar },
-        { id: "health", label: "System Health", icon: ActivityIcon, badge: "New" }
-      ] as MenuItem[]
+      ]
     },
     {
       title: "Administration",
       items: [
-        { id: "content", label: "Content Management", icon: FileSearch },
+        { id: "content", label: "Content Management", icon: FileSearch, badge: "Coming Soon", disabled: true },
         { id: "settings", label: "Admin Settings", icon: Settings },
-      ] as MenuItem[]
+      ]
     }
   ];
 
@@ -65,51 +56,27 @@ export const AdminSidebar = ({ activeTab, onTabChange }: AdminSidebarProps) => {
             <ul className="space-y-1 px-2">
               {category.items.map((item) => (
                 <li key={item.id}>
-                  {item.id === 'health' ? (
-                    <Link to="/system-health">
-                      <button
-                        className={cn(
-                          "flex w-full items-center justify-between px-4 py-3 text-sm font-medium rounded-md",
-                          activeTab === item.id
-                            ? "bg-primary text-white"
-                            : "text-gray-700 hover:bg-gray-100",
-                          item.disabled && "opacity-60 cursor-not-allowed"
-                        )}
-                      >
-                        <div className="flex items-center">
-                          <item.icon className="mr-3 h-5 w-5" />
-                          {item.label}
-                        </div>
-                        {item.badge && (
-                          <Badge variant={item.badge === "Enhanced" ? "secondary" : item.badge === "New" ? "default" : "outline"} className="ml-2">
-                            {item.badge}
-                          </Badge>
-                        )}
-                      </button>
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={() => !item.disabled && onTabChange(item.id)}
-                      disabled={item.disabled}
-                      className={cn(
-                        "flex w-full items-center justify-between px-4 py-3 text-sm font-medium rounded-md",
-                        activeTab === item.id
-                          ? "bg-primary text-white"
-                          : "text-gray-700 hover:bg-gray-100",
-                        item.disabled && "opacity-60 cursor-not-allowed"
-                      )}
-                    >
-                      <div className="flex items-center">
-                        <item.icon className="mr-3 h-5 w-5" />
-                        {item.label}
-                      </div>
-                      {item.badge && (
-                        <Badge variant={item.badge === "Enhanced" ? "secondary" : item.badge === "New" ? "default" : "outline"} className="ml-2">
-                          {item.badge}
-                        </Badge>
-                      )}
-                    </button>
-                  )}
+                  <button
+                    onClick={() => !item.disabled && onTabChange(item.id)}
+                    disabled={item.disabled}
+                    className={cn(
+                      "flex w-full items-center justify-between px-4 py-3 text-sm font-medium rounded-md",
+                      activeTab === item.id
+                        ? "bg-primary text-white"
+                        : "text-gray-700 hover:bg-gray-100",
+                      item.disabled && "opacity-60 cursor-not-allowed"
+                    )}
+                  >
+                    <div className="flex items-center">
+                      <item.icon className="mr-3 h-5 w-5" />
+                      {item.label}
+                    </div>
+                    {item.badge && (
+                      <Badge variant={item.badge === "Enhanced" ? "secondary" : "outline"} className="ml-2">
+                        {item.badge}
+                      </Badge>
+                    )}
+                  </button>
                 </li>
               ))}
             </ul>

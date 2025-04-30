@@ -1,41 +1,56 @@
 
-import { Button } from "@/components/ui/button";
-import { 
-  UserCircle, KeyRound, Bell, Settings2, Award, CreditCard, Code
-} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TabNavigationProps {
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  setActiveTab: (value: string) => void;
 }
 
 export function TabNavigation({ activeTab, setActiveTab }: TabNavigationProps) {
-  // Define tabs with their icons and labels
-  const tabs = [
-    { id: "profile", icon: <UserCircle className="h-5 w-5 mr-2" />, label: "Profile" },
-    { id: "account", icon: <KeyRound className="h-5 w-5 mr-2" />, label: "Account" },
-    { id: "notifications", icon: <Bell className="h-5 w-5 mr-2" />, label: "Notifications" },
-    { id: "preferences", icon: <Settings2 className="h-5 w-5 mr-2" />, label: "Preferences" },
-    { id: "referrals", icon: <Award className="h-5 w-5 mr-2" />, label: "Referrals" },
-    { id: "subscription", icon: <CreditCard className="h-5 w-5 mr-2" />, label: "Subscription" },
-    { id: "developer", icon: <Code className="h-5 w-5 mr-2" />, label: "Developer" }
-  ];
-
   return (
-    <div className="lg:block">
-      <div className="space-y-2">
-        {tabs.map((tab) => (
-          <Button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            variant={activeTab === tab.id ? "default" : "ghost"}
-            className={`w-full justify-start ${activeTab === tab.id ? "" : "text-muted-foreground"}`}
-          >
-            {tab.icon}
-            {tab.label}
-          </Button>
-        ))}
-      </div>
-    </div>
+    <Card className="lg:col-span-1 h-fit">
+      <CardContent className="p-0">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          orientation="vertical"
+          className="w-full"
+        >
+          <TabsList className="flex flex-col h-auto w-full rounded-none space-y-1 bg-transparent">
+            <TabsTrigger
+              value="profile"
+              className="justify-start py-3 px-4 text-left"
+            >
+              Profile Information
+            </TabsTrigger>
+            <TabsTrigger
+              value="account"
+              className="justify-start py-3 px-4 text-left"
+            >
+              Account Settings
+            </TabsTrigger>
+            <TabsTrigger
+              value="notifications"
+              className="justify-start py-3 px-4 text-left"
+            >
+              Notification Preferences
+            </TabsTrigger>
+            <TabsTrigger
+              value="referrals"
+              className="justify-start py-3 px-4 text-left"
+            >
+              Referrals
+            </TabsTrigger>
+            <TabsTrigger
+              value="subscription"
+              className="justify-start py-3 px-4 text-left"
+            >
+              Subscription
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 }

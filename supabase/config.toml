@@ -1,8 +1,0 @@
-
-project_id = "fyyfrlhcvtxddonnkeoy"
-
-[api]
-# Configure PostgREST to use extensions schema for PostGIS
-db_schemas = ["public", "storage", "extensions"]
-db_extra_search_path = ["extensions", "public"]
-

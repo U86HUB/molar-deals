@@ -1,93 +1,24 @@
-
-import React, { useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useProfileData } from "@/hooks/profile/useProfileData";
-import { PersonalInfoCard } from "./profile/PersonalInfoCard";
-import { ClinicInfoCard } from "./profile/ClinicInfoCard";
-import { FormProvider, useForm } from "react-hook-form";
-import { useAuth } from "@/context/AuthContext";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CardHeader, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
 
 export function ProfileTab() {
-  const { user, isLoading: authLoading } = useAuth();
+  const [loading, setLoading] = useState(false);
   
-  const {
-    profileData,
-    loading,
-    handleSave,
-    loadProfileData
-  } = useProfileData();
-  
-  const personalMethods = useForm({
-    defaultValues: {
-      firstName: profileData.firstName,
-      lastName: profileData.lastName,
-      email: profileData.email,
-      phone: profileData.phone,
-      specialty: profileData.specialty,
-      yearsOfExperience: profileData.yearsOfExperience,
-      bio: profileData.bio
-    }
-  });
-  
-  const clinicMethods = useForm({
-    defaultValues: {
-      practiceName: profileData.practiceName,
-      practiceSize: profileData.practiceSize,
-      clinicBio: profileData.clinicBio || "",
-    }
-  });
-  
-  // Load profile data after authentication is confirmed
-  useEffect(() => {
-    if (!authLoading && user) {
-      loadProfileData();
-    }
-  }, [authLoading, user, loadProfileData]);
-  
-  // Update form when profile data changes (e.g. on initial load)
-  useEffect(() => {
-    console.log("Resetting form with data:", profileData);
-    personalMethods.reset({
-      firstName: profileData.firstName,
-      lastName: profileData.lastName,
-      email: profileData.email,
-      phone: profileData.phone,
-      specialty: profileData.specialty,
-      yearsOfExperience: profileData.yearsOfExperience,
-      bio: profileData.bio
-    });
-    
-    clinicMethods.reset({
-      practiceName: profileData.practiceName,
-      practiceSize: profileData.practiceSize,
-      clinicBio: profileData.clinicBio || "",
-    });
-  }, [profileData]);
-
-  const onPersonalSubmit = async (data: any) => {
-    console.log("Submitting personal info:", data);
-    await handleSave({
-      ...profileData,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      phone: data.phone,
-      specialty: data.specialty,
-      yearsOfExperience: data.yearsOfExperience,
-      bio: data.bio
-    });
+  const handleSave = () => {
+    setLoading(true);
+    setTimeout(() => {
+      toast.success("Settings saved successfully!");
+      setLoading(false);
+    }, 1000);
   };
   
-  const onClinicSubmit = async (data: any) => {
-    console.log("Submitting clinic info:", data);
-    await handleSave({
-      ...profileData,
-      practiceName: data.practiceName,
-      practiceSize: data.practiceSize,
-      clinicBio: data.clinicBio
-    });
-  };
-
   return (
     <div className="space-y-6">
       <CardHeader>
@@ -96,22 +27,83 @@ export function ProfileTab() {
           Update your personal information and how it appears to others
         </p>
       </CardHeader>
-      
-      <CardContent>
-        <div className="space-y-8">
-          <FormProvider {...personalMethods}>
-            <PersonalInfoCard 
-              onSubmit={personalMethods.handleSubmit(onPersonalSubmit)}
-              loading={loading} 
-            />
-          </FormProvider>
+      <CardContent className="space-y-6">
+        <div className="flex flex-col md:flex-row gap-6 items-start">
+          <div>
+            <Avatar className="h-24 w-24">
+              <AvatarImage src="" alt="Profile" />
+              <AvatarFallback className="text-3xl">JD</AvatarFallback>
+            </Avatar>
+          </div>
           
-          <FormProvider {...clinicMethods}>
-            <ClinicInfoCard 
-              onSubmit={clinicMethods.handleSubmit(onClinicSubmit)}
-              loading={loading} 
-            />
-          </FormProvider>
+          <div className="space-y-2">
+            <h3 className="text-base font-medium">Profile Photo</h3>
+            <p className="text-sm text-muted-foreground">
+              This photo will be displayed on your profile and in comments.
+            </p>
+            <div className="flex gap-3">
+              <Button variant="secondary" size="sm">
+                Upload New Photo
+              </Button>
+              <Button variant="outline" size="sm">
+                Remove
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label htmlFor="name">Full Name</Label>
+            <Input id="name" defaultValue="Dr. Jane Doe" />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="email">Email Address</Label>
+            <Input id="email" defaultValue="jane.doe@example.com" readOnly />
+            <p className="text-xs text-muted-foreground">
+              Your email cannot be changed
+            </p>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="practice">Practice Name</Label>
+            <Input id="practice" defaultValue="Doe Dental Clinic" />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="specialty">Specialty</Label>
+            <Select defaultValue="General Dentist">
+              <SelectTrigger id="specialty">
+                <SelectValue placeholder="Select specialty" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="General Dentist">General Dentist</SelectItem>
+                <SelectItem value="Orthodontist">Orthodontist</SelectItem>
+                <SelectItem value="Endodontist">Endodontist</SelectItem>
+                <SelectItem value="Periodontist">Periodontist</SelectItem>
+                <SelectItem value="Prosthodontist">Prosthodontist</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="bio">Professional Bio</Label>
+          <Textarea
+            id="bio"
+            defaultValue="General dentist with over 10 years of experience, specializing in cosmetic dentistry and Invisalign. Passionate about providing comfortable and comprehensive dental care."
+            rows={4}
+          />
+          <p className="text-xs text-muted-foreground">
+            Brief description of your professional background and interests.
+          </p>
+        </div>
+        
+        <div className="flex justify-end">
+          <Button variant="primary" onClick={handleSave} loading={loading}>
+            Save Changes
+          </Button>
         </div>
       </CardContent>
     </div>

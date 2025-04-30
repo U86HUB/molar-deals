@@ -1,34 +1,39 @@
 
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App.tsx';
-import './index.css';
-import { setupGlobalErrorTracking } from './services/errorService';
-import { isProduction } from './config/environment';
+import { createRoot } from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
 
-// Set up global error tracking
-setupGlobalErrorTracking();
-
-// Add a comment explaining how to run lint checks
-// To run lint checks: npm run lint
-// This will help catch unused code and imports
-// For CI integration, add this to your workflows:
-// - run: npm run lint -- --max-warnings=0
-
-// Add production optimizations
-if (isProduction) {
-  // Disable console.log in production
-  console.log = () => {};
-  console.debug = () => {};
+// Register service worker for PWA capabilities
+if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('Service Worker registered with scope:', registration.scope);
+      })
+      .catch(error => {
+        console.error('Service Worker registration failed:', error);
+      });
+  });
 }
 
-// Render the app with strict mode in development only
-const AppWithStrictMode = isProduction ? (
-  <App />
-) : (
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+// Add performance monitoring
+if (typeof window !== 'undefined') {
+  // Report Web Vitals
+  const reportWebVitals = () => {
+    if (window.performance) {
+      const metrics = window.performance.getEntriesByType('navigation');
+      if (metrics && metrics.length) {
+        const navigationTiming = metrics[0] as PerformanceNavigationTiming;
+        const loadTime = navigationTiming.loadEventEnd - navigationTiming.startTime;
+        console.log(`Page load time: ${loadTime.toFixed(2)}ms`);
+        
+        // In production, send to analytics
+        // analyticsService.trackPerformance('pageLoad', loadTime);
+      }
+    }
+  };
+  
+  window.addEventListener('load', reportWebVitals);
+}
 
-ReactDOM.createRoot(document.getElementById('root')!).render(AppWithStrictMode);
+createRoot(document.getElementById("root")!).render(<App />);
