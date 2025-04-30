@@ -1,6 +1,6 @@
 
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon, ServerIcon, DatabaseIcon, FileCode2, CheckCircle, ShieldIcon } from "lucide-react";
+import { InfoIcon, ServerIcon, DatabaseIcon, FileCode2, CheckCircle, ShieldIcon, UserIcon } from "lucide-react";
 
 const SupabaseConfigInfo = () => {
   return (
@@ -15,6 +15,22 @@ const SupabaseConfigInfo = () => {
         <AlertTitle>Migration Complete</AlertTitle>
         <AlertDescription>
           <p className="mb-2">You've successfully run the required database migrations! Authentication should now work properly.</p>
+        </AlertDescription>
+      </Alert>
+      
+      <Alert className="border-red-500 bg-red-50 dark:bg-red-950">
+        <UserIcon className="h-4 w-4 text-red-500" />
+        <AlertTitle>Enable Sign-ups in Supabase</AlertTitle>
+        <AlertDescription>
+          <p className="mb-2 font-medium">Sign-ups are likely disabled at the project level which prevents new user registration.</p>
+          <ol className="list-decimal pl-5 space-y-2">
+            <li>Go to your <strong>Supabase Dashboard → Auth → Settings → General</strong></li>
+            <li>Find the <strong>"Enable sign-ups"</strong> toggle and turn it ON</li>
+            <li>Click "Save" at the bottom of the page</li>
+          </ol>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Without this setting enabled, the OTP flow cannot create new users.
+          </p>
         </AlertDescription>
       </Alert>
       

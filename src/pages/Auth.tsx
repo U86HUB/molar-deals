@@ -97,6 +97,10 @@ const Auth = () => {
     connectionStatus && 
     (!connectionStatus.success || !connectionStatus.auth || !connectionStatus.db);
 
+  // Check if the error message contains sign-ups disabled
+  const hasSignUpDisabledError = 
+    error && (error.includes("sign-up") || error.includes("sign up") || error.includes("Database error finding user"));
+
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -132,7 +136,26 @@ const Auth = () => {
             </div>
           )}
 
-          {connectionStatus && connectionStatus.success && (
+          {hasSignUpDisabledError && (
+            <div className="p-4 mb-4 border border-red-500 bg-red-50 rounded-md">
+              <h3 className="font-medium text-red-800">
+                Sign-ups Disabled in Supabase
+              </h3>
+              <p className="text-sm text-red-700 mt-1">
+                You need to enable sign-ups in the Supabase Dashboard:
+                <br />
+                <strong>Auth → Settings → General → Enable sign-ups</strong>
+              </p>
+              <button 
+                className="text-sm text-red-800 underline mt-1" 
+                onClick={toggleConfig}
+              >
+                View detailed instructions
+              </button>
+            </div>
+          )}
+
+          {connectionStatus && connectionStatus.success && !hasSignUpDisabledError && (
             <div className="p-4 mb-4 border border-green-500 bg-green-50 rounded-md">
               <h3 className="font-medium text-green-800">
                 Connection to Supabase Successful

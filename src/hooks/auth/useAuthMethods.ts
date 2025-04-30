@@ -123,7 +123,7 @@ export const useAuthMethods = () => {
           } else if (error.message?.includes("Database error finding user")) {
             // More specific error message about sign-ups being disabled
             const setupError = new Error(
-              "Sign-ups appear to be disabled in Supabase. Please go to the Supabase Dashboard → Auth → Settings → Email and enable sign-ups."
+              "Sign-ups appear to be disabled in Supabase. Please go to the Supabase Dashboard → Auth → Settings → General → Enable sign-ups and turn it on."
             );
             console.error("Supabase auth setup issue:", setupError);
             throw setupError;
@@ -164,7 +164,7 @@ export const useAuthMethods = () => {
         } else if (error.message?.includes("rate limit")) {
           errorMessage = "Too many attempts. Please wait a few minutes before trying again.";
         } else if (error.message?.includes("Database error finding user")) {
-          errorMessage = "Sign-ups appear to be disabled in Supabase. Please go to the Supabase Dashboard → Auth → Settings → Email and enable sign-ups.";
+          errorMessage = "Sign-ups appear to be disabled in Supabase. Please go to the Supabase Dashboard → Auth → Settings → General → Enable sign-ups and turn it on.";
         } else if (error.message) {
           errorMessage = error.message;
         }
