@@ -107,7 +107,7 @@ export const useAuthMethods = () => {
         const { error, data } = await supabase.auth.signInWithOtp({
           email,
           options: {
-            shouldCreateUser: true, // Create a new user if they don't exist
+            shouldCreateUser: true, // Make sure this is set to true to create users if they don't exist
             emailRedirectTo: `${origin}/auth/callback`,
           },
         });
@@ -121,11 +121,9 @@ export const useAuthMethods = () => {
           if (error.message?.includes("Invalid login credentials")) {
             throw new Error("We couldn't find an account with this email. Please check the email or sign up.");
           } else if (error.message?.includes("Database error finding user")) {
-            // This suggests a Supabase configuration issue
+            // More specific error message about sign-ups being disabled
             const setupError = new Error(
-              "There seems to be an issue with the authentication setup. " +
-              "Please check if your Supabase project is properly configured and the database is accessible. " +
-              "This could be due to a database migration issue or permissions problem."
+              "Sign-ups appear to be disabled in Supabase. Please go to the Supabase Dashboard → Auth → Settings → Email and enable sign-ups."
             );
             console.error("Supabase auth setup issue:", setupError);
             throw setupError;
@@ -166,8 +164,7 @@ export const useAuthMethods = () => {
         } else if (error.message?.includes("rate limit")) {
           errorMessage = "Too many attempts. Please wait a few minutes before trying again.";
         } else if (error.message?.includes("Database error finding user")) {
-          errorMessage = "There seems to be an issue with the authentication setup in Supabase. " +
-                         "Please contact the administrator to verify the database configuration.";
+          errorMessage = "Sign-ups appear to be disabled in Supabase. Please go to the Supabase Dashboard → Auth → Settings → Email and enable sign-ups.";
         } else if (error.message) {
           errorMessage = error.message;
         }
