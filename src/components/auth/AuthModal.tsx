@@ -108,7 +108,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
           <DialogTitle className="text-center text-2xl font-semibold">
             {otpSent ? "Check your email" : "Welcome to DentalDeals"}
           </DialogTitle>
-          <DialogDescription id="auth-modal-description" className="sr-only">
+          <DialogDescription id="auth-modal-description">
             {otpSent ? "Check your email for a magic link to sign in" : "Sign in or create an account to access exclusive dental deals"}
           </DialogDescription>
         </DialogHeader>
