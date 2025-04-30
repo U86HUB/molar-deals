@@ -66,6 +66,50 @@ const SupabaseConfigInfo = () => {
         </AlertDescription>
       </Alert>
 
+      <Alert className="border-amber-500 bg-amber-50 dark:bg-amber-950">
+        <ShieldIcon className="h-4 w-4 text-amber-600" />
+        <AlertTitle>Row Level Security (RLS) Configuration</AlertTitle>
+        <AlertDescription>
+          <p className="mb-2">Ensure that Row Level Security is properly configured for your profiles table:</p>
+          <div className="bg-slate-50 dark:bg-slate-900 p-3 rounded-md my-2 text-xs">
+            <p className="font-semibold mb-2">Required RLS Policies for profiles</p>
+            <pre className="whitespace-pre-wrap overflow-x-auto">
+              {`-- 1) Enable RLS (if not enabled)
+ALTER TABLE public.profiles
+  ENABLE ROW LEVEL SECURITY;
+
+-- 2) Let users fetch only their own profile
+CREATE POLICY IF NOT EXISTS select_own_profile
+  ON public.profiles
+  FOR SELECT
+  USING (auth.uid() = id);
+
+-- 3) Let users insert their own profile row
+CREATE POLICY IF NOT EXISTS insert_own_profile
+  ON public.profiles
+  FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
+-- 4) Let users update only their own profile
+CREATE POLICY IF NOT EXISTS update_own_profile
+  ON public.profiles
+  FOR UPDATE
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+-- 5) Let authenticated users delete only their own profile
+CREATE POLICY IF NOT EXISTS delete_own_profile
+  ON public.profiles
+  FOR DELETE
+  USING (auth.uid() = id);`}
+            </pre>
+            <p className="mt-2 text-muted-foreground">
+              These policies allow users to only access their own data in the profiles table.
+            </p>
+          </div>
+        </AlertDescription>
+      </Alert>
+
       <Alert>
         <ShieldIcon className="h-4 w-4" />
         <AlertTitle>PostGIS Security Configuration</AlertTitle>
