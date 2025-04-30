@@ -1,6 +1,6 @@
 
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon, ServerIcon, DatabaseIcon, FileCode2, CheckCircle } from "lucide-react";
+import { InfoIcon, ServerIcon, DatabaseIcon, FileCode2, CheckCircle, ShieldIcon } from "lucide-react";
 
 const SupabaseConfigInfo = () => {
   return (
@@ -46,6 +46,39 @@ const SupabaseConfigInfo = () => {
           </ul>
           <p className="text-xs text-muted-foreground mt-2">
             Note: Re-enable this for production to maintain security
+          </p>
+        </AlertDescription>
+      </Alert>
+
+      <Alert>
+        <ShieldIcon className="h-4 w-4" />
+        <AlertTitle>PostGIS Security Configuration</AlertTitle>
+        <AlertDescription>
+          <p className="mb-2">The "must be owner" error for spatial_ref_sys can be resolved using one of these approaches:</p>
+          <div className="bg-slate-50 dark:bg-slate-900 p-3 rounded-md my-2 text-xs">
+            <p className="font-semibold mb-2">Option 1: Move PostGIS to its own schema (Recommended)</p>
+            <pre className="whitespace-pre-wrap overflow-x-auto">
+              {`-- Run these commands in Supabase SQL Editor:
+CREATE SCHEMA IF NOT EXISTS extensions;
+DROP EXTENSION IF EXISTS postgis CASCADE;
+CREATE EXTENSION postgis WITH SCHEMA extensions;
+ALTER DATABASE postgres SET search_path = public, extensions;`}
+            </pre>
+            <p className="mt-2 text-muted-foreground">This removes PostGIS tables from the public schema entirely.</p>
+          </div>
+          <div className="bg-slate-50 dark:bg-slate-900 p-3 rounded-md my-2 text-xs">
+            <p className="font-semibold mb-2">Option 2: Enable RLS on spatial_ref_sys</p>
+            <pre className="whitespace-pre-wrap overflow-x-auto">
+              {`-- Run these commands in Supabase SQL Editor:
+ALTER TABLE public.spatial_ref_sys OWNER TO postgres;
+ALTER TABLE public.spatial_ref_sys ENABLE ROW LEVEL SECURITY;
+CREATE POLICY select_spatial_ref_sys ON public.spatial_ref_sys
+  FOR SELECT USING (true);`}
+            </pre>
+            <p className="mt-2 text-muted-foreground">Only use this if you need specific access control to spatial_ref_sys.</p>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            These commands must be run as postgres superuser via the SQL Editor in the Supabase Dashboard.
           </p>
         </AlertDescription>
       </Alert>

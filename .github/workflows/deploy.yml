@@ -22,47 +22,46 @@ jobs:
       - name: Build
         run: npm run build
       
-      # Set up PostGIS security with RLS
-      - name: Apply PostGIS Security
+      # Set up PostGIS in its own schema with proper security
+      - name: Configure PostGIS Security
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
-          echo "Applying PostGIS security settings..."
+          echo "Configuring PostGIS security..."
           # Install PostgreSQL client
           sudo apt-get update && sudo apt-get install -y postgresql-client
           
-          # Execute SQL commands to secure the spatial_ref_sys table
+          # Execute SQL commands to move PostGIS to extensions schema
           psql "$SUPABASE_DB_URL" << 'EOSQL'
-          -- 1. Enable RLS on the table
-          ALTER TABLE public.spatial_ref_sys ENABLE ROW LEVEL SECURITY;
+          -- Create extensions schema if it doesn't exist
+          CREATE SCHEMA IF NOT EXISTS extensions;
           
-          -- 2. Force RLS to prevent bypass via superuser
-          ALTER TABLE public.spatial_ref_sys FORCE ROW LEVEL SECURITY;
+          -- Check if PostGIS is in public schema
+          DO $$
+          BEGIN
+            IF EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'spatial_ref_sys') THEN
+              -- Drop and recreate PostGIS in the extensions schema
+              DROP EXTENSION IF EXISTS postgis CASCADE;
+              CREATE EXTENSION postgis WITH SCHEMA extensions;
+              
+              -- Set search path to include extensions
+              ALTER DATABASE postgres SET search_path = public, extensions;
+              
+              RAISE NOTICE 'PostGIS moved to extensions schema successfully';
+            ELSE
+              RAISE NOTICE 'PostGIS is not in public schema or already configured correctly';
+            END IF;
+          END;
+          $$ LANGUAGE plpgsql;
           
-          -- 3. Revoke all default privileges
-          REVOKE ALL ON public.spatial_ref_sys FROM PUBLIC;
-          
-          -- 4a. Create policy for authenticated users
-          CREATE POLICY spatial_ref_sys_select ON public.spatial_ref_sys 
-            FOR SELECT TO authenticated 
-            USING (auth.role() = 'authenticated');
-          
-          -- 4b. Deny all writes to the table
-          CREATE POLICY spatial_ref_sys_no_write ON public.spatial_ref_sys 
-            FOR INSERT, UPDATE, DELETE 
-            USING (false);
-          
-          -- 5. Grant SELECT privilege to authenticated users
-          GRANT SELECT ON public.spatial_ref_sys TO authenticated;
-          
-          -- Verify RLS is enabled
-          SELECT relname, relrowsecurity 
-          FROM pg_class 
-          WHERE oid = 'public.spatial_ref_sys'::regclass;
+          -- Verify configuration
+          SELECT schema_name, extension_name 
+          FROM information_schema.schemata s
+          JOIN pg_extension e ON s.schema_name = e.extnamespace::regnamespace::text
+          WHERE extension_name = 'postgis';
           EOSQL
           
       # This is a placeholder for your actual deployment steps
-      # You would replace this with your actual deployment logic
       - name: Deploy
         run: |
           echo "Deployment would happen here"
@@ -71,3 +70,4 @@ jobs:
           
           # Example for Vercel deployment:
           # npx vercel --prod
+

@@ -2,6 +2,7 @@
 project_id = "fyyfrlhcvtxddonnkeoy"
 
 [api]
-# Disable the PostgREST API from exposing the PostGIS schema
-db_schemas = ["public", "storage"]
-db_extra_search_path = ["postgis", "extensions"]
+# Configure PostgREST to use extensions schema for PostGIS
+db_schemas = ["public", "storage", "extensions"]
+db_extra_search_path = ["extensions", "public"]
+
