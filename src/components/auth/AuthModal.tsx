@@ -26,6 +26,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const [email, setEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
+  const [retryCount, setRetryCount] = useState<number>(0);
   const navigate = useNavigate();
 
   // Monitor network status
@@ -77,7 +78,16 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
       toast.success("Magic link sent! Please check your email. The link will expire in 15 minutes.");
     } catch (error: any) {
       console.error("Auth error:", error);
-      const errorMessage = error?.message || "Failed to send magic link. Please try again later.";
+      
+      // Format error message for better user experience
+      let errorMessage = error?.message || "Failed to send magic link. Please try again later.";
+      
+      if (errorMessage.includes("Database error finding user")) {
+        errorMessage = "Sign-ups appear to be disabled in Supabase. Please enable them in the Supabase Dashboard under Auth → Settings → General → Enable sign-ups.";
+      } else if (errorMessage.includes("permission denied")) {
+        errorMessage = "Database permission issue detected. Please ensure Row Level Security (RLS) policies are properly configured.";
+      }
+      
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -97,8 +107,29 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   };
 
   const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
     setError(null);
     form.handleSubmit(handleSubmit)();
+  };
+
+  const checkConnectionStatus = async () => {
+    setLoading(true);
+    try {
+      // Simple fetch to check connection to Supabase
+      const response = await fetch(import.meta.env.VITE_SUPABASE_URL || "https://fyyfrlhcvtxddonnkeoy.supabase.co", {
+        method: "HEAD",
+        mode: "no-cors"
+      });
+      
+      setIsOnline(true);
+      setError(null);
+      toast.success("Connection restored!");
+    } catch (error) {
+      setIsOnline(false);
+      setError("Still experiencing connection issues. Please check your internet connection and try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -123,9 +154,9 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                 variant="outline" 
                 size="sm" 
                 className="mt-2 w-full"
-                onClick={() => window.location.reload()}
+                onClick={checkConnectionStatus}
               >
-                Reload Page
+                Check Connection
               </Button>
             </AlertDescription>
           </Alert>
@@ -144,7 +175,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   className="mt-2 w-full"
                   onClick={handleRetry}
                 >
-                  Try Again
+                  Try Again {retryCount > 0 ? `(${retryCount})` : ''}
                 </Button>
                 <Button 
                   variant="ghost" 
@@ -153,6 +184,14 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   onClick={() => window.location.reload()}
                 >
                   Reload Page
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => navigate("/auth")}
+                >
+                  Go to Auth Page
                 </Button>
               </div>
             </AlertDescription>
@@ -212,7 +251,6 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   type="submit" 
                   className="w-full" 
                   variant="primary"
-                  loading={loading}
                   disabled={loading || !isOnline}
                 >
                   {loading ? (

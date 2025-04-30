@@ -58,35 +58,41 @@ export const checkSupabaseConnection = async () => {
     
     if (authError) {
       console.error('Auth check error:', authError);
+      return { 
+        success: false, 
+        auth: false, 
+        db: false, 
+        error: authError
+      };
+    }
+    
+    // Then try a database check with better error handling
+    console.log('Testing database connection...');
+    try {
+      const { data, error } = await supabase.from('profiles').select('id').limit(1);
       
-      // Check for specific schema issues
-      const errorStr = String(authError);
-      if (errorStr.includes('raw_app_meta_data') || 
-          errorStr.includes('raw_user_meta_data')) {
-        console.error('Database schema issue detected. Migrations likely required.');
+      if (error) {
+        console.error('Database check failed:', error);
+        // Don't throw here, just report the error
         return { 
-          success: false, 
-          auth: false, 
+          success: true, // Auth succeeded at least
+          auth: true,
           db: false, 
-          error: authError,
-          requiresMigration: true 
+          error: error
         };
       }
       
-      // Continue to try the database check anyway
+      console.log('Supabase connection test successful');
+      return { success: true, auth: true, db: true };
+    } catch (dbError) {
+      console.error('Database check exception:', dbError);
+      return { 
+        success: true, // Auth succeeded at least
+        auth: true,
+        db: false, 
+        error: dbError
+      };
     }
-    
-    // Then try a database check
-    console.log('Testing database connection...');
-    const { data, error } = await supabase.from('profiles').select('id').limit(1);
-    
-    if (error) {
-      console.error('Database check failed:', error);
-      throw error;
-    }
-    
-    console.log('Supabase connection test successful');
-    return { success: true, auth: !authError, db: !error };
   } catch (error) {
     console.error('Supabase connection test failed:', error);
     return { success: false, error };
@@ -125,8 +131,19 @@ export const diagnoseBrowserNetwork = () => {
       : 'unknown',
     serviceWorker: 'serviceWorker' in navigator,
     https: window.location.protocol === 'https:',
+    userAgent: navigator.userAgent
   };
   
   console.log('Browser network diagnostics:', diagnostics);
   return diagnostics;
+};
+
+// Check explicitly if Supabase auth is configured
+export const isSupabaseAuthConfigured = (): boolean => {
+  return (
+    isValidUrl(SUPABASE_URL) && 
+    SUPABASE_PUBLISHABLE_KEY !== null && 
+    SUPABASE_PUBLISHABLE_KEY !== undefined &&
+    SUPABASE_PUBLISHABLE_KEY.length > 20
+  );
 };
