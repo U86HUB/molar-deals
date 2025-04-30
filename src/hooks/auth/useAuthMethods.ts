@@ -54,7 +54,16 @@ export const useAuthMethods = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Check specifically for sign-up disabled error
+        if (error.message?.includes("disabled") || 
+            error.message?.includes("Database error finding user")) {
+          throw new Error(
+            "Sign-ups appear to be disabled in Supabase. Please go to the Supabase Dashboard → Auth → Settings → General → Enable sign-ups and turn it on."
+          );
+        }
+        throw error;
+      }
       
       toast.success("Registration successful! Please check your email to confirm your account.");
     } catch (error: any) {

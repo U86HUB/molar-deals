@@ -18,12 +18,13 @@ const Auth = () => {
   const [error, setError] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<{success?: boolean; auth?: boolean; db?: boolean} | null>(null);
+  const [signUpsEnabled, setSignUpsEnabled] = useState<boolean | null>(null);
   
   const location = useLocation();
   const navigate = useNavigate();
   const from = location.state?.from?.pathname || "/dashboard";
 
-  // Check the connection status on mount
+  // Check the connection status and sign-up settings on mount
   useEffect(() => {
     const checkConnection = async () => {
       try {
@@ -35,7 +36,30 @@ const Auth = () => {
           setShowConfig(true);
         } else {
           // Connection is successful, so let's show a success message
-          toast.success("Supabase connection successful! Authentication should work now.");
+          toast.success("Supabase connection successful! Authentication should now work properly.");
+        }
+        
+        // Check if sign-ups are enabled
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email: "test_signup_check@example.com",
+            password: "password123",
+          });
+          
+          // If we get here without an error about disabled sign-ups, then sign-ups are enabled
+          setSignUpsEnabled(true);
+        } catch (err: any) {
+          // Check if the error message indicates sign-ups are disabled
+          if (err.message && (
+              err.message.includes("sign-up") || 
+              err.message.includes("sign up") ||
+              err.message.includes("disabled") ||
+              err.message.includes("Database error finding user")
+            )) {
+            setSignUpsEnabled(false);
+            setError("Sign-ups appear to be disabled in Supabase. Please enable them in the Supabase Dashboard.");
+            setShowConfig(true);
+          }
         }
         
         // Log Supabase config for debugging
@@ -99,7 +123,8 @@ const Auth = () => {
 
   // Check if the error message contains sign-ups disabled
   const hasSignUpDisabledError = 
-    error && (error.includes("sign-up") || error.includes("sign up") || error.includes("Database error finding user"));
+    signUpsEnabled === false || 
+    (error && (error.includes("sign-up") || error.includes("sign up") || error.includes("Database error finding user")));
 
   if (isLoading) {
     return (
