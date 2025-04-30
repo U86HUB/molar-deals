@@ -11,8 +11,12 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
+  
+  // Check if mock auth is enabled
+  const isMockAuthEnabled = localStorage.getItem("useMockAuth") === "true";
 
-  if (isLoading) {
+  // Show loading indicator while authentication state is being determined
+  if (isLoading && !isMockAuthEnabled) {
     return (
       <div className="h-screen flex items-center justify-center">
         <Loader2 className="animate-spin h-8 w-8 text-primary" />
@@ -20,6 +24,28 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
     );
   }
 
+  // If mock auth is enabled, always allow access
+  if (isMockAuthEnabled) {
+    // Still respect role restrictions if specified
+    if (allowedRoles) {
+      // In mock mode, we assume the user has the "customer" role by default
+      const mockRole = "customer";
+      if (!allowedRoles.includes(mockRole)) {
+        // Redirect based on mock role if they don't have access
+        if (mockRole === "vendor") {
+          return <Navigate to="/vendor" replace />;
+        } else if (mockRole === "admin") {
+          return <Navigate to="/admin" replace />;
+        } else {
+          return <Navigate to="/dashboard" replace />;
+        }
+      }
+    }
+    
+    return <>{children}</>;
+  }
+
+  // Real authentication check
   if (!isAuthenticated) {
     // Redirect to the login page with the current location
     return <Navigate to="/auth" state={{ from: location }} replace />;

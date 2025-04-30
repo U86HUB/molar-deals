@@ -12,6 +12,7 @@ import { CookieSettingsProvider } from "./context/CookieSettingsContext";
 import HmrErrorRecovery from './components/HmrErrorRecovery';
 import { isProduction } from './config/environment';
 import { appRoutes } from "./routes/appRoutes";
+import { MockAuthBanner } from "./components/auth/MockAuthBanner";
 
 // Configure query client with optimized settings for different data types
 const queryClient = new QueryClient({
@@ -66,6 +67,7 @@ function App() {
               <AuthProvider>
                 <CookieSettingsProvider>
                   <BrowserRouter>
+                    <MockAuthBanner />
                     <AppRouter />
                   </BrowserRouter>
                 </CookieSettingsProvider>

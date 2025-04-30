@@ -9,6 +9,7 @@ import { NotificationsTab } from "@/components/settings/NotificationsTab";
 import { PreferencesTab } from "@/components/settings/PreferencesTab";
 import { ReferralsTab } from "@/components/settings/ReferralsTab";
 import { SubscriptionTab } from "@/components/settings/SubscriptionTab";
+import { DeveloperTab } from "@/components/settings/DeveloperTab";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
 
@@ -23,7 +24,7 @@ const Settings = () => {
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated && localStorage.getItem("useMockAuth") !== "true") {
       navigate('/?showAuth=true', { replace: true });
     }
   }, [isAuthenticated, isLoading, navigate]);
@@ -41,7 +42,7 @@ const Settings = () => {
     navigate(`/settings?tab=${value}`, { replace: true });
   };
 
-  if (isLoading) {
+  if (isLoading && localStorage.getItem("useMockAuth") !== "true") {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
@@ -80,12 +81,16 @@ const Settings = () => {
               <TabsContent value="subscription">
                 <SubscriptionTab />
               </TabsContent>
+              
+              <TabsContent value="developer">
+                <DeveloperTab />
+              </TabsContent>
             </Tabs>
           </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default Settings;
